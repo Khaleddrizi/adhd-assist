@@ -1,0 +1,213 @@
+"use client"
+
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { AuthGuard } from "@/components/auth-guard"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { getAuthHeaders } from "@/lib/api"
+import { ArrowLeft, Star, KeyRound, BookOpen, Clock } from "lucide-react"
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
+
+interface ApiChild {
+  id: number
+  name: string
+  age: number | null
+  diagnostic?: string | null
+  alexa_code?: string | null
+  stats: { total_sessions: number; total_correct: number; total_asked: number; avg_accuracy: number }
+  assigned_program?: { id: number; name: string; question_count: number } | null
+}
+
+interface ApiSession {
+  id: number
+  score: number
+  total_questions: number
+  accuracy_pct: number
+  created_at: string | null
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "—"
+  return new Date(value).toLocaleString()
+}
+
+function statusFrom(stats: ApiChild["stats"]) {
+  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "Needs Attention", cls: "bg-red-100 text-red-700" }
+  if (stats.avg_accuracy < 70) return { label: "Monitor", cls: "bg-amber-100 text-amber-700" }
+  return { label: "On Track", cls: "bg-emerald-100 text-emerald-700" }
+}
+
+function ChildDetailsContent() {
+  const params = useParams<{ id: string }>()
+  const childId = params?.id
+  const [child, setChild] = useState<ApiChild | null>(null)
+  const [sessions, setSessions] = useState<ApiSession[]>([])
+  const [tab, setTab] = useState("overview")
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!childId) return
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      try {
+        const [childRes, sessionsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/parents/children/${childId}`, { headers: getAuthHeaders() }),
+          fetch(`${API_BASE}/api/parents/children/${childId}/sessions?limit=30`, { headers: getAuthHeaders() }),
+        ])
+        if (cancelled) return
+        if (childRes.ok) setChild(await childRes.json())
+        if (sessionsRes.ok) setSessions(await sessionsRes.json())
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [childId])
+
+  const status = useMemo(() => statusFrom(child?.stats || { total_sessions: 0, avg_accuracy: 0, total_correct: 0, total_asked: 0 }), [child])
+  const stars = child?.stats?.total_correct ?? 0
+  const goalTarget = 50
+  const goalProgress = Math.min(100, Math.round((stars / goalTarget) * 100))
+
+  if (loading) return <p className="text-sm text-muted-foreground">Loading child details...</p>
+  if (!child) return <p className="text-sm text-muted-foreground">Child not found.</p>
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <Link href="/dashboard/children" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
+        <ArrowLeft className="h-4 w-4" /> Back to Children
+      </Link>
+
+      <Card className="surface-card">
+        <CardContent className="pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{child.name}</h1>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge variant="outline">{child.age ?? "—"} yrs</Badge>
+                <Badge variant="outline">{child.diagnostic || "No level"}</Badge>
+                <Badge className={status.cls}>{status.label}</Badge>
+                <code className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-mono text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  {child.alexa_code || "—"}
+                </code>
+              </div>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/dashboard/reports">View full reports</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="rewards">Rewards</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {tab === "overview" ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="surface-card">
+            <CardHeader><CardTitle className="text-sm">Assigned Program</CardTitle></CardHeader>
+            <CardContent>
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><BookOpen className="h-3.5 w-3.5" /> Current learning program</div>
+              <p className="font-semibold">{child.assigned_program?.name || "No program assigned"}</p>
+            </CardContent>
+          </Card>
+          <Card className="surface-card">
+            <CardHeader><CardTitle className="text-sm">Alexa Code</CardTitle></CardHeader>
+            <CardContent>
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><KeyRound className="h-3.5 w-3.5" /> Use this exact child code</div>
+              <code className="rounded bg-slate-100 px-2 py-1 font-mono dark:bg-slate-800">{child.alexa_code || "—"}</code>
+            </CardContent>
+          </Card>
+          <Card className="surface-card">
+            <CardHeader><CardTitle className="text-sm">Performance</CardTitle></CardHeader>
+            <CardContent className="space-y-1">
+              <p className="text-sm text-muted-foreground">Average accuracy</p>
+              <p className="text-2xl font-bold">{Math.round(child.stats.avg_accuracy || 0)}%</p>
+              <p className="text-xs text-muted-foreground">{child.stats.total_sessions} sessions completed</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
+      {tab === "sessions" ? (
+        <Card className="surface-card">
+          <CardHeader>
+            <CardTitle>Recent Sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Score</TableHead>
+                  <TableHead>Questions</TableHead>
+                  <TableHead>Accuracy</TableHead>
+                  <TableHead>Duration</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sessions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">No sessions yet.</TableCell>
+                  </TableRow>
+                ) : (
+                  sessions.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>{formatDateTime(s.created_at)}</TableCell>
+                      <TableCell>{s.score}/{s.total_questions}</TableCell>
+                      <TableCell>{s.total_questions}</TableCell>
+                      <TableCell>{s.accuracy_pct}%</TableCell>
+                      <TableCell>{Math.max(1, s.total_questions) * 20}s</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {tab === "rewards" ? (
+        <Card className="surface-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" /> Rewards & Goal</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Current goal: 50 stars</p>
+            <p className="text-2xl font-bold">{stars}/{goalTarget}</p>
+            <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500" style={{ width: `${goalProgress}%` }} />
+            </div>
+            <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {goalProgress >= 100 ? "Goal reached!" : `${goalTarget - stars} stars remaining`}
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  )
+}
+
+export default function ChildDetailsPage() {
+  return (
+    <AuthGuard requiredAccountType="parent">
+      <ChildDetailsContent />
+    </AuthGuard>
+  )
+}

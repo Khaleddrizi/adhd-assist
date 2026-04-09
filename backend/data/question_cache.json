@@ -1,0 +1,426 @@
+[
+  {
+    "question": "Let's start. Question: What is ADHD?\nA) Disease\nB) Disorder\nC) Virus",
+    "options": {
+      "A": "A) Disease",
+      "B": "B) Disorder",
+      "C": "C) Virus"
+    },
+    "correct": "B",
+    "chunk_id": 0,
+    "chunk_text": "ATTENTION \nDEFICIT \nHYPERACTIVITY \nDISORDER \n(ADHD)\nWHO-EM/MNH/214/E",
+    "times_asked": 8,
+    "times_correct": 0
+  },
+  {
+    "question": "Here's your question. Question: How help child?\nA) Scold\nB) Support\nC) Ignore",
+    "options": {
+      "A": "A) Scold",
+      "B": "B) Support",
+      "C": "C) Ignore"
+    },
+    "correct": "B",
+    "chunk_id": 23,
+    "chunk_text": "problems and give the child the support \nthey need. \n•\t\nHelp to build the child’s confidence and \nsocial skills.\n•\t\nProvide simple written information about \ntheir tasks and daily schedule, and stick it \nsomewhere that is easily visible to the child.\n•\t\nMonitor the child’s work closely and give \nthem positive feedback. Be flexible and \npatient. \n•",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Here's your question. Question: Do kids need movement?\nA) Yes\nB) No\nC) Maybe",
+    "options": {
+      "A": "A) Yes",
+      "B": "B) No",
+      "C": "C) Maybe"
+    },
+    "correct": "A",
+    "chunk_id": 25,
+    "chunk_text": "step. Correct and redirect any interruptions \ncarefully so that you do not harm their self-\nesteem. You can use gestures or signs that \nhave been previously agreed between you \nand the child.\n•\t\nTry to include some physical movement \nin your lessons. Alternate between seated \nactivities and those that allow some \nmovement, or ask the child to run some \nerrands.\n•",
+    "times_asked": 1,
+    "times_correct": 1
+  },
+  {
+    "question": "Let's start. Question: What helps a child with ADHD?\nA) Medicine\nB) Support\nC) Punish",
+    "options": {
+      "A": "A) Medicine",
+      "B": "B) Support",
+      "C": "C) Punish"
+    },
+    "correct": "B",
+    "chunk_id": 22,
+    "chunk_text": "How can teachers help a child who \nhas ADHD?\nAs a teacher you may find it difficult to deal \nwith students affected by ADHD. You should \nget more information about ADHD so that you \nunderstand it well and can support students \naffected by it. But these simple tips can help:\n•\t\nChildren who have ADHD often also have \nlearning problems, so look out for such \nproblems and give the child the support",
+    "times_asked": 19,
+    "times_correct": 7
+  },
+  {
+    "question": "Question: Question: Who publishes factsheets?\nA) UN\nB) WHO\nC) FDA",
+    "options": {
+      "A": "A) UN",
+      "B": "B) WHO",
+      "C": "C) FDA"
+    },
+    "correct": "B",
+    "chunk_id": 27,
+    "chunk_text": "general public more information about mental \ndisorders and how they can be treated. You can \ndownload all the factsheets free of charge from \nthe WHO website at: www.emro.who.int/mnh.\n© World Health Organization 2019\nSome rights reserved. This work is available under the Creative Commons Attribution-NonCommercial-ShareAlike",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: What happens without care?\nA) Improve\nB) Drop out\nC) Stay safe",
+    "options": {
+      "A": "A) Improve",
+      "B": "B) Drop out",
+      "C": "C) Stay safe"
+    },
+    "correct": "B",
+    "chunk_id": 9,
+    "chunk_text": "•\t\nPunishment can worsen their behaviour.\n•\t\nWhen children with ADHD do not receive \ncare and support, they may drop out of \nschool. \n•\t\nChildren with ADHD tend to have more \naccidents and injuries of all kinds than \nchildren who do not have ADHD.",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: What is hyperactivity?\nA) Sad\nB) Energetic\nC) Tired",
+    "options": {
+      "A": "A) Sad",
+      "B": "B) Energetic",
+      "C": "C) Tired"
+    },
+    "correct": "B",
+    "chunk_id": 4,
+    "chunk_text": "forgetful, easily distracted, not able to stay \nfocused on a task and finish it, seem not \nto be listening, disorganized, take time to \nstart doing things and lose their personal \npossessions frequently.\n•\t\nChildren with hyperactivity may often be \nrestless, fidgety, full of energy or “always \non the go”, loud, continuously chattering, \nunable to stay seated (in the classroom,",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: Help ADHD child?\nA) Punish\nB) Reward\nC) Ignore",
+    "options": {
+      "A": "A) Punish",
+      "B": "B) Reward",
+      "C": "C) Ignore"
+    },
+    "correct": "B",
+    "chunk_id": 21,
+    "chunk_text": "•\t\nChildren with ADHD usually respond well \nto positive reinforcement. Rewarding or \nreinforcing a new good behaviour every \ntime it occurs can encourage positive new \nhabits.\n•\t\nMake sure that you give yourself a break \nperiodically and do not neglect your other \nrelationships, including  your relationship \nwith your partner.\nHow can teachers help a child who \nhas ADHD?",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: How help child?\nA) Praise\nB) Ignore\nC) Scold",
+    "options": {
+      "A": "A) Praise",
+      "B": "B) Ignore",
+      "C": "C) Scold"
+    },
+    "correct": "A",
+    "chunk_id": 24,
+    "chunk_text": "patient. \n•\t\nPraise and reward the child for every little bit \nof progress they make.\n•\t\nBe very clear and specific in any instructions \nyou give. Be clear about what you expect the \nchild to do. Break tasks into smaller steps. \nKeep your instructions brief, and help the \nchild to follow through the tasks step by \nstep. Correct and redirect any interruptions",
+    "times_asked": 14,
+    "times_correct": 1
+  },
+  {
+    "question": "Let's start. Question: What is 2+2?\nA) 3\nB) 4\nC) 5",
+    "options": {
+      "A": "A) 3",
+      "B": "B) 4",
+      "C": "C) 5"
+    },
+    "correct": "B",
+    "chunk_id": 28,
+    "chunk_text": "3.0 IGO licence (CC BY-NC-SA 3.0 IGO; https://creativecommons.org/licenses/by-nc-sa/3.0/igo).",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Here's your question. Question: What helps ADHD children?\nA) Criticism\nB) Praise\nC) Noise",
+    "options": {
+      "A": "A) Criticism",
+      "B": "B) Praise",
+      "C": "C) Noise"
+    },
+    "correct": "B",
+    "chunk_id": 20,
+    "chunk_text": "•\t\nBreak any task, like doing homework or \nsitting at the dining table, into smaller \ntimespans such as 15–20 minutes.\n•\t\nLook for good behaviour and praise it. \nChildren with ADHD often receive and \nexpect \ncriticism.\n•\t\nBe careful about your child’s diet; some food \nadditives and colouring may make their \nsymptoms worse.\n•\t\nChildren with ADHD usually respond well",
+    "times_asked": 5,
+    "times_correct": 1
+  },
+  {
+    "question": "Let's start. Question: Who gives medicine?\nA) Child\nB) Parent\nC) Friend",
+    "options": {
+      "A": "A) Child",
+      "B": "B) Parent",
+      "C": "C) Friend"
+    },
+    "correct": "B",
+    "chunk_id": 16,
+    "chunk_text": "time.\n•\t\nDo not make children or teenagers \nresponsible for their own medication \nwithout \nproper \nsupervision.\n•\t\nAt home, keep medication locked in a \nchildproof \ncontainer. \nAn \noverdose \nof \nstimulant drugs is serious and potentially \nfatal.\n•\t\nDo not send supplies of medication to \nschool with your child. Deliver any medicine \nyourself to the school nurse or health office.\n•",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Let's start. Question: Who helps with ADHD?\nA) Teacher\nB) Doctor\nC) Psychologist",
+    "options": {
+      "A": "A) Teacher",
+      "B": "B) Doctor",
+      "C": "C) Psychologist"
+    },
+    "correct": "C",
+    "chunk_id": 8,
+    "chunk_text": "yourselves.\nWhen to seek help for your child\nIt is important to seek help from a mental health \nprofessional (psychologist or psychiatrist) if you \nthink your child has ADHD.\n•\t\nIf a child has ADHD but it is not diagnosed, \nthey may be mislabeled as naughty and \nirresponsible and be blamed and punished \nfor their behaviour. \n•\t\nPunishment can worsen their behaviour.\n•",
+    "times_asked": 7,
+    "times_correct": 3
+  },
+  {
+    "question": "Let's start. Question: What causes ADHD?\nA) Genetics\nB) Virus\nC) Bacteria",
+    "options": {
+      "A": "A) Genetics",
+      "B": "B) Virus",
+      "C": "C) Bacteria"
+    },
+    "correct": "A",
+    "chunk_id": 6,
+    "chunk_text": "blurt out answers before the question is \nfinished, look intrusive and start using other \npeople’s things without permission.\nWhat causes ADHD?\nThe exact causes of ADHD are not clear. Some \nfactors may possibly have a role, such as:\n•\t\ngenetics – ADHD can run in families\n•\t\nhaving a significant traumatic experience as \na child\n•\t\nbeing born prematurely\n•\t\nbrain injury\n•",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: Focus on?\nA) Child\nB) Behavior\nC) Errands",
+    "options": {
+      "A": "A) Child",
+      "B": "B) Behavior",
+      "C": "C) Errands"
+    },
+    "correct": "B",
+    "chunk_id": 26,
+    "chunk_text": "errands.\n•\t\nGive specific consequences immediately \nfollowing misbehaviour. You can discuss and \nagree the consequences of misbehaviour \nwith the child in advance, so they know \nwhat to expect. Focus on the behavior, not \nthe child. \nThis is one of a series of factsheets produced by \nthe World Health Organization (WHO) to give the \ngeneral public more information about mental",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Here's your question. Question: Who takes medicine?\nA) Adults\nB) Children\nC) Both",
+    "options": {
+      "A": "A) Adults",
+      "B": "B) Children",
+      "C": "C) Both"
+    },
+    "correct": "C",
+    "chunk_id": 15,
+    "chunk_text": "or become dependent on them. There is no \ngood scientific evidence to suggest that this \nis a problem. However, there is a concern that \nother people might misuse or abuse stimulant \nmedication. When giving medicines to children:\n•\t\nMake sure your child takes the right amount \nof the prescribed medication at the right \ntime.\n•\t\nDo not make children or teenagers",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Question: Question: What treats ADHD?\nA) Stimulants\nB) Antibiotics\nC) Vitamins",
+    "options": {
+      "A": "A) Stimulants",
+      "B": "B) Antibiotics",
+      "C": "C) Vitamins"
+    },
+    "correct": "A",
+    "chunk_id": 12,
+    "chunk_text": "medicines used to treat ADHD are stimulants \nsuch as methylphenidate (Ritalin). Other \ndrugs like antidepressants may be used \nif stimulants have serious side effects or \nare ineffective, or to boost the effects of \nstimulants \n•\t\nPsychotherapy. This can help patients and \ntheir families cope better with everyday \nproblems. Parents and teachers help the",
+    "times_asked": 13,
+    "times_correct": 2
+  },
+  {
+    "question": "Let's start. Question: Are ADHD medicines addictive?\nA) Yes\nB) No\nC) Maybe",
+    "options": {
+      "A": "A) Yes",
+      "B": "B) No",
+      "C": "C) Maybe"
+    },
+    "correct": "B",
+    "chunk_id": 14,
+    "chunk_text": "learn about ADHD, how it affects their family \nand how to deal effectively with negative \nfeelings that may develop within their home \nbecause of their child’s disruptive behaviour. \nMedicines such as stimulants that \nare used to treat ADHD are not \naddictive \nSome parents worry about stimulants and the \npotential risk of that their child will abuse them \nor become dependent on them. There is no",
+    "times_asked": 0,
+    "times_correct": 0
+  },
+  {
+    "question": "Here's your question. Question: What is impulsivity?\nA) Excess movement\nB) Acting hastily\nC) Poor attention",
+    "options": {
+      "A": "A) Excess movement",
+      "B": "B) Acting hastily",
+      "C": "C) Poor attention"
+    },
+    "correct": "B",
+    "chunk_id": 2,
+    "chunk_text": "•\t\nhyperactivity – excess movement that is \nnot appropriate to the setting or excessive \nfidgeting, tapping or talking \n•\t\nimpulsivity – acting hastily without thinking, \nand in a way that may have high potential \nfor harm. \nCommon signs and symptoms of \nADHD\nThe symptoms of ADHD are not the same among \nall children. The condition can range from \nmostly poor attention to mostly hyperactivity",
+    "times_asked": 10,
+    "times_correct": 1
+  },
+  {
+    "question": "Question: Question: Who helps ADHD child?\nA) Doctor\nB) Teacher\nC) Both",
+    "options": {
+      "A": "A) Doctor",
+      "B": "B) Teacher",
+      "C": "C) Both"
+    },
+    "correct": "C",
+    "chunk_id": 17,
+    "chunk_text": "yourself to the school nurse or health office.\n•\t\nNever double the dose if your child misses a \ndose of medication.\n•\t\nNever stop giving the medication without \ndiscussing this first with your doctor.\n•\t\nNever give your child’s medication to anyone \nelse, even if you feel they have the same \nproblem.\nHow can you help your child with \nADHD?\nParents and teachers can help children with",
+    "times_asked": 7,
+    "times_correct": 2
+  },
+  {
+    "question": "Question: Question: Who is supervisor?\nA) Khaled\nB) Alexa\nC) Student",
+    "options": {
+      "A": "A) Khaled",
+      "B": "B) Alexa",
+      "C": "C) Student"
+    },
+    "correct": "A",
+    "chunk_id": 1000000,
+    "chunk_text": " Q: What is the name of this project? A: It is Alexa Smart Assistant for Students. \n Q: Who is the student? A: The supervisor is khaled drizi \n Q: What is the main technology used? A: We are using RAG and FAISS vector database. \n Q: When is the project deadline? A: The deadline is June 2026",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 30
+  },
+  {
+    "question": "Let's start. Question: Who helps a child with ADHD?\nA) Doctor\nB) Teacher\nC) Psychologist",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Doctor",
+      "B": "B) Teacher",
+      "C": "C) Psychologist"
+    },
+    "correct": "C",
+    "chunk_id": 2000008,
+    "chunk_text": "yourselves.\nWhen to seek help for your child\nIt is important to seek help from a mental health \nprofessional (psychologist or psychiatrist) if you \nthink your child has ADHD.\n•\t\nIf a child has ADHD but it is not diagnosed, \nthey may be mislabeled as naughty and \nirresponsible and be blamed and punished \nfor their behaviour. \n•\t\nPunishment can worsen their behaviour.\n•",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 31
+  },
+  {
+    "question": "Here's your question. Question: What treats ADHD?\nA) Antidepressants\nB) Stimulants\nC) Vitamins",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Antidepressants",
+      "B": "B) Stimulants",
+      "C": "C) Vitamins"
+    },
+    "correct": "B",
+    "chunk_id": 2000012,
+    "chunk_text": "medicines used to treat ADHD are stimulants \nsuch as methylphenidate (Ritalin). Other \ndrugs like antidepressants may be used \nif stimulants have serious side effects or \nare ineffective, or to boost the effects of \nstimulants \n•\t\nPsychotherapy. This can help patients and \ntheir families cope better with everyday \nproblems. Parents and teachers help the",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 32
+  },
+  {
+    "question": "Let's start. Question: Who owns the work?\nA) WHO\nB) Users\nC) Others",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) WHO",
+      "B": "B) Users",
+      "C": "C) Others"
+    },
+    "correct": "A",
+    "chunk_id": 2000027,
+    "chunk_text": "general public more information about mental \ndisorders and how they can be treated. You can \ndownload all the factsheets free of charge from \nthe WHO website at: www.emro.who.int/mnh.\n© World Health Organization 2019\nSome rights reserved. This work is available under the Creative Commons Attribution-NonCommercial-ShareAlike",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 33
+  },
+  {
+    "question": "Here's your question. Question: What helps ADHD children?\nA) Bad food\nB) Good praise\nC) Loud noise",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Bad food",
+      "B": "B) Good praise",
+      "C": "C) Loud noise"
+    },
+    "correct": "B",
+    "chunk_id": 2000020,
+    "chunk_text": "•\t\nBreak any task, like doing homework or \nsitting at the dining table, into smaller \ntimespans such as 15–20 minutes.\n•\t\nLook for good behaviour and praise it. \nChildren with ADHD often receive and \nexpect \ncriticism.\n•\t\nBe careful about your child’s diet; some food \nadditives and colouring may make their \nsymptoms worse.\n•\t\nChildren with ADHD usually respond well",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 34
+  },
+  {
+    "question": "Here's your question. Question: What treats ADHD?\nA) Food\nB) Medicine\nC) Sleep",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Food",
+      "B": "B) Medicine",
+      "C": "C) Sleep"
+    },
+    "correct": "B",
+    "chunk_id": 2000011,
+    "chunk_text": "doctors, parents and school teachers. \nA standard treatment plan for ADHD includes:\n•\t\nMedicines. Not all children with ADHD need \nmedicines, but for many they are necessary. \nMedicines can reduce hyperactivity and \nimpulsivity, improve the child’s ability to \nfocus, work and learn and improve their \nphysical coordination. The most common \nmedicines used to treat ADHD are stimulants",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 35
+  },
+  {
+    "question": "Here's your question. Question: Where go toys?\nA) Floor\nB) Box\nC) Table",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Floor",
+      "B": "B) Box",
+      "C": "C) Table"
+    },
+    "correct": "B",
+    "chunk_id": 2000019,
+    "chunk_text": "•\t\nOrganize your home so that everything \n(clothes, toys, school items) has its place, and \nkeep each thing in the right place.\n•\t\nWhen you ask your child to do something, \ngive them simple, clear and consistent \ninstructions. Stand near them, look at them \nand tell them slowly and calmly what you \nwant them to do – do not shout across the \nroom.",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 36
+  },
+  {
+    "question": "Here's your question. Question: Who helps the child?\nA) Parent\nB) Teacher\nC) Both",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Parent",
+      "B": "B) Teacher",
+      "C": "C) Both"
+    },
+    "correct": "C",
+    "chunk_id": 2000023,
+    "chunk_text": "problems and give the child the support \nthey need. \n•\t\nHelp to build the child’s confidence and \nsocial skills.\n•\t\nProvide simple written information about \ntheir tasks and daily schedule, and stick it \nsomewhere that is easily visible to the child.\n•\t\nMonitor the child’s work closely and give \nthem positive feedback. Be flexible and \npatient. \n•",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 37
+  },
+  {
+    "question": "Question: Question: What affects ADHD kids?\nA) Sleep\nB) Learning\nC) Food",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Sleep",
+      "B": "B) Learning",
+      "C": "C) Food"
+    },
+    "correct": "B",
+    "chunk_id": 2000001,
+    "chunk_text": "What is ADHD? \nAttention deficit hyperactivity disorder (ADHD) \nis one of the most common mental disorders. It \naffects 5–8% of children, mostly boys, and often \nlasts into adulthood. \nADHD affects a child’s learning and their \nfunctioning in daily life. It has three main \nfeatures: \n•\t\ninattention – not being able to stay focused \n•\t\nhyperactivity – excess movement that is",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 38
+  },
+  {
+    "question": "Question: Question: What is hyperactivity?\nA) Calm\nB) Restless\nC) Sleepy",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Calm",
+      "B": "B) Restless",
+      "C": "C) Sleepy"
+    },
+    "correct": "B",
+    "chunk_id": 2000004,
+    "chunk_text": "forgetful, easily distracted, not able to stay \nfocused on a task and finish it, seem not \nto be listening, disorganized, take time to \nstart doing things and lose their personal \npossessions frequently.\n•\t\nChildren with hyperactivity may often be \nrestless, fidgety, full of energy or “always \non the go”, loud, continuously chattering, \nunable to stay seated (in the classroom,",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 39
+  },
+  {
+    "question": "Here's your question. Question: Are ADHD medicines addictive?\nA) Yes\nB) No\nC) Maybe",
+    "training_program_id": 2,
+    "options": {
+      "A": "A) Yes",
+      "B": "B) No",
+      "C": "C) Maybe"
+    },
+    "correct": "B",
+    "chunk_id": 2000014,
+    "chunk_text": "learn about ADHD, how it affects their family \nand how to deal effectively with negative \nfeelings that may develop within their home \nbecause of their child’s disruptive behaviour. \nMedicines such as stimulants that \nare used to treat ADHD are not \naddictive \nSome parents worry about stimulants and the \npotential risk of that their child will abuse them \nor become dependent on them. There is no",
+    "times_asked": 0,
+    "times_correct": 0,
+    "db_id": 40
+  }
+]

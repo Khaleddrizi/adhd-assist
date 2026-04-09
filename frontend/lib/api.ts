@@ -1,0 +1,92 @@
+/**
+ * API client for backend Web API (port 5004)
+ */
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
+
+export type AuthRole = "specialist" | "parent" | "administration"
+
+export interface AuthUser {
+  id: number
+  email: string
+  full_name: string | null
+  phone?: string | null
+  role: "specialist" | "parent" | "administration"
+  accountType?: "therapist" | "parent" | "administration"
+  auth_token?: string
+  created_at?: string | null
+}
+
+// Map backend role to frontend accountType for AuthGuard
+export function toAccountType(role: AuthRole): "therapist" | "parent" | "administration" {
+  if (role === "specialist") return "therapist"
+  if (role === "administration") return "administration"
+  return "parent"
+}
+
+export async function login(
+  email: string,
+  password: string,
+  role: AuthRole
+): Promise<AuthUser> {
+  const res = await fetch(`${API_BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, role }),
+    credentials: "include",
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || "Login failed")
+  }
+  return res.json()
+}
+
+export async function register(
+  email: string,
+  password: string,
+  role: AuthRole,
+  full_name?: string
+): Promise<AuthUser> {
+  const res = await fetch(`${API_BASE}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, role, full_name }),
+    credentials: "include",
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || "Registration failed")
+  }
+  return res.json()
+}
+
+export function getAuthHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {}
+  const raw = localStorage.getItem("adhdAssistCurrentUser")
+  if (!raw) return {}
+  try {
+    const user = JSON.parse(raw)
+    const headers: Record<string, string> = {}
+    if (user.auth_token) {
+      headers.Authorization = `Bearer ${user.auth_token}`
+    }
+    return headers
+  } catch {
+    //
+  }
+  return {}
+}
+
+export async function fetchApi<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = { ...getAuthHeaders(), ...(init?.headers as Record<string, string>) }
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...headers },
+    credentials: "include",
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || `Request failed: ${res.status}`)
+  }
+  return res.json()
+}

@@ -1,0 +1,27 @@
+# Alexa AI Quiz — dependencies
+
+# Core
+flask>=3.0.0
+flask-cors>=4.0.0
+pyngrok>=7.0.0
+python-dotenv>=1.0.0
+
+# AI / RAG
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+PyMuPDF>=1.23.0
+langchain-text-splitters>=0.2.0
+groq>=0.4.0
+
+# Auth
+bcrypt>=4.0.0
+
+# Database (Phase 3)
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.13.0
+
+# Optional: Google Drive (if using Service Account)
+# google-api-python-client>=2.100.0
+# oauth2client>=4.1.3
