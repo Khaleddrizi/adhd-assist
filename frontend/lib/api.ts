@@ -7,7 +7,7 @@
  * (then configure CORS on the backend).
  */
 export const publicApiBase = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
-const API_BASE = publicApiBase
+const API_BASE = ""
 
 export type AuthRole = "specialist" | "parent" | "administration"
 
