@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getAuthHeaders } from "@/lib/api"
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
+import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import {
   Users,
   Brain,
@@ -127,7 +126,7 @@ function DoctorPortalContent() {
       setPatientsLoading(true)
       setPatientsError(null)
       try {
-        const res = await fetch(`${API_BASE}/api/doctor/dashboard-summary`, {
+        const res = await fetch(`${publicApiBase}/api/doctor/dashboard-summary`, {
           headers: getAuthHeaders(),
         })
         if (cancelled) return

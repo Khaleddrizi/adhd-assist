@@ -1,7 +1,13 @@
 /**
- * API client for backend Web API (port 5004)
+ * API client for backend Web API.
+ *
+ * When `publicApiBase` is empty, requests go to same-origin `/api/*` and Next.js
+ * rewrites them to `BACKEND_API_URL` (or `NEXT_PUBLIC_API_URL` / localhost). No CORS needed.
+ * Set `NEXT_PUBLIC_API_URL` only if you want the browser to call the backend directly
+ * (then configure CORS on the backend).
  */
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
+export const publicApiBase = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "")
+const API_BASE = publicApiBase
 
 export type AuthRole = "specialist" | "parent" | "administration"
 

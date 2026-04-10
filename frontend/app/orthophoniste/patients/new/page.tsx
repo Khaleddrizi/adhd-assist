@@ -15,11 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AuthGuard } from "@/components/auth-guard"
-import { fetchApi, getAuthHeaders } from "@/lib/api"
+import { fetchApi, getAuthHeaders, publicApiBase } from "@/lib/api"
 import { toast } from "sonner"
 import { ArrowLeft, Users, UserPlus, Loader2, Copy, Check } from "lucide-react"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 const ADHD_LEVELS = ["Mild", "Moderate", "Severe"] as const
 
 interface TrainingProgram {
@@ -138,7 +137,7 @@ function AddPatientPage() {
     setLoading(true)
     setErrors({})
     try {
-      const res = await fetch(`${API_BASE}/api/doctor/add-patient`, {
+      const res = await fetch(`${publicApiBase}/api/doctor/add-patient`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

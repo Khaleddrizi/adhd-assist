@@ -6,10 +6,8 @@ import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { getAuthHeaders } from "@/lib/api"
+import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import { Search, ChevronRight, KeyRound } from "lucide-react"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 interface ApiChild {
   id: number
@@ -42,7 +40,7 @@ function ChildrenPageContent() {
     let cancelled = false
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/api/parents/children`, { headers: getAuthHeaders() })
+        const res = await fetch(`${publicApiBase}/api/parents/children`, { headers: getAuthHeaders() })
         if (!res.ok || cancelled) return
         const data: ApiChild[] = await res.json()
         if (!cancelled) setChildren(data)

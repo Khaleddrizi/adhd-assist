@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { fetchApi, getAuthHeaders } from "@/lib/api"
+import { fetchApi, getAuthHeaders, publicApiBase } from "@/lib/api"
 import { toast } from "sonner"
 import Link from "next/link"
 import {
@@ -25,8 +25,6 @@ import {
   Copy,
   CheckCircle2,
 } from "lucide-react"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 interface LibraryItem {
   id: number
@@ -139,7 +137,7 @@ function LibraryPage() {
         formData.append("name", form.name)
         formData.append("pdf_path", form.pdf_path)
         formData.append("pdf_file", selectedFile)
-        const res = await fetch(`${API_BASE}/api/specialists/library`, {
+        const res = await fetch(`${publicApiBase}/api/specialists/library`, {
           method: "POST",
           headers: getAuthHeaders(),
           body: formData,

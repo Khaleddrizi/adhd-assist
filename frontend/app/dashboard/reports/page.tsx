@@ -5,10 +5,8 @@ import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
-import { getAuthHeaders } from "@/lib/api"
+import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 interface ApiChild {
   id: number
@@ -45,7 +43,7 @@ function ReportsPageContent() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const childrenRes = await fetch(`${API_BASE}/api/parents/children`, { headers: getAuthHeaders() })
+      const childrenRes = await fetch(`${publicApiBase}/api/parents/children`, { headers: getAuthHeaders() })
       if (!childrenRes.ok || cancelled) return
       const kids: ApiChild[] = await childrenRes.json()
       if (cancelled) return
@@ -53,7 +51,7 @@ function ReportsPageContent() {
 
       const allSessions: ApiSession[] = []
       for (const child of kids) {
-        const r = await fetch(`${API_BASE}/api/parents/children/${child.id}/sessions?limit=60`, { headers: getAuthHeaders() })
+        const r = await fetch(`${publicApiBase}/api/parents/children/${child.id}/sessions?limit=60`, { headers: getAuthHeaders() })
         if (r.ok) {
           const data: ApiSession[] = await r.json()
           allSessions.push(...data.map((s) => ({ ...s, patient_id: child.id })))

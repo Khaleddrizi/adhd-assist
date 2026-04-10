@@ -5,10 +5,8 @@ import Link from "next/link"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { getAuthHeaders } from "@/lib/api"
+import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import { ArrowRight, Users, BarChart3, Activity, Star } from "lucide-react"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 interface ApiChild {
   id: number
@@ -24,7 +22,7 @@ function ParentPortalContent() {
     let cancelled = false
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/api/parents/children`, { headers: getAuthHeaders() })
+        const res = await fetch(`${publicApiBase}/api/parents/children`, { headers: getAuthHeaders() })
         if (!res.ok || cancelled) return
         const data: ApiChild[] = await res.json()
         if (!cancelled) setChildren(data)

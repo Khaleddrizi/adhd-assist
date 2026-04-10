@@ -9,10 +9,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { getAuthHeaders } from "@/lib/api"
+import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import { ArrowLeft, Star, KeyRound, BookOpen, Clock } from "lucide-react"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || ""
 
 interface ApiChild {
   id: number
@@ -58,8 +56,8 @@ function ChildDetailsContent() {
       setLoading(true)
       try {
         const [childRes, sessionsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/parents/children/${childId}`, { headers: getAuthHeaders() }),
-          fetch(`${API_BASE}/api/parents/children/${childId}/sessions?limit=30`, { headers: getAuthHeaders() }),
+          fetch(`${publicApiBase}/api/parents/children/${childId}`, { headers: getAuthHeaders() }),
+          fetch(`${publicApiBase}/api/parents/children/${childId}/sessions?limit=30`, { headers: getAuthHeaders() }),
         ])
         if (cancelled) return
         if (childRes.ok) setChild(await childRes.json())
