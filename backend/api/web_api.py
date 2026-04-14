@@ -5,6 +5,7 @@ import re
 import json
 import random
 import os
+import threading
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
@@ -213,6 +214,19 @@ def _process_training_program(db, item) -> None:
         item.error_message = str(exc)[:500]
         item.question_count = 0
         db.flush()
+
+
+def _process_training_program_async(item_id: int) -> None:
+    try:
+        with get_db() as db:
+            repo = TrainingProgramRepository(db)
+            item = repo.get_by_id(item_id)
+            if not item:
+                return
+            _process_training_program(db, item)
+            db.commit()
+    except Exception as exc:
+        logger.exception("Async processing failed for program %s: %s", item_id, exc)
 
 
 def create_web_api() -> Flask:
@@ -1127,9 +1141,13 @@ def create_web_api() -> Flask:
             repo = TrainingProgramRepository(db)
             initial_status = "processing" if pdf_path else "draft"
             item = repo.create(sid, name=name, pdf_path=pdf_path, status=initial_status)
-            if pdf_path:
-                _process_training_program(db, item)
             db.commit()
+            if pdf_path:
+                threading.Thread(
+                    target=_process_training_program_async,
+                    args=(item.id,),
+                    daemon=True,
+                ).start()
             return jsonify(repo._to_dict(item)), 201
 
     @app.route("/api/specialists/library/<int:item_id>/process", methods=["POST"])
@@ -1142,8 +1160,16 @@ def create_web_api() -> Flask:
             item = repo.get_by_id(item_id)
             if not item or item.specialist_id != sid:
                 return jsonify({"error": "library item not found"}), 404
-            _process_training_program(db, item)
+            if not item.pdf_path:
+                return jsonify({"error": "No PDF linked to this library item"}), 400
+            item.status = "processing"
+            item.error_message = None
             db.commit()
+            threading.Thread(
+                target=_process_training_program_async,
+                args=(item.id,),
+                daemon=True,
+            ).start()
             return jsonify(repo._to_dict(item)), 200
 
     @app.route("/api/specialists/library/<int:item_id>", methods=["DELETE"])

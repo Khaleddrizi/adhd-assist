@@ -190,6 +190,8 @@ function LibraryPage() {
       })
       if (item.status === "ready") {
         toast.success(`Processing completed with ${item.question_count} generated questions`)
+      } else if (item.status === "processing") {
+        toast.success("Processing started. This may take a minute.")
       } else {
         toast.error(item.error_message || "Processing failed")
       }
