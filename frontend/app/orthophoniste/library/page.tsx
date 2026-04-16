@@ -81,15 +81,16 @@ function LibraryPage() {
   })
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const loadItems = async () => {
-    setLoading(true)
+  const loadItems = async (opts?: { showLoading?: boolean }) => {
+    const showLoading = opts?.showLoading ?? true
+    if (showLoading) setLoading(true)
     try {
       const data = await fetchApi<LibraryItem[]>("/api/specialists/library")
       setItems(data)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to load library")
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
@@ -100,7 +101,7 @@ function LibraryPage() {
   useEffect(() => {
     if (!items.some((item) => item.status === "processing")) return
     const timer = window.setInterval(() => {
-      loadItems()
+      loadItems({ showLoading: false })
     }, 8000)
     return () => window.clearInterval(timer)
   }, [items])
