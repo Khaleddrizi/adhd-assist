@@ -29,12 +29,50 @@ export function toAccountType(role: AuthRole): "therapist" | "parent" | "adminis
   return "parent"
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
+}
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit | undefined, timeoutMs: number) {
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null
+  const t = window.setTimeout(() => controller?.abort(), timeoutMs)
+  try {
+    return await fetch(input, { ...init, signal: controller?.signal })
+  } finally {
+    window.clearTimeout(t)
+  }
+}
+
+async function fetchWithRetry(input: RequestInfo | URL, init: RequestInit, opts?: { retries?: number; timeoutMs?: number }) {
+  const retries = opts?.retries ?? 2
+  const timeoutMs = opts?.timeoutMs ?? 20000
+  let lastErr: unknown = null
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetchWithTimeout(input, init, timeoutMs)
+      if (res.status === 502 || res.status === 503 || res.status === 504) {
+        lastErr = new Error(`Server unreachable (${res.status})`)
+      } else {
+        return res
+      }
+    } catch (e) {
+      lastErr = e
+    }
+    if (attempt < retries) {
+      // Render Free often cold-starts; give it a moment then retry.
+      await sleep(800 * (attempt + 1))
+      continue
+    }
+  }
+  throw lastErr ?? new Error("Request failed")
+}
+
 export async function login(
   email: string,
   password: string,
   role: AuthRole
 ): Promise<AuthUser> {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
+  const res = await fetchWithRetry(`${API_BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password, role }),
@@ -45,7 +83,7 @@ export async function login(
     if (parsed.error) {
       throw new Error(parsed.error)
     }
-    if (res.status === 502 || res.status === 503) {
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
       throw new Error(
         `Server unreachable (${res.status}). Check BACKEND_API_URL on Vercel and that Render is Live.`,
       )
@@ -95,7 +133,7 @@ export function getAuthHeaders(): Record<string, string> {
 
 export async function fetchApi<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = { ...getAuthHeaders(), ...(init?.headers as Record<string, string>) }
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchWithRetry(`${API_BASE}${path}`, {
     ...init,
     headers: { "Content-Type": "application/json", ...headers },
     credentials: "include",
