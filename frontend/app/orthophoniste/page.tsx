@@ -56,17 +56,17 @@ interface DisplayPatient {
 }
 
 function formatLastActivity(isoDate: string | undefined): string {
-  if (!isoDate) return "No activity yet"
+  if (!isoDate) return "لا نشاط بعد"
   const d = new Date(isoDate)
   const now = new Date()
   const diffMs = now.getTime() - d.getTime()
   const diffMins = Math.floor(diffMs / 60000)
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
-  if (diffMins < 60) return diffMins <= 1 ? "Just now" : `${diffMins} minutes ago`
-  if (diffHours < 24) return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`
-  if (diffDays === 1) return "Yesterday"
-  if (diffDays < 7) return `${diffDays} days ago`
+  if (diffMins < 60) return diffMins <= 1 ? "الآن" : `منذ ${diffMins} دقيقة`
+  if (diffHours < 24) return diffHours === 1 ? "منذ ساعة" : `منذ ${diffHours} ساعة`
+  if (diffDays === 1) return "أمس"
+  if (diffDays < 7) return `منذ ${diffDays} أيام`
   return d.toLocaleDateString()
 }
 
@@ -92,9 +92,9 @@ function apiToDisplay(p: ApiPatient): DisplayPatient {
 
 function getStatusBadge(status: PatientStatus) {
   const config = {
-    on_track: { label: "On Track", className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
-    monitor: { label: "Monitor", className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
-    needs_attention: { label: "Needs Attention", className: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30" },
+    on_track: { label: "على المسار", className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" },
+    monitor: { label: "مراقبة", className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+    needs_attention: { label: "يحتاج انتباهًا", className: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30" },
   }
   const c = config[status]
   return <Badge variant="outline" className={c.className}>{c.label}</Badge>
@@ -132,7 +132,7 @@ function DoctorPortalContent() {
         if (cancelled) return
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          setPatientsError(err.error || "Failed to load patients")
+          setPatientsError(err.error || "تعذّر تحميل المرضى")
           setPatients([])
           return
         }
@@ -140,7 +140,7 @@ function DoctorPortalContent() {
         setPatients(data.map(apiToDisplay))
       } catch (e) {
         if (!cancelled) {
-          setPatientsError("Failed to load patients")
+          setPatientsError("تعذّر تحميل المرضى")
           setPatients([])
         }
       } finally {
@@ -196,33 +196,33 @@ function DoctorPortalContent() {
   return (
     <div className="min-w-0 p-6 md:p-8">
       <div className="mb-8">
-        <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">Overview of all patients and attention alerts</p>
+        <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white">لوحة التحكم</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">نظرة على جميع المرضى وتنبيهات الانتباه</p>
       </div>
 
       {/* KPI summary */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-4">
         <Card className="surface-card">
           <CardContent className="pt-6">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Total Patients</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">إجمالي المرضى</p>
             <p className="mt-1 text-3xl font-bold text-sky-700 dark:text-sky-400">{kpis.totalPatients}</p>
           </CardContent>
         </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Needs Attention</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">يحتاجون انتباهًا</p>
             <p className="mt-1 text-3xl font-bold text-red-700 dark:text-red-400">{kpis.needsAttention}</p>
           </CardContent>
         </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Avg Focus Score</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">متوسط درجة التركيز</p>
             <p className="mt-1 text-3xl font-bold text-amber-700 dark:text-amber-400">{kpis.avgFocusScore}%</p>
           </CardContent>
         </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Active This Week</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">نشطون هذا الأسبوع</p>
             <p className="mt-1 text-3xl font-bold text-emerald-700 dark:text-emerald-400">{kpis.activeThisWeek}</p>
           </CardContent>
         </Card>
@@ -245,11 +245,11 @@ function DoctorPortalContent() {
             )}
             <span className="font-medium">
               {kpis.alertCount > 0
-                ? `${kpis.alertCount} attention alert${kpis.alertCount === 1 ? "" : "s"}`
-                : "No attention alerts at the moment"}
+                ? `${kpis.alertCount} تنبيه انتباه`
+                : "لا توجد تنبيهات انتباه حاليًا"}
             </span>
           </div>
-          <span className="text-xs text-muted-foreground">Focus score & recent activity</span>
+          <span className="text-xs text-muted-foreground">درجة التركيز والنشاط الأخير</span>
         </div>
 
         {/* Patients Overview */}
@@ -259,14 +259,14 @@ function DoctorPortalContent() {
               <div>
                 <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
                   <Users className="h-5 w-5 text-primary" />
-                  <span className="text-[15px] font-semibold">Patients Overview</span>
+                  <span className="text-[15px] font-semibold">نظرة على المرضى</span>
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Table of all children under your care</p>
+                <p className="text-sm text-muted-foreground mt-1">جدول بجميع الأطفال تحت رعايتك</p>
               </div>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search patients..."
+                  placeholder="بحث في المرضى…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
@@ -279,36 +279,36 @@ function DoctorPortalContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-200 dark:border-slate-700 hover:bg-transparent">
-                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400">Patient Name</TableHead>
-                  <TableHead className="hidden text-[11px] uppercase tracking-wider text-slate-400 sm:table-cell">Age</TableHead>
-                  <TableHead className="hidden text-[11px] uppercase tracking-wider text-slate-400 lg:table-cell">Alexa Code</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400">اسم المريض</TableHead>
+                  <TableHead className="hidden text-[11px] uppercase tracking-wider text-slate-400 sm:table-cell">العمر</TableHead>
+                  <TableHead className="hidden text-[11px] uppercase tracking-wider text-slate-400 lg:table-cell">رمز الطفل</TableHead>
                   <TableHead
                     className="hidden cursor-pointer select-none text-[11px] uppercase tracking-wider text-slate-400 md:table-cell"
                     onClick={() => toggleSort("lastActivity")}
-                    title="Sort by last activity"
+                    title="ترتيب حسب آخر نشاط"
                   >
                     <span className="inline-flex items-center gap-1">
-                      Last Activity <ArrowUpDown className="h-3.5 w-3.5 opacity-70" />
+                      آخر نشاط <ArrowUpDown className="h-3.5 w-3.5 opacity-70" />
                     </span>
                   </TableHead>
                   <TableHead
                     className="cursor-pointer select-none text-[11px] uppercase tracking-wider text-slate-400"
                     onClick={() => toggleSort("focusScore")}
-                    title="Sort by focus score"
+                    title="ترتيب حسب درجة التركيز"
                   >
                     <span className="inline-flex items-center gap-1">
-                      Overall Focus Score <ArrowUpDown className="h-3.5 w-3.5 opacity-70" />
+                      درجة التركيز الإجمالية <ArrowUpDown className="h-3.5 w-3.5 opacity-70" />
                     </span>
                   </TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400">Status</TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400 text-right">Actions</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400">الحالة</TableHead>
+                  <TableHead className="text-[11px] uppercase tracking-wider text-slate-400 text-right">إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {patientsLoading ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      Loading patients...
+                      جاري تحميل المرضى…
                     </TableCell>
                   </TableRow>
                 ) : patientsError ? (
@@ -320,7 +320,7 @@ function DoctorPortalContent() {
                 ) : filteredPatients.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                      No patients found.
+                      لا يوجد مرضى.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -340,7 +340,7 @@ function DoctorPortalContent() {
                           <span className="font-medium text-slate-900 dark:text-white">{patient.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="hidden py-5 text-slate-600 dark:text-slate-400 sm:table-cell">{patient.age} yrs</TableCell>
+                      <TableCell className="hidden py-5 text-slate-600 dark:text-slate-400 sm:table-cell">{patient.age} سنة</TableCell>
                       <TableCell className="hidden py-5 lg:table-cell">
                         <code className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[12px] font-mono text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                           {patient.alexaCode}
@@ -390,7 +390,7 @@ function DoctorPortalContent() {
                           onClick={() => router.push(`/orthophoniste/patient/${patient.id}`)}
                         >
                           <Eye className="h-4 w-4 mr-1.5" />
-                          View Details
+                          التفاصيل
                         </Button>
                       </TableCell>
                     </TableRow>

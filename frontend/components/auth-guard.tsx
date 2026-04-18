@@ -43,7 +43,7 @@ export function AuthGuard({ children, requiredAccountType }: AuthGuardProps) {
 
         setIsAuthorized(true)
       } catch (error) {
-        console.error("Erreur d'authentification:", error)
+        console.error("خطأ في المصادقة:", error)
         router.push("/login")
       } finally {
         setIsLoading(false)
@@ -58,7 +58,7 @@ export function AuthGuard({ children, requiredAccountType }: AuthGuardProps) {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Vérification de l'authentification...</p>
+          <p>جاري التحقق من المصادقة…</p>
         </div>
       </div>
     )

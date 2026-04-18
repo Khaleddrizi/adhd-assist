@@ -22,7 +22,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
     }
   }, [])
 
-  const displayName = currentUser?.full_name || currentUser?.email || "Parent"
+  const displayName = currentUser?.full_name || currentUser?.email || "ولي أمر"
 
   const parentInitials = useMemo(() => {
     const n = (currentUser?.full_name || currentUser?.email || "P").trim()
@@ -65,7 +65,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
           EDUVOX
         </span>
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Parent Portal</p>
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">بوابة ولي الأمر</p>
       </Link>
     </div>
   )
@@ -75,7 +75,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500 truncate block">
         EDUVOX
       </span>
-      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">Parent Portal</p>
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">بوابة ولي الأمر</p>
     </div>
   )
 
@@ -92,7 +92,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       </div>
       <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
         <LogOut className="h-4 w-4 mr-2" />
-        Logout
+        تسجيل الخروج
       </Button>
     </div>
   )

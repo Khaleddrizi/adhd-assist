@@ -25,20 +25,20 @@ export default function AdministrationLayout({ children }: { children: React.Rea
   const navGroups = useMemo<DashboardNavGroup[]>(
     () => [
       {
-        label: "Overview",
-        items: [{ href: "/administration", label: "Dashboard", icon: LayoutDashboard }],
+        label: "نظرة عامة",
+        items: [{ href: "/administration", label: "لوحة التحكم", icon: LayoutDashboard }],
       },
       {
-        label: "Users",
+        label: "المستخدمون",
         items: [
-          { href: "/administration/doctors", label: "Doctors", icon: Stethoscope },
-          { href: "/administration/parents", label: "Parents", icon: Users },
-          { href: "/administration/children", label: "Children", icon: Baby },
+          { href: "/administration/doctors", label: "المختصون", icon: Stethoscope },
+          { href: "/administration/parents", label: "أولياء الأمور", icon: Users },
+          { href: "/administration/children", label: "الأطفال", icon: Baby },
         ],
       },
       {
-        label: "System",
-        items: [{ href: "/administration/audit", label: "Audit Logs", icon: ScrollText }],
+        label: "النظام",
+        items: [{ href: "/administration/audit", label: "سجل التدقيق", icon: ScrollText }],
       },
     ],
     [],
@@ -57,7 +57,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
         : "border-transparent text-[#94a3b8] hover:bg-[#ffffff08]",
     ].join(" ")
 
-  const displayName = currentUser?.full_name || currentUser?.email || "Administrator"
+  const displayName = currentUser?.full_name || currentUser?.email || "مشرف"
 
   const adminInitials = useMemo(() => {
     const n = (currentUser?.full_name || currentUser?.email || "Admin").trim()
@@ -81,8 +81,8 @@ export default function AdministrationLayout({ children }: { children: React.Rea
           <Shield className="h-5 w-5 text-[#93c5fd]" />
         </div>
         <div className="min-w-0 pt-0.5">
-          <span className="block text-lg font-semibold tracking-tight text-slate-100 truncate">Admin Console</span>
-          <p className="mt-1 text-[11px] leading-snug text-slate-500">System governance</p>
+          <span className="block text-lg font-semibold tracking-tight text-slate-100 truncate">لوحة الإدارة</span>
+          <p className="mt-1 text-[11px] leading-snug text-slate-500">إشراف المنصة</p>
         </div>
       </Link>
     </div>
@@ -96,7 +96,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
       >
         <Shield className="h-4 w-4 text-[#93c5fd]" />
       </div>
-      <span className="truncate text-base font-semibold text-slate-100">Admin Console</span>
+      <span className="truncate text-base font-semibold text-slate-100">لوحة الإدارة</span>
     </div>
   )
 
@@ -118,7 +118,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
         onClick={logout}
       >
         <LogOut className="mr-2 h-4 w-4" />
-        Logout
+        تسجيل الخروج
       </Button>
     </div>
   )

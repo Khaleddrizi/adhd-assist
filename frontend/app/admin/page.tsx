@@ -11,7 +11,7 @@ export default function AdminPage() {
   }, [router])
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <p className="text-muted-foreground">Redirecting...</p>
+      <p className="text-muted-foreground">جاري إعادة التوجيه…</p>
     </div>
   )
 }

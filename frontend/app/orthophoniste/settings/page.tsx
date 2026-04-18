@@ -46,14 +46,14 @@ function initialsFromName(name: string) {
 }
 
 function passwordStrength(password: string): { score: 0 | 1 | 2 | 3 | 4; label: string } {
-  if (!password) return { score: 0, label: "Empty" }
-  if (password.length < 6) return { score: 1, label: "Weak" }
+  if (!password) return { score: 0, label: "فارغ" }
+  if (password.length < 6) return { score: 1, label: "ضعيف" }
   const hasUpper = /[A-Z]/.test(password)
   const hasNumber = /\d/.test(password)
   const hasSpecial = /[^A-Za-z0-9]/.test(password)
-  if (password.length >= 8 && hasUpper && hasNumber && hasSpecial) return { score: 4, label: "Strong" }
-  if (password.length >= 8 && hasNumber) return { score: 3, label: "Good" }
-  return { score: 2, label: "Fair" }
+  if (password.length >= 8 && hasUpper && hasNumber && hasSpecial) return { score: 4, label: "قوي" }
+  if (password.length >= 8 && hasNumber) return { score: 3, label: "جيد" }
+  return { score: 2, label: "مقبول" }
 }
 
 function SettingsPage() {
@@ -85,7 +85,7 @@ function SettingsPage() {
           phone: data.phone || "",
         })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to load profile")
+        toast.error(err instanceof Error ? err.message : "تعذّر تحميل الملف الشخصي")
       } finally {
         setLoading(false)
       }
@@ -115,9 +115,9 @@ function SettingsPage() {
         body: JSON.stringify(profile),
       })
       syncStoredUser(data.full_name || "", data.email)
-      toast.success("Profile updated successfully")
+      toast.success("تم تحديث الملف الشخصي بنجاح")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update profile")
+      toast.error(err instanceof Error ? err.message : "تعذّر تحديث الملف الشخصي")
     } finally {
       setSavingProfile(false)
     }
@@ -132,7 +132,7 @@ function SettingsPage() {
   const handlePasswordSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwords.new_password !== passwords.confirm_password) {
-      toast.error("New passwords do not match")
+      toast.error("كلمتا المرور الجديدتان غير متطابقتين")
       return
     }
     setSavingPassword(true)
@@ -147,7 +147,7 @@ function SettingsPage() {
       toast.success(data.message)
       setPasswords({ current_password: "", new_password: "", confirm_password: "" })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to change password")
+      toast.error(err instanceof Error ? err.message : "تعذّر تغيير كلمة المرور")
     } finally {
       setSavingPassword(false)
     }
@@ -155,34 +155,34 @@ function SettingsPage() {
 
   const handleLogoutEverywhere = () => {
     localStorage.removeItem("adhdAssistCurrentUser")
-    toast.success("You have been logged out from this device.")
+    toast.success("تم تسجيل الخروج من هذا الجهاز.")
   }
 
   const handleDeleteAccount = () => {
-    toast.error("Doctor account deletion is not enabled.")
+    toast.error("حذف حساب المختص غير مفعّل.")
   }
 
   const strength = passwordStrength(passwords.new_password)
   const passwordsMatch = Boolean(passwords.confirm_password) && passwords.new_password === passwords.confirm_password
   const passwordsMismatch = Boolean(passwords.confirm_password) && passwords.new_password !== passwords.confirm_password
-  const doctorName = profile.full_name || "Orthophoniste"
+  const doctorName = profile.full_name || "مختص"
 
   return (
     <div className="min-w-0">
       <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Patients
+        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
       </Link>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile & Security</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your doctor account information and password.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">الملف الشخصي والأمان</h1>
+        <p className="text-sm text-muted-foreground mt-1">إدارة بيانات حساب المختص وكلمة المرور.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
         <aside className="self-start">
           <nav className="space-y-5">
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Account</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">الحساب</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -195,7 +195,7 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <UserCircle2 className="h-4 w-4" />
-                  Profile Information
+                  معلومات الملف
                 </button>
                 <button
                   type="button"
@@ -208,12 +208,12 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Lock className="h-4 w-4" />
-                  Change Password
+                  تغيير كلمة المرور
                 </button>
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Preferences</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">التفضيلات</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -226,7 +226,7 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Bell className="h-4 w-4" />
-                  Notifications
+                  الإشعارات
                 </button>
                 <button
                   type="button"
@@ -239,12 +239,12 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Globe2 className="h-4 w-4" />
-                  Language & Region
+                  اللغة والمنطقة
                 </button>
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">Danger Zone</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">منطقة خطرة</p>
               <button
                 type="button"
                 onClick={() => scrollToSection("danger")}
@@ -256,7 +256,7 @@ function SettingsPage() {
                 ].join(" ")}
               >
                 <TriangleAlert className="h-4 w-4" />
-                Delete Account
+                حذف الحساب
               </button>
             </div>
           </nav>
@@ -270,14 +270,14 @@ function SettingsPage() {
                   <User className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">Profile Information</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">Update your doctor account details</p>
+                  <CardTitle className="text-[14px] font-bold">معلومات الملف الشخصي</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">حدّث بيانات حساب المختص</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <p className="text-sm text-muted-foreground">Loading profile...</p>
+                <p className="text-sm text-muted-foreground">جاري تحميل الملف الشخصي…</p>
               ) : (
                 <form className="space-y-5" onSubmit={handleProfileSave}>
                   <div className="flex items-center justify-between gap-4 border-b border-slate-200/70 pb-4 dark:border-slate-700/70">
@@ -287,18 +287,18 @@ function SettingsPage() {
                       </div>
                       <div>
                         <p className="text-[15px] font-bold text-slate-900 dark:text-white">{doctorName}</p>
-                        <p className="text-[12px] text-muted-foreground">Orthophoniste</p>
+                        <p className="text-[12px] text-muted-foreground">مختص</p>
                       </div>
                     </div>
                     <Button type="button" variant="outline" size="sm" className="border-primary text-primary">
                       <Camera className="h-4 w-4 mr-1" />
-                      Change photo
+                      تغيير الصورة
                     </Button>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="full_name">Full Name</Label>
+                      <Label htmlFor="full_name">الاسم الكامل</Label>
                       <Input
                         id="full_name"
                         value={profile.full_name}
@@ -306,7 +306,7 @@ function SettingsPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">الهاتف</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -316,7 +316,7 @@ function SettingsPage() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
                     <Input
                       id="email"
                       type="email"
@@ -328,7 +328,7 @@ function SettingsPage() {
 
                   <Button type="submit" disabled={savingProfile}>
                     <Check className="h-4 w-4 mr-2" />
-                    {savingProfile ? "Saving..." : "Save Changes"}
+                    {savingProfile ? "جاري الحفظ…" : "حفظ التغييرات"}
                   </Button>
                 </form>
               )}
@@ -342,15 +342,15 @@ function SettingsPage() {
                   <ShieldCheck className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">Change Password</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">Keep your account secure with a strong password</p>
+                  <CardTitle className="text-[14px] font-bold">تغيير كلمة المرور</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">حافظ على أمان حسابك بكلمة مرور قوية</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <form className="space-y-4" onSubmit={handlePasswordSave}>
                 <div className="grid gap-2">
-                  <Label htmlFor="current_password">Current Password</Label>
+                  <Label htmlFor="current_password">كلمة المرور الحالية</Label>
                   <div className="relative">
                     <Input
                       id="current_password"
@@ -371,7 +371,7 @@ function SettingsPage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="new_password">New Password</Label>
+                  <Label htmlFor="new_password">كلمة المرور الجديدة</Label>
                   <div className="relative">
                     <Input
                       id="new_password"
@@ -391,7 +391,7 @@ function SettingsPage() {
                   </div>
 
                   <div className="mt-1">
-                    <p className="text-[11px] text-muted-foreground mb-1">Password strength</p>
+                    <p className="text-[11px] text-muted-foreground mb-1">قوة كلمة المرور</p>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((lvl) => (
                         <span
@@ -413,7 +413,7 @@ function SettingsPage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm_password">Confirm New Password</Label>
+                  <Label htmlFor="confirm_password">تأكيد كلمة المرور الجديدة</Label>
                   <div className="relative">
                     <Input
                       id="confirm_password"
@@ -441,12 +441,12 @@ function SettingsPage() {
                     ) : null}
                   </div>
                   {passwordsMismatch ? (
-                    <p className="text-[11px] text-red-600">Passwords do not match</p>
+                    <p className="text-[11px] text-red-600">كلمتا المرور غير متطابقتين</p>
                   ) : null}
                 </div>
 
                 <Button type="submit" variant="outline" disabled={savingPassword} className="bg-white text-slate-900 border-slate-300">
-                  {savingPassword ? "Updating..." : "Update Password"}
+                  {savingPassword ? "جاري التحديث…" : "تحديث كلمة المرور"}
                 </Button>
               </form>
             </CardContent>
@@ -459,13 +459,13 @@ function SettingsPage() {
                   <Bell className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">Notifications</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">Configure alerts and email notifications</p>
+                  <CardTitle className="text-[14px] font-bold">الإشعارات</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">ضبط التنبيهات وإشعارات البريد</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Notification preferences will be available soon.</p>
+              <p className="text-sm text-muted-foreground">تفضيلات الإشعارات ستتوفر قريبًا.</p>
             </CardContent>
           </Card>
 
@@ -476,13 +476,13 @@ function SettingsPage() {
                   <Globe2 className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">Language & Region</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">Set default language and localization</p>
+                  <CardTitle className="text-[14px] font-bold">اللغة والمنطقة</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">تعيين اللغة الافتراضية والتوطين</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">Language and region settings will be available soon.</p>
+              <p className="text-sm text-muted-foreground">إعدادات اللغة والمنطقة ستتوفر قريبًا.</p>
             </CardContent>
           </Card>
 
@@ -493,33 +493,33 @@ function SettingsPage() {
                   <TriangleAlert className="h-4 w-4 text-red-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold text-red-700">Danger Zone</CardTitle>
-                  <p className="text-[11px] text-red-600/80">Irreversible actions — proceed with caution</p>
+                  <CardTitle className="text-[14px] font-bold text-red-700">منطقة خطرة</CardTitle>
+                  <p className="text-[11px] text-red-600/80">إجراءات لا رجعة فيها — تابع بحذر</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">Log out of all devices</p>
-                  <p className="text-xs text-muted-foreground mt-1">Invalidate current sessions and require new login.</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">تسجيل الخروج من كل الأجهزة</p>
+                  <p className="text-xs text-muted-foreground mt-1">إلغاء الجلسات الحالية ويتطلب تسجيل دخول جديد.</p>
                 </div>
                 <Button variant="outline" size="sm" className="border-red-300 text-red-700" onClick={handleLogoutEverywhere}>
                   <LogOut className="h-4 w-4 mr-1.5" />
-                  Log out everywhere
+                  خروج من كل مكان
                 </Button>
               </div>
               <div className="h-px bg-slate-200 dark:bg-slate-700" />
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">Delete account</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">حذف الحساب</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Permanently delete your account and all patient data. This cannot be undone.
+                    حذف نهائي لحسابك وجميع بيانات المرضى. لا يمكن التراجع عن ذلك.
                   </p>
                 </div>
                 <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDeleteAccount}>
                   <Trash2 className="h-4 w-4 mr-1.5" />
-                  Delete account
+                  حذف الحساب
                 </Button>
               </div>
             </CardContent>

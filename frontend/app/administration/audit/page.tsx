@@ -25,20 +25,20 @@ type EventCategory = "login" | "create" | "update" | "delete"
 type QuickChip = "all" | EventCategory
 
 const ACTION_OPTIONS = [
-  { value: "all", label: "All actions" },
-  { value: "doctor_status_update", label: "doctor_status_update" },
-  { value: "parent_created", label: "parent_created" },
-  { value: "child_transfer", label: "child_transfer" },
-  { value: "admin_login", label: "admin_login" },
-  { value: "password_reset", label: "password_reset" },
+  { value: "all", label: "كل الإجراءات" },
+  { value: "doctor_status_update", label: "تحديث حالة طبيب" },
+  { value: "parent_created", label: "إنشاء ولي أمر" },
+  { value: "child_transfer", label: "نقل طفل" },
+  { value: "admin_login", label: "دخول مسؤول" },
+  { value: "password_reset", label: "إعادة تعيين كلمة المرور" },
 ] as const
 
 const TARGET_OPTIONS = [
-  { value: "all", label: "All target types" },
-  { value: "doctor", label: "doctor" },
-  { value: "parent", label: "parent" },
-  { value: "child", label: "child" },
-  { value: "admin", label: "admin" },
+  { value: "all", label: "كل أنواع الأهداف" },
+  { value: "doctor", label: "طبيب" },
+  { value: "parent", label: "ولي أمر" },
+  { value: "child", label: "طفل" },
+  { value: "admin", label: "مسؤول" },
 ] as const
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
@@ -67,28 +67,28 @@ function categoryStyle(cat: EventCategory): {
   switch (cat) {
     case "login":
       return {
-        label: "Login",
+        label: "دخول",
         badge: "bg-blue-100 text-blue-800 ring-blue-200/80 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/30",
         dot: "bg-[#1a8fe3]",
         border: "border-l-[#1a8fe3]",
       }
     case "create":
       return {
-        label: "Create",
+        label: "إنشاء",
         badge: "bg-emerald-100 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/30",
         dot: "bg-[#16a34a]",
         border: "border-l-[#16a34a]",
       }
     case "delete":
       return {
-        label: "Delete",
+        label: "حذف",
         badge: "bg-red-100 text-red-800 ring-red-200/80 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/30",
         dot: "bg-[#dc2626]",
         border: "border-l-[#dc2626]",
       }
     default:
       return {
-        label: "Update",
+        label: "تحديث",
         badge: "bg-amber-100 text-amber-900 ring-amber-200/80 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-500/30",
         dot: "bg-[#d97706]",
         border: "border-l-[#d97706]",
@@ -103,8 +103,8 @@ function formatAuditTime(iso: string | null): string {
   const now = new Date()
   const isToday =
     d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
-  const hm = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
-  if (isToday) return `Today · ${hm}`
+  const hm = d.toLocaleTimeString("ar", { hour: "2-digit", minute: "2-digit" })
+  if (isToday) return `اليوم · ${hm}`
   const dd = String(d.getDate()).padStart(2, "0")
   const mm = String(d.getMonth() + 1).padStart(2, "0")
   return `${dd}/${mm} · ${hm}`
@@ -259,7 +259,7 @@ function AuditPageContent() {
   }
 
   const exportCsv = () => {
-    const headers = ["Type", "Action", "Target type", "Target id", "Time", "Details"]
+    const headers = ["النوع", "الإجراء", "نوع الهدف", "معرّف الهدف", "الوقت", "التفاصيل"]
     const lines = [
       headers.join(","),
       ...filteredLogs.map((log) => {
@@ -288,20 +288,20 @@ function AuditPageContent() {
   const th = "text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
 
   const chipDefs: { key: QuickChip; label: string; dotClass: string; activeClass: string }[] = [
-    { key: "all", label: "All", dotClass: "bg-slate-400", activeClass: "bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white" },
-    { key: "create", label: "Create", dotClass: "bg-[#16a34a]", activeClass: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100" },
-    { key: "login", label: "Login", dotClass: "bg-[#1a8fe3]", activeClass: "bg-blue-100 text-blue-900 dark:bg-blue-950/50 dark:text-blue-100" },
-    { key: "update", label: "Update", dotClass: "bg-[#d97706]", activeClass: "bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100" },
-    { key: "delete", label: "Delete", dotClass: "bg-[#dc2626]", activeClass: "bg-red-100 text-red-900 dark:bg-red-950/40 dark:text-red-100" },
+    { key: "all", label: "الكل", dotClass: "bg-slate-400", activeClass: "bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white" },
+    { key: "create", label: "إنشاء", dotClass: "bg-[#16a34a]", activeClass: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100" },
+    { key: "login", label: "دخول", dotClass: "bg-[#1a8fe3]", activeClass: "bg-blue-100 text-blue-900 dark:bg-blue-950/50 dark:text-blue-100" },
+    { key: "update", label: "تحديث", dotClass: "bg-[#d97706]", activeClass: "bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100" },
+    { key: "delete", label: "حذف", dotClass: "bg-[#dc2626]", activeClass: "bg-red-100 text-red-900 dark:bg-red-950/40 dark:text-red-100" },
   ]
 
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Audit Logs</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">سجل التدقيق</h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Track all administration actions and security events.
+            تتبّع إجراءات الإدارة وأحداث الأمان.
           </p>
         </div>
         <Button
@@ -312,7 +312,7 @@ function AuditPageContent() {
           onClick={exportCsv}
         >
           <Download className="h-3.5 w-3.5" />
-          Export CSV
+          تصدير CSV
         </Button>
       </div>
 
@@ -320,18 +320,18 @@ function AuditPageContent() {
         <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-500" aria-hidden />
-            <span className="text-[13px] font-bold text-slate-900 dark:text-white">Filters</span>
+            <span className="text-[13px] font-bold text-slate-900 dark:text-white">عوامل التصفية</span>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="grid gap-1.5">
               <label className="sr-only" htmlFor="audit-action">
-                Action
+                الإجراء
               </label>
               <Select value={draftAction} onValueChange={setDraftAction}>
                 <SelectTrigger id="audit-action" className="h-10 w-full bg-slate-50 dark:bg-slate-800/80">
-                  <SelectValue placeholder="All actions" />
+                  <SelectValue placeholder="كل الإجراءات" />
                 </SelectTrigger>
                 <SelectContent>
                   {ACTION_OPTIONS.map((o) => (
@@ -344,11 +344,11 @@ function AuditPageContent() {
             </div>
             <div className="grid gap-1.5">
               <label className="sr-only" htmlFor="audit-target">
-                Target type
+                نوع الهدف
               </label>
               <Select value={draftTarget} onValueChange={setDraftTarget}>
                 <SelectTrigger id="audit-target" className="h-10 w-full bg-slate-50 dark:bg-slate-800/80">
-                  <SelectValue placeholder="All target types" />
+                  <SelectValue placeholder="كل أنواع الأهداف" />
                 </SelectTrigger>
                 <SelectContent>
                   {TARGET_OPTIONS.map((o) => (
@@ -361,7 +361,7 @@ function AuditPageContent() {
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
               <Input
-                placeholder="Search in details..."
+                placeholder="بحث في التفاصيل…"
                 value={draftSearch}
                 onChange={(e) => setDraftSearch(e.target.value)}
                 className="h-10 bg-slate-50 dark:bg-slate-800/80"
@@ -369,10 +369,10 @@ function AuditPageContent() {
             </div>
             <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
               <Button type="button" className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={applyFilters}>
-                Apply
+                تطبيق
               </Button>
               <Button type="button" variant="outline" className="flex-1 border-slate-200 dark:border-slate-600" onClick={resetFilters}>
-                Reset
+                إعادة ضبط
               </Button>
             </div>
           </div>
@@ -407,7 +407,7 @@ function AuditPageContent() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <List className="h-5 w-5 text-slate-600 dark:text-slate-400" aria-hidden />
-              <span className="text-base font-semibold text-slate-900 dark:text-white">Log Entries</span>
+              <span className="text-base font-semibold text-slate-900 dark:text-white">السجلات</span>
             </div>
             {!hasActiveFilters ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
@@ -415,34 +415,34 @@ function AuditPageContent() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                Live
+                مباشر
               </span>
             ) : (
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                Filtered view
+                عرض مُصفّى
               </span>
             )}
           </div>
           <p className="text-[13px] text-slate-500 dark:text-slate-400">
-            Showing {filteredLogs.length} {filteredLogs.length === 1 ? "entry" : "entries"}
+            عرض {filteredLogs.length} {filteredLogs.length === 1 ? "سجل" : "سجلات"}
           </p>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <p className="p-8 text-center text-sm text-slate-500">Loading…</p>
+            <p className="p-8 text-center text-sm text-slate-500">جاري التحميل…</p>
           ) : !filteredLogs.length ? (
             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
               <List className="h-7 w-7 text-slate-400" aria-hidden />
-              <p className="mt-3 text-[13px] text-slate-600 dark:text-slate-400">No audit logs found</p>
+              <p className="mt-3 text-[13px] text-slate-600 dark:text-slate-400">لا توجد سجلات تدقيق</p>
               <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                Try adjusting your filters or check back later.
+                جرّب تعديل عوامل التصفية أو أعد المحاولة لاحقاً.
               </p>
               <button
                 type="button"
                 className="mt-4 text-[12px] font-medium text-blue-600 hover:underline dark:text-blue-400"
                 onClick={clearFiltersOnly}
               >
-                Clear filters
+                مسح عوامل التصفية
               </button>
             </div>
           ) : (
@@ -451,11 +451,11 @@ function AuditPageContent() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                      <TableHead className={th}>Type</TableHead>
-                      <TableHead className={th}>Action</TableHead>
-                      <TableHead className={th}>Target</TableHead>
-                      <TableHead className={th}>Time</TableHead>
-                      <TableHead className={th}>Details</TableHead>
+                      <TableHead className={th}>النوع</TableHead>
+                      <TableHead className={th}>الإجراء</TableHead>
+                      <TableHead className={th}>الهدف</TableHead>
+                      <TableHead className={th}>الوقت</TableHead>
+                      <TableHead className={th}>التفاصيل</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -530,14 +530,14 @@ function AuditPageContent() {
                     disabled={safePage <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
-                    ← Previous
+                    ← السابق
                   </Button>
                   <span className="flex items-center gap-2 text-[12px] text-slate-600 dark:text-slate-400">
-                    Page{" "}
+                    صفحة{" "}
                     <span className="inline-flex min-w-[2rem] justify-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] font-bold text-blue-800 dark:bg-blue-950/60 dark:text-blue-200">
                       {safePage}
                     </span>{" "}
-                    of {totalPages}
+                    من {totalPages}
                   </span>
                   <Button
                     type="button"
@@ -547,11 +547,11 @@ function AuditPageContent() {
                     disabled={safePage >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   >
-                    Next →
+                    التالي →
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Rows per page:</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">صفوف لكل صفحة:</span>
                   <Select
                     value={String(pageSize)}
                     onValueChange={(v) => {

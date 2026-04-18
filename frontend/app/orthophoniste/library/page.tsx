@@ -67,6 +67,19 @@ function getFilename(pathValue: string | null) {
   return parts[parts.length - 1] || pathValue
 }
 
+function statusLabelAr(status: string) {
+  switch (status) {
+    case "ready":
+      return "جاهز"
+    case "processing":
+      return "قيد المعالجة"
+    case "failed":
+      return "فشل"
+    default:
+      return status
+  }
+}
+
 function LibraryPage() {
   const [items, setItems] = useState<LibraryItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -88,7 +101,7 @@ function LibraryPage() {
       const data = await fetchApi<LibraryItem[]>("/api/specialists/library")
       setItems(data)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load library")
+      toast.error(err instanceof Error ? err.message : "تعذّر تحميل المكتبة")
     } finally {
       if (showLoading) setLoading(false)
     }
@@ -126,8 +139,8 @@ function LibraryPage() {
 
   const validateForm = () => {
     const nextErrors: { name?: string; pdf?: string } = {}
-    if (!form.name.trim()) nextErrors.name = "Name is required"
-    if (!form.pdf_path.trim() && !selectedFile) nextErrors.pdf = "Please provide a PDF path or upload a file"
+    if (!form.name.trim()) nextErrors.name = "اسم المورد مطلوب"
+    if (!form.pdf_path.trim() && !selectedFile) nextErrors.pdf = "أدخل مسار PDF أو ارفع ملفًا"
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
@@ -140,7 +153,7 @@ function LibraryPage() {
       let createdItem: LibraryItem
       if (selectedFile) {
         if (selectedFile.size > 10 * 1024 * 1024) {
-          throw new Error("PDF file must be less than 10MB")
+          throw new Error("يجب أن يكون ملف PDF أقل من 10 ميجابايت")
         }
         const formData = new FormData()
         formData.append("name", form.name)
@@ -153,7 +166,7 @@ function LibraryPage() {
         })
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          throw new Error(err.error || "Failed to upload PDF")
+          throw new Error(err.error || "تعذّر رفع ملف PDF")
         }
         createdItem = await res.json()
       } else {
@@ -163,18 +176,18 @@ function LibraryPage() {
         })
       }
       if (createdItem.status === "ready") {
-        toast.success(`Resource processed with ${createdItem.question_count} generated questions`)
+        toast.success(`اكتملت المعالجة مع ${createdItem.question_count} سؤالًا مُولَّدًا`)
       } else if (createdItem.status === "failed") {
-        toast.error(createdItem.error_message || "Resource added, but processing failed")
+        toast.error(createdItem.error_message || "أُضيف المورد لكن فشلت المعالجة")
       } else {
-        toast.success("Resource added to library")
+        toast.success("تمت إضافة المورد إلى المكتبة")
       }
       setForm({ name: "", pdf_path: "" })
       setSelectedFile(null)
       setErrors({})
       await loadItems()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to add resource")
+      toast.error(err instanceof Error ? err.message : "تعذّر إضافة المورد")
     } finally {
       setSaving(false)
     }
@@ -185,10 +198,10 @@ function LibraryPage() {
       await fetchApi<{ message: string }>(`/api/specialists/library/${id}`, {
         method: "DELETE",
       })
-      toast.success("Resource deleted")
+      toast.success("تم حذف المورد")
       await loadItems()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete resource")
+      toast.error(err instanceof Error ? err.message : "تعذّر حذف المورد")
     }
   }
 
@@ -198,15 +211,15 @@ function LibraryPage() {
         method: "POST",
       })
       if (item.status === "ready") {
-        toast.success(`Processing completed with ${item.question_count} generated questions`)
+        toast.success(`اكتملت المعالجة مع ${item.question_count} سؤالًا مُولَّدًا`)
       } else if (item.status === "processing") {
-        toast.success("Processing started. This may take a minute.")
+        toast.success("بدأت المعالجة. قد تستغرق دقيقة.")
       } else {
-        toast.error(item.error_message || "Processing failed")
+        toast.error(item.error_message || "فشلت المعالجة")
       }
       await loadItems()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Processing failed")
+      toast.error(err instanceof Error ? err.message : "فشلت المعالجة")
       await loadItems()
     }
   }
@@ -220,11 +233,11 @@ function LibraryPage() {
     const file = e.dataTransfer.files?.[0]
     if (!file) return
     if (file.type !== "application/pdf") {
-      toast.error("Only PDF files are supported")
+      toast.error("يُدعم ملف PDF فقط")
       return
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("PDF file must be less than 10MB")
+      toast.error("يجب أن يكون ملف PDF أقل من 10 ميجابايت")
       return
     }
     setSelectedFile(file)
@@ -234,12 +247,12 @@ function LibraryPage() {
   return (
     <div>
       <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Patients
+        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
       </Link>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Learning Library</h1>
-        <p className="text-sm text-muted-foreground mt-1">Organize the learning resources and PDF materials used for quiz generation.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">مكتبة التعلم</h1>
+        <p className="text-sm text-muted-foreground mt-1">نظّم الموارد وملفات PDF المستخدمة لتوليد الاختبارات.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3 mb-6">
@@ -247,9 +260,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Total Resources</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">إجمالي الموارد</p>
                 <p className="text-3xl font-bold mt-1 text-[#1a8fe3]">{kpis.total}</p>
-                <p className="text-xs text-muted-foreground mt-1">In your learning library</p>
+                <p className="text-xs text-muted-foreground mt-1">في مكتبة التعلم</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-[#EBF5FE] flex items-center justify-center">
                 <FolderOpen className="h-5 w-5 text-[#1a8fe3]" />
@@ -261,9 +274,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">PDFs Linked</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">ملفات PDF مربوطة</p>
                 <p className="text-3xl font-bold mt-1 text-teal-600">{kpis.linked}</p>
-                <p className="text-xs text-muted-foreground mt-1">Path or uploaded file attached</p>
+                <p className="text-xs text-muted-foreground mt-1">مسار أو ملف مرفوع مرتبط</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-teal-50 flex items-center justify-center">
                 <FileText className="h-5 w-5 text-teal-600" />
@@ -275,9 +288,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Ready Programs</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">برامج جاهزة</p>
                 <p className="text-3xl font-bold mt-1 text-violet-600">{kpis.ready}</p>
-                <p className="text-xs text-muted-foreground mt-1">Ready for Alexa quiz usage</p>
+                <p className="text-xs text-muted-foreground mt-1">جاهزة لاستخدام أليكسا في الاختبارات</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
                 <CheckCircle2 className="h-5 w-5 text-violet-600" />
@@ -292,16 +305,16 @@ function LibraryPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PlusCircle className="h-5 w-5 text-primary" />
-              Add Resource
+              إضافة مورد
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5">
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid gap-2">
-                <Label htmlFor="name">Resource Name</Label>
+                <Label htmlFor="name">اسم المورد</Label>
                 <Input
                   id="name"
-                  placeholder="e.g. ADHD Basics Workbook"
+                  placeholder="مثال: أساسيات ADHD"
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   className={errors.name ? "border-red-500" : ""}
@@ -309,7 +322,7 @@ function LibraryPage() {
                 {errors.name ? <p className="text-xs text-red-600">{errors.name}</p> : null}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="pdf_path">PDF Path or URL</Label>
+                <Label htmlFor="pdf_path">مسار أو رابط PDF</Label>
                 <Input
                   id="pdf_path"
                   placeholder="/backend/data/sample.pdf or https://..."
@@ -319,7 +332,7 @@ function LibraryPage() {
               </div>
               <div className="flex items-center gap-3 py-1">
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-                <span className="text-xs text-muted-foreground">or upload directly</span>
+                <span className="text-xs text-muted-foreground">أو ارفع مباشرة</span>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
               <div className="grid gap-2">
@@ -351,18 +364,18 @@ function LibraryPage() {
                 >
                   <UploadCloud className="mx-auto h-7 w-7 text-slate-500" />
                   <p className="mt-3 text-sm text-slate-700 dark:text-slate-200">
-                    Drop your PDF here, or{" "}
+                    أفلت ملف PDF هنا، أو{" "}
                     <button
                       type="button"
                       onClick={openFilePicker}
                       className="text-primary font-medium hover:underline"
                     >
-                      browse
+                      تصفح
                     </button>
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">PDF files only · max 10MB</p>
+                  <p className="mt-1 text-xs text-muted-foreground">PDF فقط · حد أقصى 10 ميجابايت</p>
                   {selectedFile ? (
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">Selected: {selectedFile.name}</p>
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">المحدد: {selectedFile.name}</p>
                   ) : null}
                 </div>
                 {errors.pdf ? <p className="text-xs text-red-600">{errors.pdf}</p> : null}
@@ -373,7 +386,7 @@ function LibraryPage() {
                 className="w-full bg-[#1a8fe3] hover:bg-[#167ec9] text-white"
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
-                {saving ? "Adding..." : "Add to Library"}
+                {saving ? "جاري الإضافة…" : "إضافة إلى المكتبة"}
               </Button>
             </form>
           </CardContent>
@@ -384,12 +397,12 @@ function LibraryPage() {
             <div className="flex items-center justify-between gap-3">
               <CardTitle className="flex items-center gap-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
-                Library Resources
+                موارد المكتبة
               </CardTitle>
               <div className="relative w-56">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search resources..."
+                  placeholder="بحث في الموارد…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 bg-white dark:bg-slate-800"
@@ -399,11 +412,11 @@ function LibraryPage() {
           </CardHeader>
           <CardContent className="p-5">
             {loading ? (
-              <p className="text-sm text-muted-foreground">Loading library...</p>
+              <p className="text-sm text-muted-foreground">جاري تحميل المكتبة…</p>
             ) : filteredItems.length === 0 ? (
               <div className="py-14 flex flex-col items-center text-center text-muted-foreground">
                 <FolderOpen className="h-10 w-10 mb-3 opacity-60" />
-                <p className="text-sm italic">No resources added yet — upload your first PDF above.</p>
+                <p className="text-sm italic">لا توجد موارد بعد — ارفع أول PDF أعلاه.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -417,18 +430,18 @@ function LibraryPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide ${getStatusClasses(item.status)}`}>
-                        {item.status}
+                        {statusLabelAr(item.status)}
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
                       <span className="inline-flex items-center gap-1 text-muted-foreground">
                         <CalendarDays className="h-3.5 w-3.5" />
-                        Added on {formatDate(item.created_at)}
+                        أُضيف في {formatDate(item.created_at)}
                       </span>
                       <span className="text-muted-foreground">•</span>
                       <span className="inline-flex items-center gap-1 text-blue-600 font-semibold">
                         <Sparkles className="h-3.5 w-3.5" />
-                        {item.question_count ?? 0} questions generated
+                        {item.question_count ?? 0} سؤالًا مُولَّدًا
                       </span>
                     </div>
                     {item.pdf_path ? (
@@ -437,18 +450,18 @@ function LibraryPage() {
                         <code className="font-mono">{getFilename(item.pdf_path)}</code>
                         <button
                           type="button"
-                          title="Copy path"
+                          title="نسخ المسار"
                           className="inline-flex items-center rounded border border-slate-200 bg-white px-1.5 py-0.5 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900"
                           onClick={async () => {
                             await navigator.clipboard.writeText(item.pdf_path || "")
-                            toast.success("Path copied")
+                            toast.success("تم نسخ المسار")
                           }}
                         >
                           <Copy className="h-3 w-3" />
                         </button>
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No PDF path linked yet.</p>
+                      <p className="text-sm text-muted-foreground">لا يوجد مسار PDF مرتبط بعد.</p>
                     )}
                     {item.error_message ? (
                       <p className="text-xs text-red-600 dark:text-red-400">{item.error_message}</p>
@@ -458,7 +471,7 @@ function LibraryPage() {
                     {item.pdf_path ? (
                       <Button variant="outline" size="sm" onClick={() => handleProcess(item.id)}>
                         <RefreshCw className="h-4 w-4 mr-2" />
-                        Retry Processing
+                        إعادة المعالجة
                       </Button>
                     ) : null}
                     <Button
@@ -468,7 +481,7 @@ function LibraryPage() {
                       onClick={() => handleDelete(item.id)}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      حذف
                     </Button>
                   </div>
                 </div>

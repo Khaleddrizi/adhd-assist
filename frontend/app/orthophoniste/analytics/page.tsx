@@ -92,7 +92,7 @@ function AnalyticsPage() {
         const data = await fetchApi<SpecialistAnalytics>(`/api/specialists/dashboard?period=${period}`)
         if (!cancelled) setAnalytics(data)
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load analytics")
+        if (!cancelled) setError(err instanceof Error ? err.message : "تعذّر تحميل التحليلات")
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -124,19 +124,19 @@ function AnalyticsPage() {
   return (
     <div>
       <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Patients
+        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
       </Link>
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Clinical Analytics</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track engagement, progression, and learning trends across your patients.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">التحليلات السريرية</h1>
+          <p className="text-sm text-muted-foreground mt-1">تتبّع المشاركة والتقدم واتجاهات التعلم عبر مرضاك.</p>
         </div>
         <div className="inline-flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800/70">
           {([
-            { key: "7d", label: "7 days" },
-            { key: "30d", label: "30 days" },
-            { key: "3m", label: "3 months" },
+            { key: "7d", label: "٧ أيام" },
+            { key: "30d", label: "٣٠ يومًا" },
+            { key: "3m", label: "٣ أشهر" },
           ] as const).map((t) => (
             <button
               key={t.key}
@@ -157,11 +157,11 @@ function AnalyticsPage() {
 
       {loading ? (
         <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">Loading analytics...</CardContent>
+          <CardContent className="py-10 text-center text-muted-foreground">جاري تحميل التحليلات…</CardContent>
         </Card>
       ) : error || !analytics ? (
         <Card>
-          <CardContent className="py-10 text-center text-destructive">{error || "Unable to load analytics."}</CardContent>
+          <CardContent className="py-10 text-center text-destructive">{error || "تعذّر تحميل التحليلات."}</CardContent>
         </Card>
       ) : (
         <div className="space-y-6">
@@ -170,9 +170,9 @@ function AnalyticsPage() {
               <CardContent className="pt-6 min-h-[122px]">
                 <div className="flex h-full items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-400">Total Patients</p>
+                    <p className="text-[11px] uppercase tracking-wider text-slate-400">إجمالي المرضى</p>
                     <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{analytics.total_patients}</p>
-                    <p className="mt-1 text-[12px] text-slate-400">— no change</p>
+                    <p className="mt-1 text-[12px] text-slate-400">— بلا تغيير</p>
                   </div>
                   <div className="h-9 w-9 rounded-lg bg-[#EBF5FE] flex items-center justify-center">
                     <Users className="h-5 w-5 text-[#1a8fe3]" />
@@ -184,9 +184,9 @@ function AnalyticsPage() {
               <CardContent className="pt-6 min-h-[122px]">
                 <div className="flex h-full items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-400">Quizzes Today</p>
+                    <p className="text-[11px] uppercase tracking-wider text-slate-400">اختبارات اليوم</p>
                     <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{analytics.quiz_today}</p>
-                    <p className="mt-1 text-[12px] text-slate-400">Yesterday: {analytics.quiz_yesterday}</p>
+                    <p className="mt-1 text-[12px] text-slate-400">أمس: {analytics.quiz_yesterday}</p>
                   </div>
                   <div className="h-9 w-9 rounded-lg bg-[#E1F5EE] flex items-center justify-center">
                     <CheckCircle2 className="h-5 w-5 text-[#0f766e]" />
@@ -198,7 +198,7 @@ function AnalyticsPage() {
               <CardContent className="pt-6 min-h-[122px]">
                 <div className="flex h-full items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-400">Average Progression</p>
+                    <p className="text-[11px] uppercase tracking-wider text-slate-400">متوسط التقدم</p>
                     <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{analytics.avg_progression}%</p>
                     <p
                       className={[
@@ -212,8 +212,8 @@ function AnalyticsPage() {
                     >
                       {progressionDelta.sign === "up" ? <ArrowUpRight className="h-3.5 w-3.5" /> : progressionDelta.sign === "down" ? <ArrowDownRight className="h-3.5 w-3.5" /> : null}
                       {progressionDelta.sign === "none"
-                        ? "— no change"
-                        : `${progressionDelta.sign === "up" ? "+" : "-"}${progressionDelta.delta}% vs last week`}
+                        ? "— بلا تغيير"
+                        : `${progressionDelta.sign === "up" ? "+" : "-"}${progressionDelta.delta}% مقارنة بالأسبوع الماضي`}
                     </p>
                   </div>
                   <div className="h-9 w-9 rounded-lg bg-[#EEEDFE] flex items-center justify-center">
@@ -226,7 +226,7 @@ function AnalyticsPage() {
               <CardContent className="pt-6 min-h-[122px]">
                 <div className="flex h-full items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-400">Average Assiduity</p>
+                    <p className="text-[11px] uppercase tracking-wider text-slate-400">متوسط الانتظام</p>
                     <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{analytics.assiduity_avg}%</p>
                     <p
                       className={[
@@ -234,7 +234,7 @@ function AnalyticsPage() {
                         analytics.assiduity_avg < 30 ? "text-red-700" : "text-emerald-700",
                       ].join(" ")}
                     >
-                      {analytics.assiduity_avg < 30 ? "↓ Low engagement" : "↑ Healthy engagement"}
+                      {analytics.assiduity_avg < 30 ? "↓ مشاركة منخفضة" : "↑ مشاركة جيدة"}
                     </p>
                   </div>
                   <div className="h-9 w-9 rounded-lg bg-[#FAEEDA] flex items-center justify-center">
@@ -250,16 +250,16 @@ function AnalyticsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
-                  Weekly Progression
+                  التقدم الأسبوعي
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-[380px] flex flex-col">
                 <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-sky-500" /> Progression
+                    <span className="h-2 w-2 rounded-full bg-sky-500" /> التقدم
                   </div>
                   <div className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-slate-400" /> Target
+                    <span className="h-2 w-2 rounded-full bg-slate-400" /> الهدف
                   </div>
                 </div>
                 <div className="flex-1 w-full">
@@ -272,8 +272,8 @@ function AnalyticsPage() {
                       <XAxis dataKey="semaine" />
                       <YAxis domain={[0, 100]} />
                       <Tooltip
-                        formatter={(value: number) => [`${value}%`, "Progression"]}
-                        labelFormatter={(label) => `Period: ${label}`}
+                        formatter={(value: number) => [`${value}%`, "التقدم"]}
+                        labelFormatter={(label) => `الفترة: ${label}`}
                       />
                       <Area type="monotone" dataKey="progression" stroke="none" fill="#0ea5e9" fillOpacity={0.1} />
                       <Line
@@ -301,7 +301,7 @@ function AnalyticsPage() {
                 </div>
                 {peak.progression >= 0 && (
                   <div className="mt-3 text-xs text-muted-foreground">
-                    <span className="font-medium text-slate-700 dark:text-slate-200">Peak:</span> {peak.progression}%
+                    <span className="font-medium text-slate-700 dark:text-slate-200">الذروة:</span> {peak.progression}%
                   </div>
                 )}
               </CardContent>
@@ -311,19 +311,19 @@ function AnalyticsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary" />
-                  Diagnostic Groups
+                  مجموعات التشخيص
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-[380px] flex flex-col">
                 <div className="mb-3 flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" /> Mild
+                    <span className="h-2 w-2 rounded-full bg-amber-500" /> خفيف
                   </div>
                   <div className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-orange-500" /> Moderate
+                    <span className="h-2 w-2 rounded-full bg-orange-500" /> متوسط
                   </div>
                   <div className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-red-500" /> Severe
+                    <span className="h-2 w-2 rounded-full bg-red-500" /> شديد
                   </div>
                 </div>
                 <div className="flex-1 w-full">
@@ -335,7 +335,7 @@ function AnalyticsPage() {
                       ))}
                       <XAxis dataKey="groupe" />
                       <YAxis domain={[0, 100]} />
-                      <Tooltip formatter={(value: number) => [`${value}%`, "Average Progression"]} />
+                      <Tooltip formatter={(value: number) => [`${value}%`, "متوسط التقدم"]} />
                       <Bar dataKey="progression" radius={[4, 4, 0, 0]}>
                         {(analytics.diagnostic_by_group || []).map((row) => (
                           <Cell key={row.groupe} fill={severityColor(row.groupe)} />
@@ -352,12 +352,12 @@ function AnalyticsPage() {
           <div className="grid gap-6 xl:grid-cols-2">
             <Card className="surface-card">
               <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
+                <CardTitle>أنشطة حديثة</CardTitle>
               </CardHeader>
               <CardContent className="h-[420px] flex flex-col">
                 <div className="flex-1 space-y-4 overflow-auto pr-1">
                 {analytics.recent_activities.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">No other recent activity</p>
+                  <p className="text-sm text-muted-foreground italic">لا أنشطة حديثة أخرى</p>
                 ) : (
                   analytics.recent_activities.map((activity) => (
                     <div key={activity.id} className="flex items-start justify-between gap-4 rounded-lg border border-slate-200/70 dark:border-slate-700 p-4">
@@ -377,7 +377,7 @@ function AnalyticsPage() {
 
             <Card className="surface-card">
               <CardHeader>
-                <CardTitle>Patient Distribution</CardTitle>
+                <CardTitle>توزيع المرضى</CardTitle>
               </CardHeader>
               <CardContent className="h-[420px] flex flex-col">
                 <div className="space-y-4">
@@ -385,10 +385,11 @@ function AnalyticsPage() {
                     const row = analytics.diagnostic_distribution.find((x) => x.name === name)
                     const pct = row?.value ?? 0
                     const barColor = name === "Mild" ? "bg-amber-500" : name === "Moderate" ? "bg-orange-500" : "bg-red-500"
+                    const nameAr = name === "Mild" ? "خفيف" : name === "Moderate" ? "متوسط" : "شديد"
                     return (
                       <div key={name}>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium text-slate-900 dark:text-white">{name}</span>
+                          <span className="font-medium text-slate-900 dark:text-white">{nameAr}</span>
                           <span className="text-muted-foreground">{pct}%</span>
                         </div>
                         <div className="mt-2 h-2.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -400,7 +401,7 @@ function AnalyticsPage() {
                 </div>
 
                 <div className="mt-auto pt-6">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Sessions this week</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">الجلسات هذا الأسبوع</p>
                   <div className="mt-3 flex items-end justify-between gap-2">
                     {(analytics.sessions_by_day || []).map((d) => {
                       const max = Math.max(1, ...(analytics.sessions_by_day || []).map((x) => x.count))

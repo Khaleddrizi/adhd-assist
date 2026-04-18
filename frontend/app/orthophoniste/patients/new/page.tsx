@@ -119,14 +119,14 @@ function AddPatientPage() {
 
   const validate = (): boolean => {
     const err: Record<string, string> = {}
-    if (!childName.trim()) err.childName = "Child name is required"
+    if (!childName.trim()) err.childName = "اسم الطفل مطلوب"
     const age = childAge === "" ? NaN : Number(childAge)
-    if (isNaN(age) || age < 1 || age > 18) err.childAge = "Valid age (1-18) required"
-    if (!adhdLevel) err.adhdLevel = "ADHD level is required"
-    if (!parentName.trim() && !parentLookup?.exists) err.parentName = "Parent full name is required"
-    if (!parentEmail.trim()) err.parentEmail = "Parent email is required"
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) err.parentEmail = "Invalid email format"
-    if (parentLookup?.conflict_role === "specialist") err.parentEmail = "This email already belongs to a therapist"
+    if (isNaN(age) || age < 1 || age > 18) err.childAge = "عمر صالح بين 1 و 18 مطلوب"
+    if (!adhdLevel) err.adhdLevel = "مستوى ADHD مطلوب"
+    if (!parentName.trim() && !parentLookup?.exists) err.parentName = "الاسم الكامل لولي الأمر مطلوب"
+    if (!parentEmail.trim()) err.parentEmail = "بريد ولي الأمر مطلوب"
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(parentEmail)) err.parentEmail = "صيغة البريد غير صالحة"
+    if (parentLookup?.conflict_role === "specialist") err.parentEmail = "هذا البريد مسجّل لمختص آخر"
     setErrors(err)
     return Object.keys(err).length === 0
   }
@@ -171,10 +171,10 @@ function AddPatientPage() {
         const familyCount = typeof data.family_children_count === "number" ? data.family_children_count : null
         toast.success(
           data.parent_created
-            ? "Patient added and parent account linked."
+            ? "تمت إضافة المريض وربط حساب ولي الأمر."
             : familyCount && familyCount > 1
-              ? `Patient added to the existing family account (${familyCount} children linked).`
-              : "Patient added! The parent can log in with their existing account."
+              ? `أُضيف المريض للعائلة الموجودة (${familyCount} أطفال مرتبطون).`
+              : "تمت إضافة المريض! يمكن لولي الأمر تسجيل الدخول بحسابه الحالي."
         )
         router.push("/orthophoniste/patients")
       }
@@ -195,7 +195,7 @@ function AddPatientPage() {
 
   const handleCloseSuccess = () => {
     setSuccessData(null)
-    toast.success("Patient added successfully!")
+    toast.success("تمت إضافة المريض بنجاح!")
     router.push("/orthophoniste/patients")
   }
 
@@ -205,30 +205,30 @@ function AddPatientPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <Card className="surface-card max-w-md w-full border-2 border-emerald-500/30 shadow-xl">
             <CardHeader className="bg-emerald-50/50 dark:bg-emerald-950/30 border-b">
-              <CardTitle className="text-emerald-800 dark:text-emerald-200">Patient Added Successfully</CardTitle>
-              <p className="text-sm text-muted-foreground">Share this temporary password with the parent. They can log in at the parent login page and change it.</p>
+              <CardTitle className="text-emerald-800 dark:text-emerald-200">تمت إضافة المريض بنجاح</CardTitle>
+              <p className="text-sm text-muted-foreground">شارك كلمة المرور المؤقتة مع ولي الأمر. يمكنه تسجيل الدخول من صفحة ولي الأمر وتغييرها.</p>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
               <div>
-                <Label className="text-sm font-medium">Temporary password for parent</Label>
+                <Label className="text-sm font-medium">كلمة مرور مؤقتة لولي الأمر</Label>
                 <div className="mt-2 flex gap-2">
                   <Input
                     readOnly
                     value={successData.tempPassword}
                     className="font-mono bg-muted"
                   />
-                  <Button type="button" variant="outline" size="icon" onClick={handleCopyPassword} title="Copy">
+                  <Button type="button" variant="outline" size="icon" onClick={handleCopyPassword} title="نسخ">
                     {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
-              <Button className="w-full" onClick={handleCloseSuccess}>Done, go to Patients</Button>
+              <Button className="w-full" onClick={handleCloseSuccess}>تم، الانتقال إلى المرضى</Button>
             </CardContent>
           </Card>
         </div>
       )}
       <Link href="/orthophoniste/patients" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Patients
+        <ArrowLeft className="h-4 w-4" /> العودة إلى المرضى
       </Link>
 
       <div className="max-w-4xl">
@@ -236,9 +236,9 @@ function AddPatientPage() {
           <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
             <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
               <UserPlus className="h-5 w-5 text-primary" />
-              Add Patient
+              إضافة مريض
             </CardTitle>
-            <p className="text-sm text-muted-foreground">Register a child and create or link a parent account</p>
+            <p className="text-sm text-muted-foreground">تسجيل طفل وإنشاء أو ربط حساب ولي أمر</p>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
@@ -246,14 +246,14 @@ function AddPatientPage() {
                 <div className="space-y-5 sm:space-y-6">
                   <h3 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200">
                     <Users className="h-4 w-4 text-primary" />
-                    Child Information
+                    بيانات الطفل
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="childName" className="text-slate-700 dark:text-slate-300">Name</Label>
+                    <Label htmlFor="childName" className="text-slate-700 dark:text-slate-300">الاسم</Label>
                     <Input
                       id="childName"
                       type="text"
-                      placeholder="Child's full name"
+                      placeholder="الاسم الكامل للطفل"
                       value={childName}
                       onChange={(e) => setChildName(e.target.value)}
                       className={`border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-primary/20 ${errors.childName ? "border-red-500" : ""}`}
@@ -261,7 +261,7 @@ function AddPatientPage() {
                     {errors.childName && <p className="text-sm text-red-600 dark:text-red-400">{errors.childName}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="childAge" className="text-slate-700 dark:text-slate-300">Age</Label>
+                    <Label htmlFor="childAge" className="text-slate-700 dark:text-slate-300">العمر</Label>
                     <Input
                       id="childAge"
                       type="number"
@@ -275,10 +275,10 @@ function AddPatientPage() {
                     {errors.childAge && <p className="text-sm text-red-600 dark:text-red-400">{errors.childAge}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="adhdLevel" className="text-slate-700 dark:text-slate-300">ADHD Level</Label>
+                    <Label htmlFor="adhdLevel" className="text-slate-700 dark:text-slate-300">مستوى ADHD</Label>
                     <Select value={adhdLevel} onValueChange={setAdhdLevel}>
                       <SelectTrigger className={`border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-primary/20 ${errors.adhdLevel ? "border-red-500" : ""}`}>
-                        <SelectValue placeholder="Select level" />
+                        <SelectValue placeholder="اختر المستوى" />
                       </SelectTrigger>
                       <SelectContent>
                         {ADHD_LEVELS.map((level) => (
@@ -289,13 +289,13 @@ function AddPatientPage() {
                     {errors.adhdLevel && <p className="text-sm text-red-600 dark:text-red-400">{errors.adhdLevel}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="assignedProgram" className="text-slate-700 dark:text-slate-300">Assigned Program</Label>
+                    <Label htmlFor="assignedProgram" className="text-slate-700 dark:text-slate-300">البرنامج المعيّن</Label>
                     <Select value={selectedProgramId} onValueChange={setSelectedProgramId}>
                       <SelectTrigger id="assignedProgram" className="border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-primary/20">
-                        <SelectValue placeholder="Select a ready program" />
+                        <SelectValue placeholder="اختر برنامجًا جاهزًا" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">Assign later</SelectItem>
+                        <SelectItem value="none">تعيين لاحقًا</SelectItem>
                         {programs.map((program) => (
                           <SelectItem key={program.id} value={String(program.id)}>
                             {program.name} ({program.question_count} questions)
@@ -312,14 +312,14 @@ function AddPatientPage() {
                 <div className="space-y-5 sm:space-y-6">
                   <h3 className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-200">
                     <UserPlus className="h-4 w-4 text-primary" />
-                    Parent Account Creation
+                    إنشاء حساب ولي الأمر
                   </h3>
                   <div className="space-y-2">
-                    <Label htmlFor="parentName" className="text-slate-700 dark:text-slate-300">Full Name</Label>
+                    <Label htmlFor="parentName" className="text-slate-700 dark:text-slate-300">الاسم الكامل</Label>
                     <Input
                       id="parentName"
                       type="text"
-                      placeholder="Parent's full name"
+                      placeholder="الاسم الكامل لولي الأمر"
                       value={parentName}
                       onChange={(e) => setParentName(e.target.value)}
                       className={`border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-primary/20 ${errors.parentName ? "border-red-500" : ""}`}
@@ -327,7 +327,7 @@ function AddPatientPage() {
                     {errors.parentName && <p className="text-sm text-red-600 dark:text-red-400">{errors.parentName}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="parentEmail" className="text-slate-700 dark:text-slate-300">Email <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="parentEmail" className="text-slate-700 dark:text-slate-300">البريد <span className="text-red-500">*</span></Label>
                     <Input
                       id="parentEmail"
                       type="email"
@@ -338,16 +338,16 @@ function AddPatientPage() {
                     />
                     {errors.parentEmail && <p className="text-sm text-red-600 dark:text-red-400">{errors.parentEmail}</p>}
                     {lookupLoading ? (
-                      <p className="text-xs text-muted-foreground">Checking existing parent account...</p>
+                      <p className="text-xs text-muted-foreground">جاري التحقق من حساب ولي الأمر…</p>
                     ) : parentLookup?.exists && parentLookup.parent ? (
                       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-100">
-                        <p className="font-medium">Existing parent account found.</p>
+                        <p className="font-medium">وُجد حساب ولي أمر موجود.</p>
                         <p className="mt-1">
-                          The new child will be linked to {parentLookup.parent.full_name || parentLookup.parent.email}.
+                          سيرتبط الطفل الجديد بـ {parentLookup.parent.full_name || parentLookup.parent.email}.
                         </p>
                         {parentLookup.children.length > 0 ? (
                           <div className="mt-2">
-                            <p className="text-xs uppercase tracking-wide opacity-80">Current children in this family</p>
+                            <p className="text-xs uppercase tracking-wide opacity-80">الأطفال الحاليون في هذه العائلة</p>
                             <div className="mt-1 flex flex-wrap gap-2">
                               {parentLookup.children.map((child) => (
                                 <span key={child.id} className="rounded-full bg-white/80 px-2.5 py-1 text-xs text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100">
@@ -357,13 +357,13 @@ function AddPatientPage() {
                             </div>
                           </div>
                         ) : (
-                          <p className="mt-2 text-xs opacity-80">This parent account exists but has no children linked to your dashboard yet.</p>
+                          <p className="mt-2 text-xs opacity-80">حساب ولي الأمر موجود لكن بلا أطفال مرتبطين بلوحتك بعد.</p>
                         )}
                       </div>
                     ) : null}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="parentPhone" className="text-slate-700 dark:text-slate-300">Phone</Label>
+                    <Label htmlFor="parentPhone" className="text-slate-700 dark:text-slate-300">الهاتف</Label>
                     <Input
                       id="parentPhone"
                       type="tel"
@@ -373,7 +373,7 @@ function AddPatientPage() {
                       className="border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-primary/20"
                     />
                     {parentLookup?.exists ? (
-                      <p className="text-xs text-muted-foreground">Existing parent details were loaded automatically. You can still complete any missing information.</p>
+                      <p className="text-xs text-muted-foreground">تم تحميل بيانات ولي الأمر تلقائيًا. يمكنك إكمال أي معلومات ناقصة.</p>
                     ) : null}
                   </div>
                 </div>
@@ -388,10 +388,10 @@ function AddPatientPage() {
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Registering...
+                      جاري التسجيل…
                     </>
                   ) : (
-                    "Register Patient & Invite Parent"
+                    "تسجيل المريض ودعوة ولي الأمر"
                   )}
                 </Button>
               </div>

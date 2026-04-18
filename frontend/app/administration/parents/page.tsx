@@ -111,7 +111,7 @@ function ParentsPageContent() {
 
   const toggleStatus = async (row: AdminParent) => {
     const ok = window.confirm(
-      `${row.is_active ? "Disable" : "Enable"} this parent account?\n\nThis action will be logged in Audit Logs.`,
+      `${row.is_active ? "تعطيل" : "تفعيل"} حساب ولي الأمر هذا؟\n\nسيُسجّل الإجراء في سجل التدقيق.`,
     )
     if (!ok) return
     try {
@@ -119,16 +119,16 @@ function ParentsPageContent() {
         method: "PUT",
         body: JSON.stringify({ is_active: !row.is_active }),
       })
-      toast.success(`Parent ${!row.is_active ? "enabled" : "disabled"} successfully. Check Audit Logs.`)
+      toast.success(`تم ${!row.is_active ? "تفعيل" : "تعطيل"} ولي الأمر بنجاح. راجع سجل التدقيق.`)
       await reload()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to update parent status")
+      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة ولي الأمر")
     }
   }
 
   const resetPassword = async (row: AdminParent) => {
     const ok = window.confirm(
-      "Generate a temporary password for this parent?\n\nThis action will be logged in Audit Logs.",
+      "إنشاء كلمة مرور مؤقتة لولي الأمر هذا؟\n\nسيُسجّل الإجراء في سجل التدقيق.",
     )
     if (!ok) return
     try {
@@ -137,9 +137,9 @@ function ParentsPageContent() {
         { method: "POST" },
       )
       await navigator.clipboard.writeText(res.temporary_password)
-      toast.success("Temporary password copied to clipboard. Check Audit Logs.")
+      toast.success("تم نسخ كلمة المرور المؤقتة. راجع سجل التدقيق.")
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to reset parent password")
+      toast.error(e instanceof Error ? e.message : "تعذّر إعادة تعيين كلمة مرور ولي الأمر")
     }
   }
 
@@ -148,13 +148,13 @@ function ParentsPageContent() {
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <AdminManagementHeader
-        title="Parents Management"
-        description="Inspect parent accounts and linked children."
+        title="إدارة أولياء الأمور"
+        description="فحص حسابات أولياء الأمور والأطفال المرتبطين."
         action={
           <Button asChild className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             <Link href="/register?role=parent" target="_blank" rel="noopener noreferrer">
               <Plus className="h-4 w-4" />
-              Add Parent
+              إضافة ولي أمر
             </Link>
           </Button>
         }
@@ -162,18 +162,18 @@ function ParentsPageContent() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminEntityKpiCard
-          label="Total Parents"
+          label="إجمالي أولياء الأمور"
           value={items.length}
-          subtitle="Registered family accounts"
+          subtitle="حسابات عائلية مسجّلة"
           icon={UserRound}
           iconWrapClass="bg-teal-500/10"
           iconClass="text-teal-600 dark:text-teal-400"
           valueClassName="text-teal-700 dark:text-teal-300"
         />
         <AdminEntityKpiCard
-          label="Linked Children"
+          label="أطفال مرتبطون"
           value={linkedChildrenTotal}
-          subtitle="Total children linked to any parent"
+          subtitle="إجمالي الأطفال المرتبطين بأي ولي أمر"
           icon={Baby}
           iconWrapClass="bg-blue-500/10"
           iconClass="text-blue-600 dark:text-blue-400"
@@ -181,9 +181,9 @@ function ParentsPageContent() {
         />
         {unlinkedParentsCount === 0 ? (
           <AdminEntityKpiCard
-            label="Unlinked Parents"
+            label="أولياء أمور بلا أطفال"
             value={0}
-            subtitle="All parents have children"
+            subtitle="كل أولياء الأمور لديهم أطفال"
             iconWrapClass="bg-emerald-500/10"
             customIcon={<CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
             valueClassName="text-emerald-600 dark:text-emerald-400"
@@ -191,9 +191,13 @@ function ParentsPageContent() {
           />
         ) : (
           <AdminEntityKpiCard
-            label="Unlinked Parents"
+            label="أولياء أمور بلا أطفال"
             value={unlinkedParentsCount}
-            subtitle={`${unlinkedParentsCount} parent${unlinkedParentsCount === 1 ? "" : "s"} have no linked child`}
+            subtitle={
+              unlinkedParentsCount === 1
+                ? "ولي أمر واحد بلا أطفال مرتبطين"
+                : `${unlinkedParentsCount} أولياء أمور بلا أطفال مرتبطين`
+            }
             iconWrapClass="bg-red-500/10"
             customIcon={<AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" aria-hidden />}
             valueClassName="text-red-600 dark:text-red-400"
@@ -208,22 +212,22 @@ function ParentsPageContent() {
           variant="success"
           icon={<ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
         >
-          No open parent account issues — all accounts are healthy
+          لا مشاكل مفتوحة لحسابات أولياء الأمور — كل الحسابات سليمة
         </AdminIssuesStrip>
       ) : (
         <AdminIssuesStrip
           variant="warning"
           icon={<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />}
         >
-          {`${disabledCount} parent account${disabledCount === 1 ? "" : "s"} have open issues`}
+          {`${disabledCount} حساب${disabledCount === 1 ? "" : "ات"} ولي أمر بها مشاكل مفتوحة`}
         </AdminIssuesStrip>
       )}
 
       <Card className="overflow-hidden border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <AdminDirectoryToolbar
-          title="Parents Directory"
+          title="دليل أولياء الأمور"
           titleIcon={<Users className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
-          searchPlaceholder="Search by name or email..."
+          searchPlaceholder="بحث بالاسم أو البريد…"
           search={search}
           onSearchChange={setSearch}
           filterActive={inactiveOnly}
@@ -234,12 +238,12 @@ function ParentsPageContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                  <TableHead className={th}>Parent</TableHead>
-                  <TableHead className={th}>Email</TableHead>
-                  <TableHead className={th}>Phone</TableHead>
-                  <TableHead className={th}>Children</TableHead>
-                  <TableHead className={th}>Status</TableHead>
-                  <TableHead className={cn(th, "text-right")}>Actions</TableHead>
+                  <TableHead className={th}>ولي الأمر</TableHead>
+                  <TableHead className={th}>البريد</TableHead>
+                  <TableHead className={th}>الهاتف</TableHead>
+                  <TableHead className={th}>الأطفال</TableHead>
+                  <TableHead className={th}>الحالة</TableHead>
+                  <TableHead className={cn(th, "text-right")}>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -267,7 +271,7 @@ function ParentsPageContent() {
                           <div className="min-w-0">
                             <p className="text-[13px] font-bold text-slate-900 dark:text-white">{name}</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              Joined {formatJoinedDate(row.created_at)}
+                              انضم {formatJoinedDate(row.created_at)}
                             </p>
                           </div>
                         </div>
@@ -284,7 +288,7 @@ function ParentsPageContent() {
                         {row.phone ? (
                           <span className="text-[13px] text-slate-700 dark:text-slate-300">{row.phone}</span>
                         ) : (
-                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">No phone</span>
+                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">لا هاتف</span>
                         )}
                       </TableCell>
                       <TableCell className="max-w-[280px]">
@@ -293,7 +297,7 @@ function ParentsPageContent() {
                             {row.children_count}
                           </span>
                           {noKids ? (
-                            <span className="text-[12px] italic text-red-600 dark:text-red-400">— no children</span>
+                            <span className="text-[12px] italic text-red-600 dark:text-red-400">— لا أطفال</span>
                           ) : (
                             childNames.map((n, idx) => (
                               <span
@@ -322,7 +326,7 @@ function ParentsPageContent() {
                               onClick={() => toggleStatus(row)}
                             >
                               <AlertTriangle className="h-3 w-3 shrink-0" />
-                              Disable
+                              تعطيل
                             </Button>
                           ) : (
                             <Button
@@ -333,7 +337,7 @@ function ParentsPageContent() {
                               )}
                               onClick={() => toggleStatus(row)}
                             >
-                              Enable
+                              تفعيل
                             </Button>
                           )}
                           <Button
@@ -345,7 +349,7 @@ function ParentsPageContent() {
                             onClick={() => resetPassword(row)}
                           >
                             <Lock className="h-3 w-3 shrink-0" />
-                            Reset pwd
+                            إعادة كلمة المرور
                           </Button>
                         </div>
                       </TableCell>
@@ -355,7 +359,7 @@ function ParentsPageContent() {
                 {!displayParents.length ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                      No parents found.
+                      لا يوجد أولياء أمور.
                     </TableCell>
                   </TableRow>
                 ) : null}

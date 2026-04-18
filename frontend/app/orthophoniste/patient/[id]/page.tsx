@@ -92,7 +92,7 @@ function getStatusChip(status: ReturnType<typeof getStatus>) {
     monitor: "bg-amber-100 text-amber-700",
     needs_attention: "bg-red-100 text-red-700",
   }
-  const label = status === "on_track" ? "On Track" : status === "monitor" ? "Monitor" : "Needs Attention"
+  const label = status === "on_track" ? "على المسار" : status === "monitor" ? "مراقبة" : "يحتاج انتباهًا"
   return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${config[status]}`}>{label}</span>
 }
 
@@ -138,7 +138,7 @@ function PatientDetailsPageContent() {
         setSessions(sessionsData)
         setPrograms(programsData.filter((program) => program.status === "ready"))
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load patient details")
+        if (!cancelled) setError(err instanceof Error ? err.message : "تعذّر تحميل تفاصيل المريض")
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -160,9 +160,9 @@ function PatientDetailsPageContent() {
         }),
       })
       setPatient(updated)
-      toast.success(selectedProgramValue === "none" ? "Program removed from patient" : "Program assigned to patient")
+      toast.success(selectedProgramValue === "none" ? "تمت إزالة البرنامج عن المريض" : "تم تعيين البرنامج للمريض")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to assign program")
+      toast.error(err instanceof Error ? err.message : "تعذّر تعيين البرنامج")
     } finally {
       setAssigningProgram(false)
     }
@@ -170,7 +170,7 @@ function PatientDetailsPageContent() {
 
   const exportSessionsCsv = () => {
     if (!sessions.length) return
-    const rows = [["Date", "Score", "Total Questions", "Accuracy", "Duration"]]
+    const rows = [["التاريخ", "النتيجة", "إجمالي الأسئلة", "الدقة", "المدة"]]
     for (const s of sessions) {
       const duration = `${Math.max(1, s.total_questions) * 20}s`
       rows.push([formatDateTime(s.created_at), String(s.score), String(s.total_questions), `${s.accuracy_pct}%`, duration])
@@ -188,15 +188,15 @@ function PatientDetailsPageContent() {
   return (
     <div>
       <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> Back to Patients
+        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
       </Link>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading patient details...</p>
+        <p className="text-sm text-muted-foreground">جاري تحميل تفاصيل المريض…</p>
       ) : error || !patient ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            {error || "Patient not found."}
+            {error || "لم يُعثر على المريض."}
           </CardContent>
         </Card>
       ) : (
@@ -210,8 +210,8 @@ function PatientDetailsPageContent() {
                 <div>
                   <h1 className="text-[20px] font-bold text-slate-900 dark:text-white">{patient.name}</h1>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-blue-50 text-blue-700 px-2.5 py-1 text-xs font-medium">{patient.age ?? "—"} yrs</span>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${severityChip(patient.diagnostic)}`}>{patient.diagnostic || "No level"}</span>
+                    <span className="rounded-full bg-blue-50 text-blue-700 px-2.5 py-1 text-xs font-medium">{patient.age != null ? `${patient.age} سنة` : "—"}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${severityChip(patient.diagnostic)}`}>{patient.diagnostic || "بدون مستوى"}</span>
                     {getStatusChip(getStatus(Math.round(patient.stats?.avg_accuracy ?? 0), patient.stats?.total_sessions ?? 0))}
                     <code className="rounded-full bg-slate-100 text-slate-700 px-2.5 py-1 text-xs font-mono">{patient.alexa_code || "—"}</code>
                   </div>
@@ -220,11 +220,11 @@ function PatientDetailsPageContent() {
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="text-xs px-[14px] py-[7px]">
                   <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                  Edit Patient
+                  تعديل المريض
                 </Button>
                 <Button size="sm" className="text-xs px-[14px] py-[7px]">
                   <Wand2 className="h-3.5 w-3.5 mr-1.5" />
-                  Assign Program
+                  تعيين برنامج
                 </Button>
               </div>
             </div>
@@ -235,26 +235,26 @@ function PatientDetailsPageContent() {
               <CardHeader className="border-b border-slate-200/70 dark:border-slate-700/70">
                 <CardTitle className="flex items-center gap-2 text-[13px] font-bold">
                   <span className="h-7 w-7 rounded-md bg-[#EBF5FE] text-[#1a8fe3] inline-flex items-center justify-center"><UserRound className="h-4 w-4" /></span>
-                  Patient Information
+                  معلومات المريض
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-0 text-sm">
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-[12px] text-muted-foreground">Age</span>
-                  <span className="text-[12px] font-semibold">{patient.age ?? "—"} yrs</span>
+                  <span className="text-[12px] text-muted-foreground">العمر</span>
+                  <span className="text-[12px] font-semibold">{patient.age != null ? `${patient.age} سنة` : "—"}</span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-[12px] text-muted-foreground">ADHD Level</span>
+                  <span className="text-[12px] text-muted-foreground">مستوى ADHD</span>
                   <span className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${severityChip(patient.diagnostic)}`}>
                     {patient.diagnostic || "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-[12px] text-muted-foreground">Alexa Code</span>
+                  <span className="text-[12px] text-muted-foreground">رمز الطفل</span>
                   <code className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[12px] font-mono">{patient.alexa_code || "—"}</code>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-[12px] text-muted-foreground">Created At</span>
+                  <span className="text-[12px] text-muted-foreground">تاريخ الإنشاء</span>
                   <span className="text-[12px] font-semibold">{formatDateTime(patient.created_at)}</span>
                 </div>
               </CardContent>
@@ -264,7 +264,7 @@ function PatientDetailsPageContent() {
               <CardHeader className="border-b border-slate-200/70 dark:border-slate-700/70">
                 <CardTitle className="flex items-center gap-2 text-[13px] font-bold">
                   <span className="h-7 w-7 rounded-md bg-[#EBF5FE] text-[#1a8fe3] inline-flex items-center justify-center"><Wand2 className="h-4 w-4" /></span>
-                  Assigned Training Program
+                  البرنامج التدريبي المعيّن
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
@@ -274,10 +274,10 @@ function PatientDetailsPageContent() {
                   disabled={assigningProgram}
                 >
                   <SelectTrigger className="bg-[#f9fafb] border-slate-300">
-                    <SelectValue placeholder="Select a ready program" />
+                    <SelectValue placeholder="اختر برنامجًا جاهزًا" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No program assigned</SelectItem>
+                    <SelectItem value="none">لا برنامج معيّن</SelectItem>
                     {programs.map((program) => (
                       <SelectItem key={program.id} value={String(program.id)}>
                         {program.name} ({program.question_count} questions)
@@ -287,23 +287,23 @@ function PatientDetailsPageContent() {
                 </Select>
                 <div className="inline-flex items-start gap-2 text-xs text-muted-foreground">
                   <Info className="h-3.5 w-3.5 mt-0.5" />
-                  <span>Choose which ready program Alexa should use for this patient.</span>
+                  <span>اختر البرنامج الجاهز الذي تستخدمه أليكسا لهذا المريض.</span>
                 </div>
                 <Button className="w-full" onClick={handleAssignProgram} disabled={assigningProgram}>
                   <Wand2 className="h-4 w-4 mr-2" />
-                  {assigningProgram ? "Assigning..." : "Assign Program"}
+                  {assigningProgram ? "جاري التعيين…" : "تعيين البرنامج"}
                 </Button>
 
                 {patient.assigned_program ? (
                   <div className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
                     <p className="font-medium">{patient.assigned_program.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Status: {patient.assigned_program.status} • Questions: {patient.assigned_program.question_count}
+                      الحالة: {patient.assigned_program.status} • الأسئلة: {patient.assigned_program.question_count}
                     </p>
                   </div>
                 ) : (
                   <p className="text-muted-foreground">
-                    Alexa will not start a quiz for this patient until a ready program is assigned.
+                    لن تبدأ أليكسا اختبارًا لهذا المريض حتى يُعيَّن برنامج جاهز.
                   </p>
                 )}
               </CardContent>
@@ -313,29 +313,29 @@ function PatientDetailsPageContent() {
               <CardHeader className="border-b border-slate-200/70 dark:border-slate-700/70">
                 <CardTitle className="flex items-center gap-2 text-[13px] font-bold">
                   <span className="h-7 w-7 rounded-md bg-[#EBF5FE] text-[#1a8fe3] inline-flex items-center justify-center"><Users className="h-4 w-4" /></span>
-                  Parent Information
+                  معلومات ولي الأمر
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
                   <div className="h-[34px] w-[34px] rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-semibold">
-                    {initials(patient.parent?.full_name || "Parent")}
+                    {initials(patient.parent?.full_name || "ولي أمر")}
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900 dark:text-white">{patient.parent?.full_name || "Parent"}</p>
-                    <p className="text-xs text-muted-foreground">Linked parent</p>
+                    <p className="font-semibold text-slate-900 dark:text-white">{patient.parent?.full_name || "ولي أمر"}</p>
+                    <p className="text-xs text-muted-foreground">ولي أمر مرتبط</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{patient.parent?.email || "No parent linked"}</span>
+                  <span>{patient.parent?.email || "لا ولي أمر مرتبط"}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   {patient.parent?.phone ? (
                     <span>{patient.parent.phone}</span>
                   ) : (
-                    <span className="italic text-slate-400">No phone number</span>
+                    <span className="italic text-slate-400">لا رقم هاتف</span>
                   )}
                 </div>
               </CardContent>
@@ -345,18 +345,18 @@ function PatientDetailsPageContent() {
           <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
             <Card className="surface-card">
               <CardHeader className="pb-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Activity className="h-3.5 w-3.5" /> Total Sessions</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Activity className="h-3.5 w-3.5" /> إجمالي الجلسات</p>
               </CardHeader>
               <CardContent>
                 <p className={`text-3xl font-bold ${(patient.stats?.total_sessions ?? 0) === 0 ? "text-[#d1d5db]" : "text-slate-900 dark:text-white"}`}>
                   {patient.stats?.total_sessions ?? 0}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">All quiz sessions completed</p>
+                <p className="text-xs text-muted-foreground mt-1">كل جلسات الاختبار المكتملة</p>
               </CardContent>
             </Card>
             <Card className="surface-card">
               <CardHeader className="pb-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" /> Average Accuracy</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Gauge className="h-3.5 w-3.5" /> متوسط الدقة</p>
               </CardHeader>
               <CardContent>
                 {(() => {
@@ -368,7 +368,7 @@ function PatientDetailsPageContent() {
                       <div className="mt-2 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
                         <div className={`h-full ${barColor}`} style={{ width: `${avg}%` }} />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Overall performance trend</p>
+                      <p className="text-xs text-muted-foreground mt-1">اتجاه الأداء العام</p>
                     </>
                   )
                 })()}
@@ -376,7 +376,7 @@ function PatientDetailsPageContent() {
             </Card>
             <Card className="surface-card">
               <CardHeader className="pb-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> Last Session</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> آخر جلسة</p>
               </CardHeader>
               <CardContent>
                 {patient.last_session ? (
@@ -388,8 +388,8 @@ function PatientDetailsPageContent() {
                   </>
                 ) : (
                   <>
-                    <p className="text-sm italic text-muted-foreground">No sessions yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Session details will appear here</p>
+                    <p className="text-sm italic text-muted-foreground">لا توجد جلسات بعد</p>
+                    <p className="text-xs text-muted-foreground mt-1">ستظهر تفاصيل الجلسات هنا</p>
                   </>
                 )}
               </CardContent>
@@ -399,10 +399,10 @@ function PatientDetailsPageContent() {
           <Card className="surface-card">
             <CardHeader className="border-b border-slate-200/70 dark:border-slate-700/70">
               <div className="flex items-center justify-between gap-3">
-                <CardTitle>Recent Quiz Sessions</CardTitle>
+                <CardTitle>آخر جلسات الاختبار</CardTitle>
                 <Button variant="outline" size="sm" className="text-xs" onClick={exportSessionsCsv} disabled={!sessions.length}>
                   <Download className="h-3.5 w-3.5 mr-1.5" />
-                  Export CSV
+                  تصدير CSV
                 </Button>
               </div>
             </CardHeader>
@@ -410,11 +410,11 @@ function PatientDetailsPageContent() {
               <Table>
                 <TableHeader className="bg-slate-50/80 dark:bg-slate-900/40">
                   <TableRow>
-                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">Date</TableHead>
-                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">Score</TableHead>
-                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">Total Questions</TableHead>
-                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">Accuracy</TableHead>
-                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">Duration</TableHead>
+                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">التاريخ</TableHead>
+                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">النتيجة</TableHead>
+                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">إجمالي الأسئلة</TableHead>
+                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">الدقة</TableHead>
+                    <TableHead className="text-[10px] uppercase tracking-wider text-slate-400">المدة</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -423,8 +423,8 @@ function PatientDetailsPageContent() {
                       <TableCell colSpan={5} className="h-40">
                         <div className="flex flex-col items-center justify-center text-center">
                           <CalendarDays className="h-7 w-7 text-slate-400 mb-2" />
-                          <p className="text-[12px] text-muted-foreground">No sessions recorded yet</p>
-                          <p className="text-[11px] text-slate-400">Sessions will appear here once the patient starts a quiz.</p>
+                          <p className="text-[12px] text-muted-foreground">لا توجد جلسات مسجّلة بعد</p>
+                          <p className="text-[11px] text-slate-400">ستظهر الجلسات هنا عندما يبدأ المريض الاختبار.</p>
                         </div>
                       </TableCell>
                     </TableRow>

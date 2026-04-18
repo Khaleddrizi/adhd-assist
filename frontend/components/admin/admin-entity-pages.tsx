@@ -9,7 +9,7 @@ import { Filter, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function formatJoinedDate(iso: string | null): string {
-  if (!iso) return "Unknown date"
+  if (!iso) return "تاريخ غير معروف"
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
 }
 
@@ -164,7 +164,7 @@ export function AdminDirectoryToolbar(props: {
           onClick={onFilterClick}
         >
           <Filter className="h-3.5 w-3.5" />
-          Filter
+          تصفية
         </Button>
       </div>
     </div>
@@ -180,7 +180,7 @@ export function StatusPill(props: { kind: "active" | "disabled" | "pending" }) {
     pending:
       "bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/25",
   } as const
-  const label = kind === "active" ? "Active" : kind === "disabled" ? "Disabled" : "Pending"
+  const label = kind === "active" ? "نشط" : kind === "disabled" ? "معطّل" : "قيد الانتظار"
   return (
     <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold", map[kind])}>{label}</span>
   )
@@ -212,7 +212,7 @@ export function clinicalFocusKind(avgAccuracy: number, sessionCount: number): "o
 
 export function ClinicalFocusPill(props: { avgAccuracy: number; sessionCount: number }) {
   const kind = clinicalFocusKind(props.avgAccuracy, props.sessionCount)
-  const label = kind === "ok" ? "On Track" : kind === "watch" ? "Monitor" : "Needs Attention"
+  const label = kind === "ok" ? "على المسار" : kind === "watch" ? "مراقبة" : "يحتاج انتباهًا"
   const cls =
     kind === "ok"
       ? "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/30"
@@ -225,9 +225,9 @@ export function ClinicalFocusPill(props: { avgAccuracy: number; sessionCount: nu
 export function severityDotAndLabel(diagnostic: string | null): { dotClass: string; label: string } {
   const raw = (diagnostic || "").trim()
   const lower = raw.toLowerCase()
-  if (lower.includes("severe")) return { dotClass: "bg-red-500", label: "Severe" }
-  if (lower.includes("moderate")) return { dotClass: "bg-orange-500", label: "Moderate" }
-  if (lower.includes("mild")) return { dotClass: "bg-amber-500", label: "Mild" }
+  if (lower.includes("severe")) return { dotClass: "bg-red-500", label: "شديد" }
+  if (lower.includes("moderate")) return { dotClass: "bg-orange-500", label: "متوسط" }
+  if (lower.includes("mild")) return { dotClass: "bg-amber-500", label: "خفيف" }
   if (!raw) return { dotClass: "bg-slate-400", label: "—" }
   return { dotClass: "bg-slate-500", label: raw }
 }
@@ -243,19 +243,19 @@ export function severityLevelDisplay(diagnostic: string | null): {
   if (lower.includes("severe"))
     return {
       dotClass: "bg-red-500",
-      label: "Severe",
+      label: "شديد",
       textClass: "text-red-600 dark:text-red-400",
     }
   if (lower.includes("moderate"))
     return {
       dotClass: "bg-orange-500",
-      label: "Moderate",
+      label: "متوسط",
       textClass: "text-orange-600 dark:text-orange-400",
     }
   if (lower.includes("mild"))
     return {
       dotClass: "bg-amber-500",
-      label: "Mild",
+      label: "خفيف",
       textClass: "text-amber-600 dark:text-amber-400",
     }
   if (!raw)

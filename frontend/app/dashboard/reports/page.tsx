@@ -95,7 +95,7 @@ function weeklySeries(sessions: ApiSession[]) {
 function formatTableDate(value: string | null) {
   if (!value) return "—"
   try {
-    return new Date(value).toLocaleString("en-GB", {
+    return new Date(value).toLocaleString("ar", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -108,7 +108,7 @@ function formatTableDate(value: string | null) {
 }
 
 function exportSessionsCsv(rows: { child: string; date: string; score: string; questions: string; accuracy: string }[]) {
-  const header = ["Child", "Date", "Score", "Questions", "Accuracy"]
+  const header = ["الطفل", "التاريخ", "النتيجة", "الأسئلة", "الدقة"]
   const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`
   const lines = [header.join(","), ...rows.map((r) => [esc(r.child), esc(r.date), r.score, r.questions, esc(r.accuracy)].join(","))]
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" })
@@ -206,9 +206,9 @@ function ReportsPageContent() {
     return {
       total,
       pie: [
-        { name: "High (≥70%)", value: green, color: DONUT_GREEN },
-        { name: "Mid (30–69%)", value: amber, color: DONUT_AMBER },
-        { name: "Low (<30%)", value: red, color: DONUT_RED },
+        { name: "مرتفع (≥٧٠٪)", value: green, color: DONUT_GREEN },
+        { name: "متوسط (٣٠–٦٩٪)", value: amber, color: DONUT_AMBER },
+        { name: "منخفض (<٣٠٪)", value: red, color: DONUT_RED },
       ].filter((x) => x.value > 0),
       pct: {
         green: total ? Math.round((green / total) * 100) : 0,
@@ -254,15 +254,15 @@ function ReportsPageContent() {
     window.print()
   }, [])
 
-  const rangeLabels: Record<RangeKey, string> = { "7d": "7 days", "30d": "30 days", all: "All" }
+  const rangeLabels: Record<RangeKey, string> = { "7d": "٧ أيام", "30d": "٣٠ يومًا", all: "الكل" }
 
   return (
     <div id="parent-reports-print" className="max-w-7xl mx-auto space-y-6">
       {/* Header: title + period + export */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Reports</h1>
-          <p className="text-sm text-muted-foreground mt-1">Family performance insights across children and sessions.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">التقارير</h1>
+          <p className="text-sm text-muted-foreground mt-1">رؤى أداء العائلة عبر الأطفال والجلسات.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {(["7d", "30d", "all"] as const).map((key) => (
@@ -288,7 +288,7 @@ function ReportsPageContent() {
             onClick={handleExportPdf}
           >
             <Download className="h-4 w-4 mr-2" />
-            Export PDF
+            تصدير PDF
           </Button>
         </div>
       </div>
@@ -298,9 +298,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Total Sessions</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">إجمالي الجلسات</p>
               <p className="text-xl font-bold text-[#0f766e]">{loading ? "—" : totalSessions}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{rangeLabels[range]} window</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">نافذة {rangeLabels[range]}</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -313,9 +313,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Overall Accuracy</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">الدقة الإجمالية</p>
               <p className="text-xl font-bold text-[#534AB7]">{loading ? "—" : `${overallAccuracy}%`}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Across all sessions</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">عبر كل الجلسات</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -328,9 +328,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Stars Earned</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">النجوم المكتسبة</p>
               <p className="text-xl font-bold text-[#d97706]">{loading ? "—" : starsEarned}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Correct answers total</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">إجمالي الإجابات الصحيحة</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -343,9 +343,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Active Children</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">أطفال نشطون</p>
               <p className="text-xl font-bold text-[#1a8fe3]">{loading ? "—" : activeChildren}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">With sessions in period</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">لديهم جلسات في الفترة</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -361,12 +361,12 @@ function ReportsPageContent() {
       <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
         <Card className="surface-card flex h-full min-h-[420px] flex-col border-border/70 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Performance by Child</CardTitle>
+            <CardTitle className="text-base">الأداء حسب الطفل</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col gap-6">
             <div className="space-y-4">
               {children.length === 0 && !loading ? (
-                <p className="text-sm text-muted-foreground">No children linked.</p>
+                <p className="text-sm text-muted-foreground">لا يوجد أطفال مرتبطون.</p>
               ) : (
                 byChild.map((row) => {
                   const colors = accColor(row.avgAccuracy)
@@ -396,7 +396,7 @@ function ReportsPageContent() {
               )}
             </div>
             <div className="mt-auto border-t border-slate-100 pt-4 dark:border-slate-800">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">Sessions over time</p>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">الجلسات عبر الزمن</p>
               <div className="h-[160px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={lineData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
@@ -405,7 +405,7 @@ function ReportsPageContent() {
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={28} />
                     <Tooltip
                       contentStyle={{ borderRadius: 8, fontSize: 12 }}
-                      formatter={(v: number) => [v, "Sessions"]}
+                      formatter={(v: number) => [v, "جلسات"]}
                     />
                     <Line
                       type="monotone"
@@ -425,14 +425,14 @@ function ReportsPageContent() {
 
         <Card className="surface-card flex h-full min-h-[420px] flex-col border-border/70 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Accuracy Distribution + Stars Milestones</CardTitle>
+            <CardTitle className="text-base">توزيع الدقة ومراحل النجوم</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col gap-6">
             <div className="flex min-h-[180px] flex-1 flex-col items-center justify-center">
               {distribution.total === 0 ? (
                 <div className="flex flex-col items-center py-6 text-center">
                   <PieChartIcon className="h-10 w-10 text-slate-300 dark:text-slate-600" strokeWidth={1.25} />
-                  <p className="mt-3 text-sm text-muted-foreground">No sessions yet</p>
+                  <p className="mt-3 text-sm text-muted-foreground">لا توجد جلسات بعد</p>
                 </div>
               ) : (
                 <div className="flex w-full flex-col items-center sm:flex-row sm:justify-center sm:gap-6">
@@ -453,22 +453,22 @@ function ReportsPageContent() {
                             <Cell key={i} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(v: number) => [v, "Sessions"]} />
+                        <Tooltip formatter={(v: number) => [v, "جلسات"]} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                   <ul className="mt-4 space-y-2 text-xs sm:mt-0">
                     <li className="flex items-center gap-2">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: DONUT_GREEN }} />
-                      High ≥70% — {distribution.pct.green}%
+                      مرتفع ≥٧٠٪ — {distribution.pct.green}%
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: DONUT_AMBER }} />
-                      Mid 30–69% — {distribution.pct.amber}%
+                      متوسط ٣٠–٦٩٪ — {distribution.pct.amber}%
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: DONUT_RED }} />
-                      Low &lt;30% — {distribution.pct.red}%
+                      منخفض &lt;٣٠٪ — {distribution.pct.red}%
                     </li>
                   </ul>
                 </div>
@@ -477,14 +477,14 @@ function ReportsPageContent() {
 
             <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Stars Milestones
+                مراحل النجوم
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {(
                   [
-                    { key: "bronze", label: "Bronze", count: milestones.bronze },
-                    { key: "silver", label: "Silver", count: milestones.silver },
-                    { key: "gold", label: "Gold", count: milestones.gold },
+                    { key: "bronze", label: "برونزي", count: milestones.bronze },
+                    { key: "silver", label: "فضي", count: milestones.silver },
+                    { key: "gold", label: "ذهبي", count: milestones.gold },
                   ] as const
                 ).map((m) => (
                   <div
@@ -500,12 +500,12 @@ function ReportsPageContent() {
                     <p className={cn("mt-1 text-lg font-bold", m.count === 0 && "text-slate-400 dark:text-slate-500")}>
                       {m.count}
                     </p>
-                    <p className="text-[10px] text-muted-foreground">sessions</p>
+                    <p className="text-[10px] text-muted-foreground">جلسات</p>
                   </div>
                 ))}
               </div>
               <p className="mt-2 text-[10px] text-muted-foreground">
-                Tiers by accuracy: Gold ≥85%, Silver 50–84%, Bronze &lt;50%.
+                المستويات حسب الدقة: ذهبي ≥٨٥٪، فضي ٥٠–٨٤٪، برونزي &lt;٥٠٪.
               </p>
             </div>
           </CardContent>
@@ -515,7 +515,7 @@ function ReportsPageContent() {
       {/* Sessions table */}
       <Card className="surface-card border-border/70 shadow-sm print:break-inside-avoid">
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 space-y-0 pb-2">
-          <CardTitle className="text-base">Recent sessions</CardTitle>
+          <CardTitle className="text-base">آخر الجلسات</CardTitle>
           <Button
             type="button"
             variant="outline"
@@ -525,16 +525,16 @@ function ReportsPageContent() {
             disabled={sortedTableRows.length === 0}
           >
             <Download className="h-3.5 w-3.5 mr-2" />
-            Export CSV
+            تصدير CSV
           </Button>
         </CardHeader>
         <CardContent className="pt-0">
           {sortedTableRows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <Calendar className="h-[26px] w-[26px] text-slate-400 dark:text-slate-500" strokeWidth={1.25} />
-              <p className="mt-3 text-xs text-muted-foreground">No sessions recorded yet</p>
+              <p className="mt-3 text-xs text-muted-foreground">لا توجد جلسات مسجّلة بعد</p>
               <p className="mt-1 max-w-sm text-[11px] text-slate-400 dark:text-slate-500">
-                Sessions will appear here once your child starts a quiz.
+                ستظهر الجلسات هنا عندما يبدأ طفلك الاختبار.
               </p>
             </div>
           ) : (
@@ -543,19 +543,19 @@ function ReportsPageContent() {
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50 text-left dark:border-slate-800 dark:bg-slate-900/50">
                     <th className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Child
+                      الطفل
                     </th>
                     <th className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Date
+                      التاريخ
                     </th>
                     <th className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Score
+                      النتيجة
                     </th>
                     <th className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Questions
+                      الأسئلة
                     </th>
                     <th className="px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Accuracy
+                      الدقة
                     </th>
                   </tr>
                 </thead>

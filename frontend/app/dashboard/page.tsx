@@ -34,24 +34,25 @@ function initials(name: string) {
 }
 
 function childStatus(stats: ApiChild["stats"]) {
-  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "Needs Attention", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
-  if (stats.avg_accuracy < 70) return { label: "Monitor", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
-  return { label: "On Track", cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
+  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "يحتاج انتباهًا", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
+  if (stats.avg_accuracy < 70) return { label: "مراقبة", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
+  return { label: "على المسار", cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
 }
 
 function severityChip(diagnostic: string | null | undefined) {
   const d = (diagnostic || "").trim()
   if (!d) return { label: "—", cls: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" }
-  if (/severe/i.test(d)) return { label: d, cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
-  if (/moderate/i.test(d)) return { label: d, cls: "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100" }
+  if (/severe/i.test(d)) return { label: "شديد", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
+  if (/moderate/i.test(d)) return { label: "متوسط", cls: "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100" }
+  if (/mild/i.test(d)) return { label: "خفيف", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
   return { label: d, cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
 }
 
 function formatTodayChip() {
-  return new Date().toLocaleDateString("en-GB", {
-    weekday: "short",
+  return new Date().toLocaleDateString("ar", {
+    weekday: "long",
     day: "numeric",
-    month: "short",
+    month: "long",
     year: "numeric",
   })
 }
@@ -94,7 +95,7 @@ function ParentPortalContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">جاري التحميل…</p>
       </div>
     )
   }
@@ -104,9 +105,9 @@ function ParentPortalContent() {
       {/* Welcome bar */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-bold text-slate-900 dark:text-white leading-tight">Parent Overview</h1>
+          <h1 className="text-[20px] font-bold text-slate-900 dark:text-white leading-tight">نظرة ولي الأمر</h1>
           <p className="mt-1 text-xs text-muted-foreground max-w-md">
-            Quick snapshot — jump to Children or Reports for details.
+            ملخص سريع — انتقل إلى «الأطفال» أو «التقارير» للتفاصيل.
           </p>
         </div>
         <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
@@ -118,7 +119,7 @@ function ParentPortalContent() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Children</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">الأطفال</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#1a8fe3" }}>
               {totals.totalChildren}
             </p>
@@ -134,7 +135,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sessions</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">الجلسات</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#0f766e" }}>
               {totals.totalSessions}
             </p>
@@ -150,7 +151,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Stars</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">النجوم</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#d97706" }}>
               {totals.totalStars}
             </p>
@@ -166,7 +167,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Average Accuracy</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">متوسط الدقة</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#534AB7" }}>
               {totals.avgAccuracy}%
             </p>
@@ -197,12 +198,12 @@ function ParentPortalContent() {
                 <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{spotlightChild.name}</p>
                 {children.length > 1 && (
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Showing first of {children.length} — see all in Children
+                    عرض الأول من {children.length} — راجع الكل في «الأطفال»
                   </p>
                 )}
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
-                    {spotlightChild.age != null ? `${spotlightChild.age} yrs` : "Age —"}
+                    {spotlightChild.age != null ? `${spotlightChild.age} سنة` : "العمر —"}
                   </span>
                   {(() => {
                     const sev = severityChip(spotlightChild.diagnostic)
@@ -225,7 +226,7 @@ function ParentPortalContent() {
               className="shrink-0 rounded-full bg-[#1a8fe3] px-5 text-white hover:bg-[#1578c4]"
             >
               <Link href={`/dashboard/children/${spotlightChild.id}`}>
-                View details
+                التفاصيل
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -235,7 +236,7 @@ function ParentPortalContent() {
         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3.5 dark:border-amber-900/50 dark:bg-amber-950/25">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
           <p className="text-sm text-amber-950 dark:text-amber-100">
-            No child linked to your account yet. Contact your specialist to get set up.
+            لا يوجد طفل مرتبط بحسابك بعد. تواصل مع المختص لإكمال الإعداد.
           </p>
         </div>
       )}
@@ -250,23 +251,22 @@ function ParentPortalContent() {
             >
               <Users className="h-5 w-5" style={{ color: "#1a8fe3" }} />
             </div>
-            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">Children Workspace</h2>
+            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">مساحة الأطفال</h2>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Deep dive into each child&apos;s learning journey, sessions, and rewards. Everything you need to support
-              practice at home in one place.
+              تتبّع رحلة كل طفل والجلسات والمكافآت. كل ما تحتاجه لدعم الممارسة في المنزل في مكان واحد.
             </p>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Overview, Sessions, and Rewards tabs</span>
+                <span>تبويبات النظرة العامة والجلسات والمكافآت</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Focus score history per child</span>
+                <span>سجل درجة التركيز لكل طفل</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Stars and reward milestones</span>
+                <span>النجوم ومراحل المكافآت</span>
               </li>
             </ul>
             <div className="mt-auto pt-6">
@@ -275,7 +275,7 @@ function ParentPortalContent() {
                 className="w-full rounded-full bg-[#1a8fe3] text-white hover:bg-[#1578c4]"
               >
                 <Link href="/dashboard/children">
-                  Open Children →
+                  فتح الأطفال ←
                 </Link>
               </Button>
             </div>
@@ -290,29 +290,28 @@ function ParentPortalContent() {
             >
               <CalendarRange className="h-5 w-5" style={{ color: "#534AB7" }} />
             </div>
-            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">Reports Workspace</h2>
+            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">مساحة التقارير</h2>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Visualize progress across time ranges, compare performance, and spot trends early so you can celebrate
-              wins and adjust routines.
+              تصوّر التقدم عبر الفترات الزمنية ومقارنة الأداء واكتشاف الاتجاهات مبكرًا للاحتفال بالإنجازات وتعديل الروتين.
             </p>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Weekly and monthly progress charts</span>
+                <span>مخططات التقدم الأسبوعية والشهرية</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Accuracy trends over time</span>
+                <span>اتجاهات الدقة عبر الزمن</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>Downloadable session reports</span>
+                <span>تقارير جلسات قابلة للتنزيل</span>
               </li>
             </ul>
             <div className="mt-auto pt-6">
               <Button asChild variant="outline" className="w-full rounded-full border-slate-300 bg-white dark:bg-transparent">
                 <Link href="/dashboard/reports">
-                  Open Reports →
+                  فتح التقارير ←
                 </Link>
               </Button>
             </div>

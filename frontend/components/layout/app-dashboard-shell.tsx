@@ -130,7 +130,7 @@ export function AppDashboardShell({
             sheetContentClassName,
           )}
         >
-          <SheetTitle className="sr-only">Main navigation</SheetTitle>
+          <SheetTitle className="sr-only">التنقل الرئيسي</SheetTitle>
           <div className="flex min-h-0 flex-1 flex-col">
             {sidebarHeader}
             <NavList onNavigate={() => setMobileOpen(false)} />
@@ -151,7 +151,7 @@ export function AppDashboardShell({
             variant="outline"
             size="icon"
             className={cn("shrink-0", mobileMenuButtonClassName)}
-            aria-label="Open menu"
+            aria-label="فتح القائمة"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="h-5 w-5" />

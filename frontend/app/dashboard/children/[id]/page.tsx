@@ -36,9 +36,9 @@ function formatDateTime(value: string | null | undefined) {
 }
 
 function statusFrom(stats: ApiChild["stats"]) {
-  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "Needs Attention", cls: "bg-red-100 text-red-700" }
-  if (stats.avg_accuracy < 70) return { label: "Monitor", cls: "bg-amber-100 text-amber-700" }
-  return { label: "On Track", cls: "bg-emerald-100 text-emerald-700" }
+  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "يحتاج انتباهًا", cls: "bg-red-100 text-red-700" }
+  if (stats.avg_accuracy < 70) return { label: "مراقبة", cls: "bg-amber-100 text-amber-700" }
+  return { label: "على المسار", cls: "bg-emerald-100 text-emerald-700" }
 }
 
 function ChildDetailsContent() {
@@ -77,13 +77,13 @@ function ChildDetailsContent() {
   const goalTarget = 50
   const goalProgress = Math.min(100, Math.round((stars / goalTarget) * 100))
 
-  if (loading) return <p className="text-sm text-muted-foreground">Loading child details...</p>
-  if (!child) return <p className="text-sm text-muted-foreground">Child not found.</p>
+  if (loading) return <p className="text-sm text-muted-foreground">جاري تحميل تفاصيل الطفل…</p>
+  if (!child) return <p className="text-sm text-muted-foreground">لم يُعثر على الطفل.</p>
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       <Link href="/dashboard/children" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-        <ArrowLeft className="h-4 w-4" /> Back to Children
+        <ArrowLeft className="h-4 w-4" /> العودة إلى الأطفال
       </Link>
 
       <Card className="surface-card">
@@ -92,8 +92,8 @@ function ChildDetailsContent() {
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{child.name}</h1>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Badge variant="outline">{child.age ?? "—"} yrs</Badge>
-                <Badge variant="outline">{child.diagnostic || "No level"}</Badge>
+                <Badge variant="outline">{child.age != null ? `${child.age} سنة` : "—"}</Badge>
+                <Badge variant="outline">{child.diagnostic || "بدون مستوى"}</Badge>
                 <Badge className={status.cls}>{status.label}</Badge>
                 <code className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-mono text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                   {child.alexa_code || "—"}
@@ -101,7 +101,7 @@ function ChildDetailsContent() {
               </div>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link href="/dashboard/reports">View full reports</Link>
+              <Link href="/dashboard/reports">عرض التقارير الكاملة</Link>
             </Button>
           </div>
         </CardContent>
@@ -109,34 +109,34 @@ function ChildDetailsContent() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="rewards">Rewards</TabsTrigger>
+          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="sessions">الجلسات</TabsTrigger>
+          <TabsTrigger value="rewards">المكافآت</TabsTrigger>
         </TabsList>
       </Tabs>
 
       {tab === "overview" ? (
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="surface-card">
-            <CardHeader><CardTitle className="text-sm">Assigned Program</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm">البرنامج المعيّن</CardTitle></CardHeader>
             <CardContent>
-              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><BookOpen className="h-3.5 w-3.5" /> Current learning program</div>
-              <p className="font-semibold">{child.assigned_program?.name || "No program assigned"}</p>
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><BookOpen className="h-3.5 w-3.5" /> برنامج التعلم الحالي</div>
+              <p className="font-semibold">{child.assigned_program?.name || "لا يوجد برنامج معيّن"}</p>
             </CardContent>
           </Card>
           <Card className="surface-card">
-            <CardHeader><CardTitle className="text-sm">Alexa Code</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm">رمز الطفل</CardTitle></CardHeader>
             <CardContent>
-              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><KeyRound className="h-3.5 w-3.5" /> Use this exact child code</div>
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground mb-2"><KeyRound className="h-3.5 w-3.5" /> استخدم هذا الرمز كما هو للطفل</div>
               <code className="rounded bg-slate-100 px-2 py-1 font-mono dark:bg-slate-800">{child.alexa_code || "—"}</code>
             </CardContent>
           </Card>
           <Card className="surface-card">
-            <CardHeader><CardTitle className="text-sm">Performance</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm">الأداء</CardTitle></CardHeader>
             <CardContent className="space-y-1">
-              <p className="text-sm text-muted-foreground">Average accuracy</p>
+              <p className="text-sm text-muted-foreground">متوسط الدقة</p>
               <p className="text-2xl font-bold">{Math.round(child.stats.avg_accuracy || 0)}%</p>
-              <p className="text-xs text-muted-foreground">{child.stats.total_sessions} sessions completed</p>
+              <p className="text-xs text-muted-foreground">{child.stats.total_sessions} جلسة مكتملة</p>
             </CardContent>
           </Card>
         </div>
@@ -145,23 +145,23 @@ function ChildDetailsContent() {
       {tab === "sessions" ? (
         <Card className="surface-card">
           <CardHeader>
-            <CardTitle>Recent Sessions</CardTitle>
+            <CardTitle>آخر الجلسات</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Questions</TableHead>
-                  <TableHead>Accuracy</TableHead>
-                  <TableHead>Duration</TableHead>
+                  <TableHead>التاريخ</TableHead>
+                  <TableHead>النتيجة</TableHead>
+                  <TableHead>الأسئلة</TableHead>
+                  <TableHead>الدقة</TableHead>
+                  <TableHead>المدة</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sessions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">No sessions yet.</TableCell>
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">لا توجد جلسات بعد.</TableCell>
                   </TableRow>
                 ) : (
                   sessions.map((s) => (
@@ -183,17 +183,17 @@ function ChildDetailsContent() {
       {tab === "rewards" ? (
         <Card className="surface-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" /> Rewards & Goal</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-500" /> المكافآت والهدف</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">Current goal: 50 stars</p>
+            <p className="text-sm text-muted-foreground">الهدف الحالي: 50 نجمة</p>
             <p className="text-2xl font-bold">{stars}/{goalTarget}</p>
             <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-purple-500" style={{ width: `${goalProgress}%` }} />
             </div>
             <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              {goalProgress >= 100 ? "Goal reached!" : `${goalTarget - stars} stars remaining`}
+              {goalProgress >= 100 ? "تم تحقيق الهدف!" : `${goalTarget - stars} نجمة متبقية`}
             </p>
           </CardContent>
         </Card>

@@ -159,9 +159,9 @@ function AdministrationHome() {
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Administration Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">لوحة الإدارة</h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Organize accounts, monitor system activity, and protect platform data.
+          إدارة الحسابات، مراقبة نشاط النظام، وحماية بيانات المنصة.
         </p>
       </div>
 
@@ -174,61 +174,61 @@ function AdministrationHome() {
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
             <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
-              All systems operational — platform running normally
+              كل الأنظمة تعمل — المنصة تعمل بشكل طبيعي
             </p>
           </div>
-          <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/80 sm:text-right">Last checked: just now</p>
+          <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/80 sm:text-right">آخر فحص: الآن</p>
         </div>
       ) : orphanList.length > 0 ? (
         <div className="flex w-full flex-col gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/50 dark:bg-red-950/30">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" aria-hidden />
             <p className="text-sm font-medium text-red-950 dark:text-red-100">
-              {totalIncidents} open incident{totalIncidents === 1 ? "" : "s"} — orphan children need linking
+              {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — أطفال يحتاجون ربطًا بولي أمر
             </p>
           </div>
-          <p className="text-xs text-red-800/90 dark:text-red-300/80 sm:text-right">Last checked: just now</p>
+          <p className="text-xs text-red-800/90 dark:text-red-300/80 sm:text-right">آخر فحص: الآن</p>
         </div>
       ) : (
         <div className="flex w-full flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-amber-800/60 dark:bg-amber-950/25">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
             <p className="text-sm font-medium text-amber-950 dark:text-amber-100">
-              {totalIncidents} open incident{totalIncidents === 1 ? "" : "s"} — review required
+              {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — يتطلب مراجعة
             </p>
           </div>
-          <p className="text-xs text-amber-800/90 dark:text-amber-300/80 sm:text-right">Last checked: just now</p>
+          <p className="text-xs text-amber-800/90 dark:text-amber-300/80 sm:text-right">آخر فحص: الآن</p>
         </div>
       )}
 
-      {loading ? <p className="text-sm text-slate-500">Loading…</p> : null}
+      {loading ? <p className="text-sm text-slate-500">جاري التحميل…</p> : null}
 
       {/* KPI rows */}
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard
-            label="Doctors"
+            label="المختصون"
             value={overview?.total_doctors ?? 0}
             valueClassName="text-blue-600 dark:text-blue-400"
-            subtitle="Registered specialists"
+            subtitle="مختصون مسجّلون"
             icon={Stethoscope}
             iconWrapClass="bg-blue-500/10"
             iconClass="text-blue-600 dark:text-blue-400"
           />
           <KpiCard
-            label="Parents"
+            label="أولياء الأمور"
             value={overview?.total_parents ?? 0}
             valueClassName="text-teal-600 dark:text-teal-400"
-            subtitle="Family accounts"
+            subtitle="حسابات عائلية"
             icon={Users}
             iconWrapClass="bg-teal-500/10"
             iconClass="text-teal-600 dark:text-teal-400"
           />
           <KpiCard
-            label="Children"
+            label="الأطفال"
             value={overview?.total_children ?? 0}
             valueClassName="text-purple-600 dark:text-purple-400"
-            subtitle="Patients in the system"
+            subtitle="مرضى في النظام"
             icon={Baby}
             iconWrapClass="bg-purple-500/10"
             iconClass="text-purple-600 dark:text-purple-400"
@@ -236,33 +236,33 @@ function AdministrationHome() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard
-            label="Alexa Users"
+            label="مستخدمو أليكسا"
             value={overview?.total_alexa_users ?? 0}
             valueClassName={alexaZero ? "text-[#d1d5db] dark:text-slate-500" : "text-amber-600 dark:text-amber-400"}
-            subtitle="Linked Alexa accounts"
+            subtitle="حسابات أليكسا المرتبطة"
             icon={Bot}
             iconWrapClass="bg-amber-500/10"
             iconClass={alexaZero ? "text-[#d1d5db] dark:text-slate-500" : "text-amber-600 dark:text-amber-400"}
           />
           <KpiCard
-            label="Sessions Today"
+            label="جلسات اليوم"
             value={overview?.sessions_today ?? 0}
             valueClassName={sessionsZero ? "text-[#d1d5db] dark:text-slate-500" : "text-emerald-600 dark:text-emerald-400"}
-            subtitle="Quiz sessions since midnight (UTC)"
+            subtitle="جلسات اختبار منذ منتصف الليل (UTC)"
             icon={Activity}
             iconWrapClass="bg-emerald-500/10"
             iconClass={sessionsZero ? "text-[#d1d5db] dark:text-slate-500" : "text-emerald-600 dark:text-emerald-400"}
           />
           <KpiCard
-            label="Orphan Children"
+            label="أطفال بلا ولي"
             value={orphanCount}
             valueClassName={
               orphanCount === 0 ? "text-[#d1d5db] dark:text-slate-500" : "text-red-600 dark:text-red-400"
             }
             subtitle={
               orphanCount === 0
-                ? "No unlinked children"
-                : `${orphanCount} ${orphanCount === 1 ? "child needs" : "children need"} linking`
+                ? "لا أطفال غير مرتبطين"
+                : `${orphanCount} ${orphanCount === 1 ? "طفل يحتاج" : "أطفال يحتاجون"} ربطًا بولي أمر`
             }
             subtitleClassName={
               orphanCount === 0 ? "text-emerald-600 dark:text-emerald-400" : "font-medium text-red-600 dark:text-red-400"
@@ -281,23 +281,23 @@ function AdministrationHome() {
           <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
               <Shield className="h-5 w-5 text-indigo-500" />
-              Incident Snapshot
+              ملخص الحوادث
             </CardTitle>
             <Link
               href={incidentViewHref}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
             >
-              View all →
+              عرض الكل ←
             </Link>
           </CardHeader>
           <CardContent className="space-y-0 pt-4">
             {totalIncidents === 0 ? (
               <div className="mb-4 rounded-md border border-emerald-200 bg-[#ecfdf5] px-3 py-2 text-sm font-medium text-emerald-900 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-100">
-                0 open incidents — platform is healthy
+                ٠ حوادث مفتوحة — المنصة بصحة جيدة
               </div>
             ) : (
               <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100">
-                {totalIncidents} open incident{totalIncidents === 1 ? "" : "s"} — attention needed
+                {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — يتطلب انتباهًا
               </div>
             )}
 
@@ -312,7 +312,7 @@ function AdministrationHome() {
                 <Stethoscope className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Doctor issues</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">مشاكل المختصين</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -322,8 +322,8 @@ function AdministrationHome() {
                   )}
                 >
                   {disabledDoctors.length === 0
-                    ? "0 unresolved · All clear"
-                    : `${disabledDoctors.length} unresolved · Review required`}
+                    ? "٠ غير محلولة · الوضع سليم"
+                    : `${disabledDoctors.length} غير محلولة · يتطلب مراجعة`}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -340,7 +340,7 @@ function AdministrationHome() {
                 <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Parent issues</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">مشاكل أولياء الأمور</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -350,8 +350,8 @@ function AdministrationHome() {
                   )}
                 >
                   {disabledParents.length === 0
-                    ? "0 unresolved · All clear"
-                    : `${disabledParents.length} unresolved · Review required`}
+                    ? "٠ غير محلولة · الوضع سليم"
+                    : `${disabledParents.length} غير محلولة · يتطلب مراجعة`}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -368,7 +368,7 @@ function AdministrationHome() {
                 <Baby className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">Orphan children</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">أطفال بلا ولي</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -378,8 +378,8 @@ function AdministrationHome() {
                   )}
                 >
                   {orphanList.length === 0
-                    ? "0 unlinked · All assigned"
-                    : `${orphanList.length} unlinked · Needs assignment`}
+                    ? "٠ غير مرتبطين · الكل معيّن"
+                    : `${orphanList.length} غير مرتبطين · يحتاج تعيينًا`}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -392,15 +392,15 @@ function AdministrationHome() {
           <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
               <ScrollText className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-              Recent Audit Logs
+              آخر سجل التدقيق
             </CardTitle>
             <Link href="/administration/audit" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-              View all →
+              عرض الكل ←
             </Link>
           </CardHeader>
           <CardContent className="pt-4">
             {!auditLogs.length ? (
-              <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">No recent activity</p>
+              <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">لا نشاط حديث</p>
             ) : (
               <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                 {auditLogs.map((log) => {

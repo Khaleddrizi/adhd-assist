@@ -72,7 +72,7 @@ function DoctorsPageContent() {
 
   const toggleStatus = async (doctor: AdminDoctor) => {
     const ok = window.confirm(
-      `${doctor.is_active ? "Disable" : "Enable"} this doctor account?\n\nThis action will be logged in Audit Logs.`,
+      `${doctor.is_active ? "تعطيل" : "تفعيل"} حساب هذا المختص؟\n\nسيُسجّل الإجراء في سجل التدقيق.`,
     )
     if (!ok) return
     try {
@@ -80,16 +80,16 @@ function DoctorsPageContent() {
         method: "PUT",
         body: JSON.stringify({ is_active: !doctor.is_active }),
       })
-      toast.success(`Doctor ${!doctor.is_active ? "enabled" : "disabled"} successfully. Check Audit Logs.`)
+      toast.success(`تم ${!doctor.is_active ? "تفعيل" : "تعطيل"} المختص بنجاح. راجع سجل التدقيق.`)
       await reload()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to update doctor status")
+      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة المختص")
     }
   }
 
   const resetPassword = async (doctor: AdminDoctor) => {
     const ok = window.confirm(
-      "Generate a temporary password for this doctor?\n\nThis action will be logged in Audit Logs.",
+      "إنشاء كلمة مرور مؤقتة لهذا المختص؟\n\nسيُسجّل الإجراء في سجل التدقيق.",
     )
     if (!ok) return
     try {
@@ -98,9 +98,9 @@ function DoctorsPageContent() {
         { method: "POST" },
       )
       await navigator.clipboard.writeText(res.temporary_password)
-      toast.success("Temporary password copied to clipboard. Check Audit Logs.")
+      toast.success("تم نسخ كلمة المرور المؤقتة. راجع سجل التدقيق.")
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to reset password")
+      toast.error(e instanceof Error ? e.message : "تعذّر إعادة تعيين كلمة المرور")
     }
   }
 
@@ -109,13 +109,13 @@ function DoctorsPageContent() {
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <AdminManagementHeader
-        title="Doctors Management"
-        description="Review doctor accounts and assigned patient load."
+        title="إدارة المختصين"
+        description="مراجعة حسابات المختصين وحمل المرضى المعيّن."
         action={
           <Button asChild className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             <Link href="/register?role=specialist" target="_blank" rel="noopener noreferrer">
               <Plus className="h-4 w-4" />
-              Add Doctor
+              إضافة مختص
             </Link>
           </Button>
         }
@@ -123,9 +123,9 @@ function DoctorsPageContent() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminEntityKpiCard
-          label="Total Doctors"
+          label="إجمالي المختصين"
           value={items.length}
-          subtitle="Registered specialists on the platform"
+          subtitle="مختصون مسجّلون على المنصة"
           iconWrapClass="bg-blue-500/10"
           customIcon={
             <span className="flex items-center justify-center gap-px text-blue-600 dark:text-blue-400" aria-hidden>
@@ -135,17 +135,17 @@ function DoctorsPageContent() {
           }
         />
         <AdminEntityKpiCard
-          label="Total Assigned Children"
+          label="إجمالي الأطفال المعيّنين"
           value={totalPatients}
-          subtitle="Children linked to specialists"
+          subtitle="أطفال مرتبطون بالمختصين"
           icon={Users}
           iconWrapClass="bg-teal-500/10"
           iconClass="text-teal-600 dark:text-teal-400"
         />
         <AdminEntityKpiCard
-          label="Average Children per Doctor"
+          label="متوسط الأطفال لكل مختص"
           value={avgPerDoctor}
-          subtitle="Mean patient load per specialist"
+          subtitle="متوسط حمل المرضى لكل مختص"
           icon={BarChart3}
           iconWrapClass="bg-purple-500/10"
           iconClass="text-purple-600 dark:text-purple-400"
@@ -157,22 +157,22 @@ function DoctorsPageContent() {
           variant="success"
           icon={<ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
         >
-          No open doctor account issues — all accounts are healthy
+          لا مشاكل مفتوحة لحسابات المختصين — كل الحسابات سليمة
         </AdminIssuesStrip>
       ) : (
         <AdminIssuesStrip
           variant="warning"
           icon={<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />}
         >
-          {disabledCount} doctor account{disabledCount === 1 ? "" : "s"} have open issues — review below
+          {disabledCount} حساب{disabledCount === 1 ? "" : "ات"} مختص بها مشاكل مفتوحة — راجع أدناه
         </AdminIssuesStrip>
       )}
 
       <Card className="overflow-hidden border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <AdminDirectoryToolbar
-          title="Doctors Directory"
+          title="دليل المختصين"
           titleIcon={<Stethoscope className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
-          searchPlaceholder="Search by name or email..."
+          searchPlaceholder="بحث بالاسم أو البريد…"
           search={search}
           onSearchChange={setSearch}
           filterActive={inactiveOnly}
@@ -183,12 +183,12 @@ function DoctorsPageContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                  <TableHead className={th}>Doctor</TableHead>
-                  <TableHead className={th}>Email</TableHead>
-                  <TableHead className={th}>Phone</TableHead>
-                  <TableHead className={th}>Patients</TableHead>
-                  <TableHead className={th}>Status</TableHead>
-                  <TableHead className={cn(th, "text-right")}>Actions</TableHead>
+                  <TableHead className={th}>المختص</TableHead>
+                  <TableHead className={th}>البريد</TableHead>
+                  <TableHead className={th}>الهاتف</TableHead>
+                  <TableHead className={th}>المرضى</TableHead>
+                  <TableHead className={th}>الحالة</TableHead>
+                  <TableHead className={cn(th, "text-right")}>إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -211,7 +211,7 @@ function DoctorsPageContent() {
                           <div className="min-w-0">
                             <p className="text-[13px] font-bold text-slate-900 dark:text-white">{name}</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              Joined {formatJoinedDate(row.created_at)}
+                              انضم {formatJoinedDate(row.created_at)}
                             </p>
                           </div>
                         </div>
@@ -228,7 +228,7 @@ function DoctorsPageContent() {
                         {row.phone ? (
                           <span className="text-[13px] text-slate-700 dark:text-slate-300">{row.phone}</span>
                         ) : (
-                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">No phone</span>
+                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">لا هاتف</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -249,7 +249,7 @@ function DoctorsPageContent() {
                               onClick={() => toggleStatus(row)}
                             >
                               <AlertTriangle className="h-3.5 w-3.5" />
-                              Disable
+                              تعطيل
                             </Button>
                           ) : (
                             <Button
@@ -258,7 +258,7 @@ function DoctorsPageContent() {
                               className="h-8 gap-1 border-emerald-400 bg-transparent text-emerald-700 hover:bg-emerald-50 dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
                               onClick={() => toggleStatus(row)}
                             >
-                              Enable
+                              تفعيل
                             </Button>
                           )}
                           <Button
@@ -268,7 +268,7 @@ function DoctorsPageContent() {
                             onClick={() => resetPassword(row)}
                           >
                             <Lock className="h-3.5 w-3.5" />
-                            Reset pwd
+                            إعادة كلمة المرور
                           </Button>
                         </div>
                       </TableCell>
@@ -278,7 +278,7 @@ function DoctorsPageContent() {
                 {!filteredItems.length ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                      No doctors found.
+                      لا يوجد مختصون.
                     </TableCell>
                   </TableRow>
                 ) : null}

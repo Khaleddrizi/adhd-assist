@@ -75,9 +75,9 @@ function passwordStrength(password: string): { score: 0 | 1 | 2 | 3 | 4 } {
 }
 
 function statusFrom(stats: ApiChild["stats"]) {
-  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "Needs Attention", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
-  if (stats.avg_accuracy < 70) return { label: "Monitor", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
-  return { label: "On Track", cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
+  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "يحتاج انتباهًا", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
+  if (stats.avg_accuracy < 70) return { label: "مراقبة", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
+  return { label: "على المسار", cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
 }
 
 const inputClass =
@@ -120,7 +120,7 @@ function ParentProfilePageContent() {
           phone: data.phone || "",
         })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to load profile")
+        toast.error(err instanceof Error ? err.message : "تعذّر تحميل الملف الشخصي")
       } finally {
         setLoading(false)
       }
@@ -176,9 +176,9 @@ function ParentProfilePageContent() {
         body: JSON.stringify(profile),
       })
       syncStoredUser(data.full_name || "", data.email)
-      toast.success("Profile updated successfully")
+      toast.success("تم تحديث الملف الشخصي بنجاح")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update profile")
+      toast.error(err instanceof Error ? err.message : "تعذّر تحديث الملف الشخصي")
     } finally {
       setSavingProfile(false)
     }
@@ -187,7 +187,7 @@ function ParentProfilePageContent() {
   const handlePasswordSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwords.new_password !== passwords.confirm_password) {
-      toast.error("New passwords do not match")
+      toast.error("كلمتا المرور الجديدتان غير متطابقتين")
       return
     }
     setSavingPassword(true)
@@ -202,7 +202,7 @@ function ParentProfilePageContent() {
       toast.success(data.message)
       setPasswords({ current_password: "", new_password: "", confirm_password: "" })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to change password")
+      toast.error(err instanceof Error ? err.message : "تعذّر تغيير كلمة المرور")
     } finally {
       setSavingPassword(false)
     }
@@ -210,17 +210,17 @@ function ParentProfilePageContent() {
 
   const handleLogoutEverywhere = () => {
     localStorage.removeItem("adhdAssistCurrentUser")
-    toast.success("Logged out on this device. Sign in again on other devices with your password.")
+    toast.success("تم تسجيل الخروج من هذا الجهاز. سجّل الدخول مجددًا على الأجهزة الأخرى بكلمة مرورك.")
     router.replace("/login")
   }
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== "DELETE") {
-      toast.error('Type DELETE exactly to confirm')
+      toast.error("اكتب DELETE حرفيًا للتأكيد")
       return
     }
     if (!deletePassword) {
-      toast.error("Enter your current password")
+      toast.error("أدخل كلمة المرور الحالية")
       return
     }
     setDeleting(true)
@@ -230,11 +230,11 @@ function ParentProfilePageContent() {
         body: JSON.stringify({ current_password: deletePassword }),
       })
       localStorage.removeItem("adhdAssistCurrentUser")
-      toast.success("Account deleted successfully")
+      toast.success("تم حذف الحساب بنجاح")
       setDeleteDialogOpen(false)
       router.replace("/")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to delete account")
+      toast.error(err instanceof Error ? err.message : "تعذّر حذف الحساب")
     } finally {
       setDeleting(false)
     }
@@ -243,7 +243,7 @@ function ParentProfilePageContent() {
   const strength = passwordStrength(passwords.new_password)
   const passwordsMatch = Boolean(passwords.confirm_password) && passwords.new_password === passwords.confirm_password
   const passwordsMismatch = Boolean(passwords.confirm_password) && passwords.new_password !== passwords.confirm_password
-  const parentDisplayName = profile.full_name || profile.email || "Parent"
+  const parentDisplayName = profile.full_name || profile.email || "ولي أمر"
 
   const navBtn = (active: boolean, isDanger?: boolean) =>
     cn(
@@ -260,35 +260,35 @@ function ParentProfilePageContent() {
   return (
     <div className="max-w-6xl min-w-0 w-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Profile & Security</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your parent account, password, and linked children.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">الملف الشخصي والأمان</h1>
+        <p className="text-sm text-muted-foreground mt-1">إدارة حساب ولي الأمر وكلمة المرور والأطفال المرتبطين.</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[180px_1fr] lg:items-start">
         <aside className="lg:sticky lg:top-6 self-start">
           <nav className="space-y-5 rounded-xl border border-slate-200/80 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
             <div>
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account</p>
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">الحساب</p>
               <div className="space-y-1">
                 <button type="button" onClick={() => scrollToSection("profile")} className={navBtn(activeNav === "profile")}>
                   <UserCircle2 className="h-4 w-4 shrink-0" />
-                  Profile Info
+                  بيانات الملف
                 </button>
                 <button type="button" onClick={() => scrollToSection("password")} className={navBtn(activeNav === "password")}>
                   <Lock className="h-4 w-4 shrink-0" />
-                  Password
+                  كلمة المرور
                 </button>
                 <button type="button" onClick={() => scrollToSection("children")} className={navBtn(activeNav === "children")}>
                   <Users className="h-4 w-4 shrink-0" />
-                  Linked Children
+                  الأطفال المرتبطون
                 </button>
               </div>
             </div>
             <div>
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Danger</p>
+              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">منطقة خطرة</p>
               <button type="button" onClick={() => scrollToSection("danger")} className={navBtn(activeNav === "danger", true)}>
                 <TriangleAlert className="h-4 w-4 shrink-0" />
-                Delete Account
+                حذف الحساب
               </button>
             </div>
           </nav>
@@ -302,14 +302,14 @@ function ParentProfilePageContent() {
                   <User className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-bold">Profile Information</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">Update your name, email and contact details</p>
+                  <CardTitle className="text-base font-bold">معلومات الملف الشخصي</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">حدّث الاسم والبريد وبيانات الاتصال</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-5">
               {loading ? (
-                <p className="text-sm text-muted-foreground">Loading profile...</p>
+                <p className="text-sm text-muted-foreground">جاري تحميل الملف الشخصي…</p>
               ) : (
                 <form className="space-y-0" onSubmit={handleProfileSave}>
                   <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
@@ -322,7 +322,7 @@ function ParentProfilePageContent() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{parentDisplayName}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Parent · EDUVOX Portal</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">ولي أمر · بوابة EDUVOX</p>
                       </div>
                     </div>
                     <Button
@@ -330,16 +330,16 @@ function ParentProfilePageContent() {
                       variant="outline"
                       size="sm"
                       className="shrink-0 border-[#1a8fe3] text-[#1a8fe3] hover:bg-[#EBF5FE] self-start sm:self-center"
-                      onClick={() => toast.info("Photo upload will be available in a future update.")}
+                      onClick={() => toast.info("رفع الصورة سيتوفر في تحديث قادم.")}
                     >
                       <Camera className="h-4 w-4 mr-1.5" />
-                      Change photo
+                      تغيير الصورة
                     </Button>
                   </div>
 
                   <div className="grid gap-4 pt-5 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="full_name">Full Name</Label>
+                      <Label htmlFor="full_name">الاسم الكامل</Label>
                       <Input
                         id="full_name"
                         value={profile.full_name}
@@ -348,7 +348,7 @@ function ParentProfilePageContent() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">Phone</Label>
+                      <Label htmlFor="phone">الهاتف</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -359,7 +359,7 @@ function ParentProfilePageContent() {
                     </div>
                   </div>
                   <div className="grid gap-2 pt-4 md:col-span-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
                     <Input
                       id="email"
                       type="email"
@@ -372,7 +372,7 @@ function ParentProfilePageContent() {
 
                   <Button type="submit" disabled={savingProfile} className="mt-5 bg-[#1a8fe3] hover:bg-[#1578c4] text-white">
                     <Check className="h-4 w-4 mr-2" />
-                    {savingProfile ? "Saving..." : "Save Changes"}
+                    {savingProfile ? "جاري الحفظ…" : "حفظ التغييرات"}
                   </Button>
                 </form>
               )}
@@ -386,15 +386,15 @@ function ParentProfilePageContent() {
                   <Lock className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-bold">Change Password</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">Keep your account secure with a strong password</p>
+                  <CardTitle className="text-base font-bold">تغيير كلمة المرور</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">حافظ على أمان حسابك بكلمة مرور قوية</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-5">
               <form className="space-y-4" onSubmit={handlePasswordSave}>
                 <div className="grid gap-2">
-                  <Label htmlFor="current_password">Current Password</Label>
+                  <Label htmlFor="current_password">كلمة المرور الحالية</Label>
                   <div className="relative">
                     <Input
                       id="current_password"
@@ -416,7 +416,7 @@ function ParentProfilePageContent() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="new_password">New Password</Label>
+                  <Label htmlFor="new_password">كلمة المرور الجديدة</Label>
                   <div className="relative">
                     <Input
                       id="new_password"
@@ -436,7 +436,7 @@ function ParentProfilePageContent() {
                     </button>
                   </div>
                   <div className="mt-1">
-                    <p className="text-[11px] text-muted-foreground mb-1.5">Password strength</p>
+                    <p className="text-[11px] text-muted-foreground mb-1.5">قوة كلمة المرور</p>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((lvl) => (
                         <span
@@ -458,7 +458,7 @@ function ParentProfilePageContent() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm_password">Confirm New Password</Label>
+                  <Label htmlFor="confirm_password">تأكيد كلمة المرور الجديدة</Label>
                   <div className="relative">
                     <Input
                       id="confirm_password"
@@ -482,12 +482,12 @@ function ParentProfilePageContent() {
                       {passwordsMatch ? (
                         <>
                           <Check className="h-3.5 w-3.5 text-emerald-600" />
-                          <span className="text-emerald-700 dark:text-emerald-400">Passwords match</span>
+                          <span className="text-emerald-700 dark:text-emerald-400">كلمتا المرور متطابقتان</span>
                         </>
                       ) : (
                         <>
                           <X className="h-3.5 w-3.5 text-red-600" />
-                          <span className="text-red-600">Passwords do not match</span>
+                          <span className="text-red-600">كلمتا المرور غير متطابقتين</span>
                         </>
                       )}
                     </div>
@@ -500,7 +500,7 @@ function ParentProfilePageContent() {
                   disabled={savingPassword}
                   className="mt-1 bg-white text-slate-900 border-slate-300 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-100 dark:border-slate-600"
                 >
-                  {savingPassword ? "Updating..." : "Update Password"}
+                  {savingPassword ? "جاري التحديث…" : "تحديث كلمة المرور"}
                 </Button>
               </form>
             </CardContent>
@@ -513,24 +513,24 @@ function ParentProfilePageContent() {
                   <Users className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-bold">Linked Children</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">Children connected to your parent account</p>
+                  <CardTitle className="text-base font-bold">الأطفال المرتبطون</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">الأطفال المرتبطون بحساب ولي الأمر</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-5">
               {childrenLoading ? (
-                <p className="text-sm text-muted-foreground">Loading...</p>
+                <p className="text-sm text-muted-foreground">جاري التحميل…</p>
               ) : linkedChildren.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No children linked yet. Contact your specialist.
+                  لا يوجد أطفال مرتبطون بعد. تواصل مع المختص.
                 </p>
               ) : (
                 <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                   {linkedChildren.map((child) => {
                     const st = statusFrom(child.stats)
-                    const agePart = child.age != null ? `${child.age} yrs` : "— yrs"
-                    const diagPart = child.diagnostic?.trim() || "No diagnostic"
+                    const agePart = child.age != null ? `${child.age} سنة` : "—"
+                    const diagPart = child.diagnostic?.trim() || "بدون تشخيص"
                     const codePart = child.alexa_code || "—"
                     return (
                       <li key={child.id} className="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between">
@@ -544,7 +544,7 @@ function ParentProfilePageContent() {
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-900 dark:text-white">{child.name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5">
-                              {agePart} · {diagPart} · Code:{" "}
+                              {agePart} · {diagPart} · الرمز:{" "}
                               <span className="font-mono text-slate-600 dark:text-slate-400">{codePart}</span>
                             </p>
                           </div>
@@ -568,9 +568,9 @@ function ParentProfilePageContent() {
               <div className="flex items-start gap-3">
                 <TriangleAlert className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
                 <div>
-                  <CardTitle className="text-base font-bold text-red-700 dark:text-red-400">Danger Zone</CardTitle>
+                  <CardTitle className="text-base font-bold text-red-700 dark:text-red-400">منطقة خطرة</CardTitle>
                   <p className="text-xs text-red-600/90 dark:text-red-400/90 mt-0.5">
-                    Irreversible actions — proceed with caution
+                    إجراءات لا رجعة فيها — تابع بحذر
                   </p>
                 </div>
               </div>
@@ -578,9 +578,9 @@ function ParentProfilePageContent() {
             <CardContent className="p-0">
               <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">Log out of all devices</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">تسجيل الخروج من كل الأجهزة</p>
                   <p className="text-xs text-muted-foreground mt-1 max-w-md">
-                    Revoke all active sessions across all browsers and devices
+                    إلغاء كل الجلسات النشطة في المتصفحات والأجهزة
                   </p>
                 </div>
                 <Button
@@ -591,15 +591,14 @@ function ParentProfilePageContent() {
                   onClick={handleLogoutEverywhere}
                 >
                   <LogOut className="h-4 w-4 mr-1.5" />
-                  Log out everywhere
+                  خروج من كل مكان
                 </Button>
               </div>
               <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">Delete account</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">حذف الحساب</p>
                   <p className="text-xs text-muted-foreground mt-1 max-w-lg">
-                    Permanently deletes your account. Your linked children and all their results will be deleted too. This
-                    cannot be undone.
+                    يحذف حسابك نهائيًا مع الأطفال المرتبطين وكل نتائج الاختبارات. لا يمكن التراجع عن ذلك.
                   </p>
                 </div>
                 <Button
@@ -614,7 +613,7 @@ function ParentProfilePageContent() {
                   }}
                 >
                   <Trash2 className="h-4 w-4 mr-1.5" />
-                  Delete account
+                  حذف الحساب
                 </Button>
               </div>
             </CardContent>
@@ -625,14 +624,14 @@ function ParentProfilePageContent() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete account permanently?</DialogTitle>
+            <DialogTitle>حذف الحساب نهائيًا؟</DialogTitle>
             <DialogDescription>
-              This will remove your parent account, all linked children, and every quiz result. This cannot be undone.
+              سيُزال حساب ولي الأمر وجميع الأطفال المرتبطين وكل نتائج الاختبارات. لا يمكن التراجع عن ذلك.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 py-2">
             <div className="grid gap-2">
-              <Label htmlFor="delete-type-confirm">Type DELETE to confirm</Label>
+              <Label htmlFor="delete-type-confirm">اكتب DELETE للتأكيد</Label>
               <Input
                 id="delete-type-confirm"
                 value={deleteConfirmText}
@@ -643,20 +642,20 @@ function ParentProfilePageContent() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="delete-pw">Current password</Label>
+              <Label htmlFor="delete-pw">كلمة المرور الحالية</Label>
               <Input
                 id="delete-pw"
                 type="password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="Required to verify identity"
+                placeholder="مطلوب للتحقق من الهوية"
                 className={inputClass}
               />
             </div>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
+              إلغاء
             </Button>
             <Button
               type="button"
@@ -664,7 +663,7 @@ function ParentProfilePageContent() {
               disabled={deleting || deleteConfirmText !== "DELETE" || !deletePassword}
               onClick={handleDeleteAccount}
             >
-              {deleting ? "Deleting..." : "Delete forever"}
+              {deleting ? "جاري الحذف…" : "حذف نهائي"}
             </Button>
           </DialogFooter>
         </DialogContent>

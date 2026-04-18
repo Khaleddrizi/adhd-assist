@@ -23,15 +23,15 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
     }
   }, [])
 
-  const displayName = currentUser?.full_name || currentUser?.email || "Doctor"
+  const displayName = currentUser?.full_name || currentUser?.email || "مختص"
 
   const nav = useMemo<DashboardNavItem[]>(
     () => [
-      { href: "/orthophoniste", label: "Dashboard", icon: Activity },
-      { href: "/orthophoniste/patients", label: "Patients", icon: Users },
-      { href: "/orthophoniste/analytics", label: "Clinical Analytics", icon: BarChart3 },
-      { href: "/orthophoniste/library", label: "Library", icon: Upload },
-      { href: "/orthophoniste/settings", label: "Settings", icon: Settings },
+      { href: "/orthophoniste", label: "الرئيسية", icon: Activity },
+      { href: "/orthophoniste/patients", label: "المرضى", icon: Users },
+      { href: "/orthophoniste/analytics", label: "التحليلات السريرية", icon: BarChart3 },
+      { href: "/orthophoniste/library", label: "المكتبة", icon: Upload },
+      { href: "/orthophoniste/settings", label: "الإعدادات", icon: Settings },
     ],
     [],
   )
@@ -74,7 +74,7 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
       <p className="text-sm font-medium truncate">{displayName}</p>
       <Button variant="outline" size="sm" className="w-full mt-3" onClick={handleLogout}>
         <LogOut className="h-4 w-4 mr-2" />
-        Logout
+        تسجيل الخروج
       </Button>
     </div>
   )

@@ -50,8 +50,8 @@ function SecurityPageContent() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">Security & Data Protection</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track integrity indicators and respond to account linkage issues.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">الأمان وحماية البيانات</h1>
+        <p className="mt-1 text-sm text-muted-foreground">راقب مؤشرات السلامة ومعالجة مشاكل ربط الحسابات.</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="surface-card">
@@ -63,12 +63,12 @@ function SecurityPageContent() {
           </CardHeader>
           <CardContent>
             <p className={`text-lg font-semibold ${hasRisk ? "text-red-600" : "text-emerald-600"}`}>
-              {hasRisk ? "Action Required" : "Healthy"}
+              {hasRisk ? "يتطلب إجراءً" : "سليم"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {hasRisk
-                ? `There are ${overview?.orphan_children ?? 0} children without parent linkage.`
-                : "All children are properly linked to parent accounts."}
+                ? `يوجد ${overview?.orphan_children ?? 0} طفلًا بلا ربط بولي أمر.`
+                : "جميع الأطفال مرتبطون بشكل صحيح بحسابات أولياء الأمور."}
             </p>
           </CardContent>
         </Card>
@@ -76,24 +76,24 @@ function SecurityPageContent() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-600" />
-              Recommended Controls
+              ضوابط موصى بها
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <p>- Review orphan children in the `Children` page.</p>
-            <p>- Confirm doctor-parent ownership consistency before interventions.</p>
-            <p>- Keep admin account count minimal and monitored.</p>
-            <p>- Rotate admin passwords periodically.</p>
+            <p>- راجع الأطفال بدون ولي في صفحة «الأطفال».</p>
+            <p>- تأكد من اتساق ملكية المختص–ولي الأمر قبل أي تدخل.</p>
+            <p>- حافظ على عدد حسابات الإدارة أقل ما يمكن ومراقبته.</p>
+            <p>- جدّد كلمات مرور الإدارة بشكل دوري.</p>
           </CardContent>
         </Card>
       </div>
       <Card className="surface-card">
         <CardHeader>
-          <CardTitle>Recent Audit Logs</CardTitle>
+          <CardTitle>آخر سجل التدقيق</CardTitle>
         </CardHeader>
         <CardContent>
           {!logs.length ? (
-            <p className="text-sm text-muted-foreground">No audit logs yet.</p>
+            <p className="text-sm text-muted-foreground">لا سجلات تدقيق بعد.</p>
           ) : (
             <div className="space-y-2">
               {logs.map((log) => (
