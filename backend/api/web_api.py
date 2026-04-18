@@ -18,7 +18,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import func, or_
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
-from backend.database.connection import get_db
+from backend.database.connection import get_db, init_db
 from backend.config import DATA_DIR, QUESTION_CACHE_PATH, CHUNK_SIZE, CHUNK_OVERLAP, GROQ_API_KEY
 from backend.database.models import QuizSessionModel, PatientModel, ParentModel, SpecialistModel, AdministratorModel, UserModel, QuestionModel, AuditLogModel, TrainingProgramModel
 from backend.database.repositories import (
@@ -288,6 +288,14 @@ def _mark_stale_processing_programs(db, specialist_id: int | None = None) -> Non
 
 def create_web_api() -> Flask:
     app = Flask(__name__)
+    # Render runs this module directly (run.py with PORT); ensure schema patches run
+    # so ORM columns (e.g. specialists/parents preferred_locale) exist before login queries.
+    try:
+        init_db()
+    except Exception:
+        logger.exception("init_db() failed during Web API startup")
+        raise
+
     default_origins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
