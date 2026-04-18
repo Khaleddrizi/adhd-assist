@@ -6,7 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { ArrowRight, Users, FileText, Brain, BarChart3, ClipboardCheck, Gamepad2, Heart, Target } from "lucide-react"
+import { ArrowLeft, Users, FileText, Brain, BarChart3, ClipboardCheck, Gamepad2, Heart, Target } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 export default function LandingPage() {
@@ -37,21 +37,19 @@ export default function LandingPage() {
       <SiteHeader />
 
       <main className="flex-1">
-        {/* 1. Hero Section */}
+        {/* Hero */}
         <section className="bg-gradient-to-b from-background to-sky-50 dark:from-background dark:to-sky-950/10 pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden">
           <div className="container grid items-center gap-6 pt-6 md:py-10 lg:grid-cols-2">
             <div className="flex flex-col items-start gap-4 animate-on-scroll">
               <div className="inline-block rounded-lg bg-primary/10 px-3 py-1 text-sm text-primary">
-                Solution innovante pour l&apos;ADHD
+                دعم معرفي مخصص لاضطراب فرط الحركة وتشتت الانتباه
               </div>
               <h1 className="text-3xl font-bold leading-tight tracking-tighter md:text-4xl lg:text-5xl lg:leading-[1.1] bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-500 to-teal-500">
-                ADHD Assist — Interventions personnalisées grâce aux assistants vocaux et à l'IA générative
+                ADHD Assist — مساعدة ذكية عبر الصوت والذكاء الاصطناعي
               </h1>
               <p className="text-lg text-muted-foreground md:text-xl">
-                Une solution digitale innovante qui met en place des systèmes intelligents de soutien au comportement,
-                adaptés aux enfants et adultes atteints d'un Trouble du Déficit de l'Attention avec ou sans
-                Hyperactivité (ADHD – Attention Deficit Hyperactivity Disorder), afin de favoriser la concentration,
-                l'attention et l'autonomie au quotidien.
+                منصة رقمية تجمع بين المتابعة المهنية، التمارين التفاعلية، والمساعد الصوتي لدعم التركيز والانتباه
+                والاستقلالية اليومية للأطفال والمراهقين المصابين باضطراب فرط الحركة وتشتت الانتباه (ADHD).
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link href="/login">
@@ -59,8 +57,8 @@ export default function LandingPage() {
                     size="lg"
                     className="px-8 gap-2 group bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 transition-all duration-300"
                   >
-                    Login
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    تسجيل الدخول
+                    <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                   </Button>
                 </Link>
                 <Link href="/register">
@@ -69,7 +67,7 @@ export default function LandingPage() {
                     variant="outline"
                     className="px-8 border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
                   >
-                    Create Professional Account
+                    إنشاء حساب مهني
                   </Button>
                 </Link>
               </div>
@@ -81,7 +79,7 @@ export default function LandingPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Essai gratuit de 7 jours</span>
+                <span>تجربة مجانية لمدة 7 أيام</span>
                 <span className="mx-2">•</span>
                 <svg className="h-4 w-4 fill-current text-teal-500" viewBox="0 0 20 20">
                   <path
@@ -90,26 +88,26 @@ export default function LandingPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Aucune carte de crédit requise</span>
+                <span>بدون بطاقة بنكية</span>
               </div>
             </div>
             <div className="flex justify-center lg:justify-end animate-on-scroll">
               <div className="relative">
-                <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-gradient-to-r from-sky-300/30 to-cyan-300/30 blur-3xl animate-pulse-slow" />
-                <div className="absolute -bottom-10 -right-10 h-60 w-60 rounded-full bg-gradient-to-r from-blue-300/30 to-teal-300/30 blur-3xl animate-pulse-slow" />
+                <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-gradient-to-r from-sky-300/30 to-cyan-300/30 blur-3xl animate-pulse-slow" />
+                <div className="absolute -bottom-10 -left-10 h-60 w-60 rounded-full bg-gradient-to-r from-blue-300/30 to-teal-300/30 blur-3xl animate-pulse-slow" />
                 <div className="relative z-10">
                   <Image
                     src="/enfant-assistant-vocal.png"
-                    alt="Enfant avec assistant cognitif"
+                    alt="طفل يستخدم مساعدًا صوتيًا"
                     width={500}
                     height={400}
                     className="rounded-lg shadow-xl"
                     priority
                   />
-                  <div className="absolute -top-10 -right-10 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg animate-bounce-slow border-2 border-primary/20">
+                  <div className="absolute -top-10 -left-10 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg animate-bounce-slow border-2 border-primary/20">
                     <Brain className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="absolute -bottom-5 -left-5 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg animate-float border-2 border-cyan-500/20">
+                  <div className="absolute -bottom-5 -right-5 bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg animate-float border-2 border-cyan-500/20">
                     <Target className="h-6 w-6 text-cyan-600" />
                   </div>
                 </div>
@@ -118,16 +116,16 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 2. Fonctionnalités principales */}
+        {/* Features */}
         <section className="py-16 bg-gradient-to-b from-sky-50 to-background dark:from-sky-950/10 dark:to-background">
           <div className="container">
             <div className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
-                Fonctionnalités principales de la plateforme
+                أهم ميزات المنصة
               </h2>
               <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-                Notre solution propose des outils modernes pour accompagner la rééducation des personnes atteintes
-                d'ADHD, et les aider à développer leurs capacités ainsi que leur confiance.
+                أدوات حديثة لمساعدة المختصين والعائلات على متابعة التقدم، وتخصيص البرامج، وتقديم تجربة تفاعلية
+                وممتعة.
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -139,41 +137,26 @@ export default function LandingPage() {
                         <div className="rounded-full bg-gradient-to-r from-sky-500/10 to-cyan-500/10 p-3 transition-all duration-300 group-hover:scale-110">
                           <ClipboardCheck className="h-8 w-8 text-sky-600" />
                         </div>
-                        <h3 className="text-xl font-bold">1. Évaluation et suivi personnalisé</h3>
+                        <h3 className="text-xl font-bold">تقييم ومتابعة مخصصة</h3>
                       </div>
-                      <ul className="space-y-3 text-muted-foreground ml-14">
+                      <ul className="space-y-3 text-muted-foreground ms-14">
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-sky-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-sky-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Évaluation initiale du niveau de l&apos;enfant/adulte</span>
+                          <span>تقييم أولي واضح للاحتياجات</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-sky-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-sky-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Génération de rapports détaillés et statistiques de progression</span>
+                          <span>تقارير وإحصائيات لتتبع التقدم</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-sky-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-sky-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Adaptation continue des exercices en fonction des besoins identifiés</span>
+                          <span>تعديل مستمر للتمارين حسب الأداء</span>
                         </li>
                       </ul>
                     </div>
@@ -188,41 +171,26 @@ export default function LandingPage() {
                         <div className="rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10 p-3 transition-all duration-300 group-hover:scale-110">
                           <Brain className="h-8 w-8 text-blue-600" />
                         </div>
-                        <h3 className="text-xl font-bold">2. Génération et analyse de quiz</h3>
+                        <h3 className="text-xl font-bold">اختبارات وتحليل ذكي</h3>
                       </div>
                       <ul className="space-y-3 text-muted-foreground">
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-blue-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Création automatique de quiz à partir de documents fournis</span>
+                          <span>توليد أسئلة من مستندات PDF</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-blue-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Analyse des réponses pour identifier les points forts</span>
+                          <span>تحليل الإجابات لتحديد نقاط القوة والضعف</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-blue-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-blue-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Adaptation des prochains exercices selon les performances</span>
+                          <span>تكييف الأسئلة التالية حسب الأداء</span>
                         </li>
                       </ul>
                     </div>
@@ -237,32 +205,20 @@ export default function LandingPage() {
                         <div className="rounded-full bg-gradient-to-r from-teal-500/10 to-cyan-500/10 p-3 transition-all duration-300 group-hover:scale-110">
                           <Gamepad2 className="h-8 w-8 text-teal-600" />
                         </div>
-                        <h3 className="text-xl font-bold">3. Exercices ludiques et interactifs</h3>
+                        <h3 className="text-xl font-bold">تمارين تفاعلية وممتعة</h3>
                       </div>
                       <ul className="space-y-3 text-muted-foreground">
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-teal-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-teal-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>
-                            Jeux éducatifs pour renforcer la prononciation, la compréhension et le vocabulaire
-                          </span>
+                          <span>أنشطة تدعم الانتباه والذاكرة</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-teal-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-teal-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Activités interactives pour stimuler l&apos;attention et la mémoire</span>
+                          <span>تجربة لطيفة تبقي الطفل متحمسًا</span>
                         </li>
                       </ul>
                     </div>
@@ -277,30 +233,20 @@ export default function LandingPage() {
                         <div className="rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-3 transition-all duration-300 group-hover:scale-110">
                           <Users className="h-8 w-8 text-indigo-600" />
                         </div>
-                        <h3 className="text-xl font-bold">4. Suivi pour parents et professionnels</h3>
+                        <h3 className="text-xl font-bold">متابعة للعائلة والمختص</h3>
                       </div>
                       <ul className="space-y-3 text-muted-foreground">
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-indigo-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-indigo-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Tableau de bord dédié aux parents pour suivre les progrès</span>
+                          <span>لوحة معلومات للوالدين</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-indigo-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-indigo-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Espace professionnel pour personnaliser les contenus et adapter les niveaux</span>
+                          <span>مساحة للمختص لتخصيص المحتوى والمستويات</span>
                         </li>
                       </ul>
                     </div>
@@ -315,30 +261,20 @@ export default function LandingPage() {
                         <div className="rounded-full bg-gradient-to-r from-pink-500/10 to-rose-500/10 p-3 transition-all duration-300 group-hover:scale-110">
                           <Heart className="h-8 w-8 text-pink-600" />
                         </div>
-                        <h3 className="text-xl font-bold">5. Motivation et encouragements</h3>
+                        <h3 className="text-xl font-bold">تحفيز وتشجيع مستمر</h3>
                       </div>
                       <ul className="space-y-3 text-muted-foreground">
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-pink-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-pink-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>L&apos;assistant vocal félicite et encourage après chaque réussite</span>
+                          <span>تغذية راجعة إيجابية بعد كل نجاح</span>
                         </li>
                         <li className="flex items-start gap-2">
-                          <svg
-                            className="h-4 w-4 text-pink-600 mt-1 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
+                          <svg className="h-4 w-4 text-pink-600 mt-1 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          <span>Maintien de l&apos;engagement grâce à un feedback positif et régulier</span>
+                          <span>تعزيز الاستمرارية والثقة بالنفس</span>
                         </li>
                       </ul>
                     </div>
@@ -349,16 +285,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 3. Fonctionnement en 3 étapes */}
+        {/* Steps */}
         <section className="py-16">
           <div className="container">
             <div className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
-                Fonctionnement en 3 étapes
+                كيف تعمل المنصة؟
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Une approche simple et efficace pour transformer l&apos;accompagnement ADHD.
-              </p>
+              <p className="text-muted-foreground max-w-2xl mx-auto">ثلاث خطوات بسيطة لتحويل دعم ADHD إلى تجربة واضحة وفعّالة.</p>
             </div>
             <div className="grid gap-8 md:grid-cols-3 relative">
               <div className="absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent hidden md:block" />
@@ -369,10 +303,8 @@ export default function LandingPage() {
                 <div className="rounded-full bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900/20 dark:to-cyan-900/20 p-6 mb-4 shadow-md hover:scale-105 transition-transform duration-300">
                   <FileText className="h-12 w-12 text-sky-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Évaluation</h3>
-                <p className="text-muted-foreground">
-                  Le professionnel évalue les besoins spécifiques de l&apos;enfant et configure son profil.
-                </p>
+                <h3 className="text-xl font-bold mb-2">التقييم</h3>
+                <p className="text-muted-foreground">يقوم المختص بتقييم الاحتياجات وضبط ملف الطفل.</p>
               </div>
               <div className="relative flex flex-col items-center text-center animate-on-scroll">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white w-10 h-10 flex items-center justify-center font-bold shadow-lg z-10">
@@ -381,10 +313,8 @@ export default function LandingPage() {
                 <div className="rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 mb-4 shadow-md hover:scale-105 transition-transform duration-300">
                   <Brain className="h-12 w-12 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Entraînement</h3>
-                <p className="text-muted-foreground">
-                  L&apos;IA génère des exercices personnalisés pour développer les capacités cognitives.
-                </p>
+                <h3 className="text-xl font-bold mb-2">التدريب</h3>
+                <p className="text-muted-foreground">تولّد المنصة تمارين مخصصة لتطوير المهارات المعرفية.</p>
               </div>
               <div className="relative flex flex-col items-center text-center animate-on-scroll">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white w-10 h-10 flex items-center justify-center font-bold shadow-lg z-10">
@@ -393,25 +323,21 @@ export default function LandingPage() {
                 <div className="rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900/20 dark:to-cyan-900/20 p-6 mb-4 shadow-md hover:scale-105 transition-transform duration-300">
                   <BarChart3 className="h-12 w-12 text-teal-600" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Suivi</h3>
-                <p className="text-muted-foreground">
-                  Les progrès sont analysés et partagés avec les parents et professionnels.
-                </p>
+                <h3 className="text-xl font-bold mb-2">المتابعة</h3>
+                <p className="text-muted-foreground">يتم تحليل التقدم ومشاركته مع العائلة والمختص.</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 4. Pour qui est cette plateforme ? */}
+        {/* Audience */}
         <section className="py-16 bg-gradient-to-b from-background to-blue-50/50 dark:from-background dark:to-blue-950/10">
           <div className="container">
             <div className="text-center mb-12 animate-on-scroll">
               <h2 className="text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-                Pour qui est cette plateforme ?
+                لمن هذه المنصة؟
               </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                ADHD Assist s&apos;adresse à tous les acteurs impliqués dans l&apos;accompagnement ADHD.
-              </p>
+              <p className="text-muted-foreground max-w-2xl mx-auto">لجميع الفاعلين في دعم الطفل المصاب بـ ADHD.</p>
             </div>
             <div className="grid gap-8 md:grid-cols-3">
               <div className="animate-on-scroll">
@@ -421,34 +347,32 @@ export default function LandingPage() {
                       <div className="hover:rotate-6 transition-transform duration-300">
                         <Image
                           src="/orthophoniste-professional.png"
-                          alt="Orthophoniste en séance"
+                          alt="أخصائي"
                           width={80}
                           height={80}
                           className="rounded-full border-4 border-blue-100 dark:border-blue-900/30 shadow-md"
                         />
                       </div>
-                      <h3 className="text-xl font-bold">Orthophonistes</h3>
-                      <p className="text-muted-foreground">
-                        Spécialistes de la rééducation, proposant des programmes adaptés aux personnes avec ADHD.
-                      </p>
-                      <ul className="text-sm text-left space-y-2">
+                      <h3 className="text-xl font-bold">المختصون</h3>
+                      <p className="text-muted-foreground">برامج مخصصة، متابعة دقيقة، وتحليل تقدم واضح.</p>
+                      <ul className="text-sm text-start space-y-2">
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Suivi de multiples patients
+                          إدارة عدة مرضى
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Programmes personnalisés
+                          برامج قابلة للتخصيص
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Analyse détaillée des progrès
+                          تقارير تقدم مفصلة
                         </li>
                       </ul>
                     </div>
@@ -462,34 +386,32 @@ export default function LandingPage() {
                       <div className="hover:-rotate-6 transition-transform duration-300">
                         <Image
                           src="/parents-icon.png"
-                          alt="Parents"
+                          alt="الوالدان"
                           width={80}
                           height={80}
                           className="rounded-full border-4 border-sky-100 dark:border-sky-900/30 shadow-md"
                         />
                       </div>
-                      <h3 className="text-xl font-bold">Parents</h3>
-                      <p className="text-muted-foreground">
-                        Accompagner, comprendre et suivre les progrès depuis la maison.
-                      </p>
-                      <ul className="text-sm text-left space-y-2">
+                      <h3 className="text-xl font-bold">العائلات</h3>
+                      <p className="text-muted-foreground">متابعة يومية، فهم أوضح، وتعاون أفضل مع المختص.</p>
+                      <ul className="text-sm text-start space-y-2">
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Participation active à l&apos;accompagnement
+                          مشاركة فعالة في الدعم
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Suivi des progrès en temps réel
+                          متابعة التقدم لحظيًا
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Communication avec les professionnels
+                          تواصل أسهل مع المختص
                         </li>
                       </ul>
                     </div>
@@ -503,34 +425,32 @@ export default function LandingPage() {
                       <div className="hover:rotate-6 transition-transform duration-300">
                         <Image
                           src="/happy-child-icon.png"
-                          alt="Enfants"
+                          alt="الأطفال"
                           width={80}
                           height={80}
                           className="rounded-full border-4 border-cyan-100 dark:border-cyan-900/30 shadow-md"
                         />
                       </div>
-                      <h3 className="text-xl font-bold">Enfants avec ADHD</h3>
-                      <p className="text-muted-foreground">
-                        Développer ses capacités en s&apos;amusant avec des exercices adaptés et motivants.
-                      </p>
-                      <ul className="text-sm text-left space-y-2">
+                      <h3 className="text-xl font-bold">الأطفال</h3>
+                      <p className="text-muted-foreground">تطوير المهارات بطريقة ممتعة ومحفزة.</p>
+                      <ul className="text-sm text-start space-y-2">
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Exercices ludiques et interactifs
+                          تمارين تفاعلية
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Feedback positif et encourageant
+                          تشجيع مستمر
                         </li>
                         <li className="flex items-center gap-2">
                           <svg className="h-4 w-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Progression adaptée à leur rythme
+                          تقدم يناسب الإيقاع الفردي
                         </li>
                       </ul>
                     </div>
@@ -541,15 +461,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 5. Appel final */}
+        {/* CTA */}
         <section className="py-16 bg-gradient-to-r from-primary to-cyan-500 text-white relative overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-white/10 blur-3xl animate-pulse-slow" />
           <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-white/10 blur-3xl animate-pulse-slow" />
           <div className="container relative z-10">
             <div className="flex flex-col items-center text-center max-w-3xl mx-auto gap-6 animate-on-scroll">
-              <h2 className="text-3xl font-bold">Rejoignez la nouvelle génération de l&apos;accompagnement ADHD</h2>
+              <h2 className="text-3xl font-bold">انضم إلى الجيل القادم من دعم ADHD</h2>
               <p className="text-white/90 text-lg">
-                Transformez votre approche thérapeutique et offrez une expérience engageante aux enfants avec ADHD.
+                حسّن تجربة المتابعة، وقدّم للأطفال مسارًا واضحًا وممتعًا يعزز التركيز والثقة.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
                 <Link href="/register">
@@ -558,7 +478,7 @@ export default function LandingPage() {
                     variant="secondary"
                     className="min-w-[240px] bg-white text-primary hover:bg-white/90 transition-all duration-300 hover:scale-105"
                   >
-                    Create Professional Account
+                    إنشاء حساب مهني
                   </Button>
                 </Link>
                 <Link href="/login">
@@ -567,7 +487,7 @@ export default function LandingPage() {
                     variant="outline"
                     className="min-w-[200px] text-white border-white hover:bg-white hover:text-primary transition-all duration-300 bg-transparent hover:scale-105"
                   >
-                    Login
+                    تسجيل الدخول
                   </Button>
                 </Link>
               </div>
@@ -579,7 +499,7 @@ export default function LandingPage() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Aucune carte de crédit requise. Annulez à tout moment.
+                بدون بطاقة بنكية. يمكنك الإلغاء في أي وقت.
               </p>
             </div>
           </div>
@@ -597,8 +517,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Floating elements */}
-        <div className="fixed bottom-10 right-10 z-50 hidden md:block">
+        <div className="fixed bottom-10 left-10 z-50 hidden md:block">
           <div className="bg-gradient-to-r from-primary to-cyan-500 text-white p-4 rounded-full shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300 border-2 border-white/20">
             <Brain className="h-6 w-6" />
           </div>

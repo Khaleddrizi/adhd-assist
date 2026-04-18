@@ -24,12 +24,12 @@ export function SiteHeader() {
           <ModeToggle />
           <Link href="/login">
             <Button variant="ghost" className="hover:text-primary">
-              Login
+              تسجيل الدخول
             </Button>
           </Link>
           <Link href="/register">
             <Button className="bg-gradient-to-r from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 transition-all duration-300">
-              Join as a Doctor
+              انضم كمختص
             </Button>
           </Link>
         </nav>
@@ -46,10 +46,10 @@ export function SiteHeader() {
         <div className="md:hidden border-t">
           <div className="container py-4 space-y-2">
             <Link href="/login" className="block py-2">
-              <Button variant="outline" className="w-full">Login</Button>
+              <Button variant="outline" className="w-full">تسجيل الدخول</Button>
             </Link>
             <Link href="/register" className="block py-2">
-              <Button className="w-full bg-gradient-to-r from-primary to-cyan-500">Join as a Doctor</Button>
+              <Button className="w-full bg-gradient-to-r from-primary to-cyan-500">انضم كمختص</Button>
             </Link>
           </div>
         </div>

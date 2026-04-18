@@ -1,15 +1,16 @@
 import type React from "react"
 import "@/app/globals.css"
-import { Inter } from "next/font/google"
+import { Inter, Noto_Sans_Arabic } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+const notoArabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-noto-arabic" })
 
 export const metadata = {
-  title: "ADHD Assist - L'assistance cognitive assistée par l'intelligence artificielle",
+  title: "ADHD Assist — مساعدة معرفية مدعومة بالذكاء الاصطناعي",
   description:
-    "Solution digitale dédiée aux enfants avec ADHD, combinant science cognitive, intelligence artificielle et interaction ludique pour améliorer la concentration et l'attention.",
+    "منصة رقمية لدعم الأطفال المصابين باضطراب فرط الحركة وتشتت الانتباه (ADHD)، تجمع بين العلوم المعرفية والذكاء الاصطناعي والتفاعل اللطيف لتحسين التركيز والانتباه.",
     generator: 'v0.app'
 }
 
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body className={`${inter.variable} ${notoArabic.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster />
