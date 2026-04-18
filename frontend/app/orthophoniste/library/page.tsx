@@ -8,14 +8,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { fetchApi, getAuthHeaders, publicApiBase } from "@/lib/api"
 import { toast } from "sonner"
-import Link from "next/link"
 import {
-  ArrowLeft,
   FolderOpen,
   PlusCircle,
   Trash2,
   FileText,
-  Link as LinkIcon,
   RefreshCw,
   Search,
   UploadCloud,
@@ -246,10 +243,6 @@ function LibraryPage() {
 
   return (
     <div>
-      <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
-      </Link>
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">مكتبة التعلم</h1>
         <p className="text-sm text-muted-foreground mt-1">نظّم الموارد وملفات PDF المستخدمة لتوليد الاختبارات.</p>

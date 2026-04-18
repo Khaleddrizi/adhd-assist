@@ -18,8 +18,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { fetchApi } from "@/lib/api"
-import LinkIcon from "next/link"
-import { ArrowLeft, Search, Users, Mail, Phone, Eye, PlusCircle, ArrowUpDown } from "lucide-react"
+import { Search, Users, Mail, Phone, Eye, PlusCircle, ArrowUpDown } from "lucide-react"
 
 type PatientStatus = "on_track" | "monitor" | "needs_attention"
 type SortKey = "lastActivity" | "sessions" | "focusScore"
@@ -235,17 +234,14 @@ function PatientsPage() {
     <div className="min-w-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-3">
-            <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
-          </Link>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">إدارة المرضى</h1>
           <p className="text-sm text-muted-foreground mt-1">راجع المرضى وأولياء الأمور المرتبطين وحالة النشاط.</p>
         </div>
         <Button asChild>
-          <LinkIcon href="/orthophoniste/patients/new">
+          <Link href="/orthophoniste/patients/new">
             <PlusCircle className="h-4 w-4 mr-2" />
             إضافة مريض
-          </LinkIcon>
+          </Link>
         </Button>
       </div>
 

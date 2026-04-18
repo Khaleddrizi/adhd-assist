@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useParams } from "next/navigation"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { fetchApi } from "@/lib/api"
-import { ArrowLeft, UserRound, Users, Mail, Phone, Activity, Brain, Pencil, Wand2, Info, Download, CalendarDays, Gauge, Clock3 } from "lucide-react"
+import { UserRound, Users, Mail, Phone, Activity, Brain, Pencil, Wand2, Info, Download, CalendarDays, Gauge, Clock3 } from "lucide-react"
 import { toast } from "sonner"
 
 interface PatientDetails {
@@ -187,10 +186,6 @@ function PatientDetailsPageContent() {
 
   return (
     <div>
-      <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
-      </Link>
-
       {loading ? (
         <p className="text-sm text-muted-foreground">جاري تحميل تفاصيل المريض…</p>
       ) : error || !patient ? (

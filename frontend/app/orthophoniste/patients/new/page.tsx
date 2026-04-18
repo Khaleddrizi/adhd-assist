@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,7 +16,7 @@ import {
 import { AuthGuard } from "@/components/auth-guard"
 import { fetchApi, getAuthHeaders, publicApiBase } from "@/lib/api"
 import { toast } from "sonner"
-import { ArrowLeft, Users, UserPlus, Loader2, Copy, Check } from "lucide-react"
+import { Users, UserPlus, Loader2, Copy, Check } from "lucide-react"
 
 const ADHD_LEVELS = ["Mild", "Moderate", "Severe"] as const
 
@@ -227,10 +226,6 @@ function AddPatientPage() {
           </Card>
         </div>
       )}
-      <Link href="/orthophoniste/patients" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> العودة إلى المرضى
-      </Link>
-
       <div className="max-w-4xl">
         <Card className="surface-card border-slate-200 dark:border-slate-700 shadow-md">
           <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">

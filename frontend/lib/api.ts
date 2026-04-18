@@ -11,6 +11,8 @@ const API_BASE = publicApiBase
 
 export type AuthRole = "specialist" | "parent" | "administration"
 
+export type SpecialistLocale = "ar" | "fr" | "en"
+
 export interface AuthUser {
   id: number
   email: string
@@ -20,6 +22,8 @@ export interface AuthUser {
   accountType?: "therapist" | "parent" | "administration"
   auth_token?: string
   created_at?: string | null
+  /** Specialist or parent UI language (from backend after login / settings). */
+  preferred_locale?: SpecialistLocale
 }
 
 // Map backend role to frontend accountType for AuthGuard

@@ -89,7 +89,6 @@ function ParentPortalContent() {
     return { totalChildren, totalSessions, totalStars, avgAccuracy }
   }, [children])
 
-  const spotlightChild = children[0] ?? null
   const dateChip = useMemo(() => formatTodayChip(), [])
 
   if (loading) {
@@ -183,55 +182,57 @@ function ParentPortalContent() {
         </Card>
       </div>
 
-      {/* Child summary or empty state */}
-      {spotlightChild ? (
-        <Card className="border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
-          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-              <div
-                className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-base font-bold text-[#1a8fe3]"
-                style={{ backgroundColor: "#EBF5FE" }}
-              >
-                {initials(spotlightChild.name)}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{spotlightChild.name}</p>
-                {children.length > 1 && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    عرض الأول من {children.length} — راجع الكل في «الأطفال»
-                  </p>
-                )}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
-                    {spotlightChild.age != null ? `${spotlightChild.age} سنة` : "العمر —"}
-                  </span>
-                  {(() => {
-                    const sev = severityChip(spotlightChild.diagnostic)
-                    return (
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${sev.cls}`}>{sev.label}</span>
-                    )
-                  })()}
-                  {(() => {
-                    const st = childStatus(spotlightChild.stats)
-                    return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${st.cls}`}>{st.label}</span>
-                  })()}
-                  <code className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                    {spotlightChild.alexa_code || "—"}
-                  </code>
-                </div>
-              </div>
-            </div>
-            <Button
-              asChild
-              className="shrink-0 rounded-full bg-[#1a8fe3] px-5 text-white hover:bg-[#1578c4]"
+      {/* قائمة الأطفال المرتبطين */}
+      {children.length > 0 ? (
+        <div className="space-y-3">
+          {children.map((child) => (
+            <Card
+              key={child.id}
+              className="border border-slate-200/80 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950/40"
             >
-              <Link href={`/dashboard/children/${spotlightChild.id}`}>
-                التفاصيل
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                  <div
+                    className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-base font-bold text-[#1a8fe3]"
+                    style={{ backgroundColor: "#EBF5FE" }}
+                  >
+                    {initials(child.name)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{child.name}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
+                        {child.age != null ? `${child.age} سنة` : "العمر —"}
+                      </span>
+                      {(() => {
+                        const sev = severityChip(child.diagnostic)
+                        return (
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${sev.cls}`}>{sev.label}</span>
+                        )
+                      })()}
+                      {(() => {
+                        const st = childStatus(child.stats)
+                        return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${st.cls}`}>{st.label}</span>
+                      })()}
+                      <code className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {child.alexa_code || "—"}
+                      </code>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  asChild
+                  className="shrink-0 rounded-full bg-[#1a8fe3] px-5 text-white hover:bg-[#1578c4]"
+                >
+                  <Link href={`/dashboard/children/${child.id}`}>
+                    التفاصيل
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3.5 dark:border-amber-900/50 dark:bg-amber-950/25">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />

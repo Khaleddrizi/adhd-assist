@@ -1,17 +1,31 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { fetchApi } from "@/lib/api"
-import { toast } from "sonner"
-import Link from "next/link"
+import { Textarea } from "@/components/ui/textarea"
 import {
-  ArrowLeft,
-  Save,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { fetchApi, type SpecialistLocale } from "@/lib/api"
+import { toast } from "sonner"
+import {
   ShieldCheck,
   UserCircle2,
   User,
@@ -34,6 +48,10 @@ interface SpecialistProfile {
   full_name: string | null
   phone?: string | null
   created_at?: string | null
+  preferred_locale?: string
+  country?: string | null
+  state_region?: string | null
+  address_line?: string | null
 }
 
 type SettingsNavItem = "profile" | "password" | "notifications" | "language" | "danger"
@@ -57,9 +75,14 @@ function passwordStrength(password: string): { score: 0 | 1 | 2 | 3 | 4; label: 
 }
 
 function SettingsPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
+  const [savingPrefs, setSavingPrefs] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deletePassword, setDeletePassword] = useState("")
+  const [deletingAccount, setDeletingAccount] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -73,6 +96,12 @@ function SettingsPage() {
     new_password: "",
     confirm_password: "",
   })
+  const [prefs, setPrefs] = useState({
+    preferred_locale: "ar" as SpecialistLocale,
+    country: "",
+    state_region: "",
+    address_line: "",
+  })
   const [activeNav, setActiveNav] = useState<SettingsNavItem>("profile")
 
   useEffect(() => {
@@ -84,6 +113,16 @@ function SettingsPage() {
           email: data.email || "",
           phone: data.phone || "",
         })
+        const loc = data.preferred_locale === "fr" || data.preferred_locale === "en" ? data.preferred_locale : "ar"
+        setPrefs({
+          preferred_locale: loc,
+          country: data.country || "",
+          state_region: data.state_region || "",
+          address_line: data.address_line || "",
+        })
+        if (typeof document !== "undefined") {
+          document.documentElement.lang = loc
+        }
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "تعذّر تحميل الملف الشخصي")
       } finally {
@@ -93,13 +132,14 @@ function SettingsPage() {
     loadProfile()
   }, [])
 
-  const syncStoredUser = (full_name: string, email: string) => {
+  const syncStoredUser = (full_name: string, email: string, preferred_locale?: string) => {
     const raw = localStorage.getItem("adhdAssistCurrentUser")
     if (!raw) return
     try {
       const user = JSON.parse(raw)
       user.full_name = full_name
       user.email = email
+      if (preferred_locale) user.preferred_locale = preferred_locale
       localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(user))
     } catch {
       //
@@ -114,7 +154,7 @@ function SettingsPage() {
         method: "PUT",
         body: JSON.stringify(profile),
       })
-      syncStoredUser(data.full_name || "", data.email)
+      syncStoredUser(data.full_name || "", data.email, data.preferred_locale)
       toast.success("تم تحديث الملف الشخصي بنجاح")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "تعذّر تحديث الملف الشخصي")
@@ -158,8 +198,59 @@ function SettingsPage() {
     toast.success("تم تسجيل الخروج من هذا الجهاز.")
   }
 
-  const handleDeleteAccount = () => {
-    toast.error("حذف حساب المختص غير مفعّل.")
+  const handlePreferencesSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSavingPrefs(true)
+    try {
+      const data = await fetchApi<SpecialistProfile>("/api/specialists/me", {
+        method: "PUT",
+        body: JSON.stringify({
+          preferred_locale: prefs.preferred_locale,
+          country: prefs.country.trim() || null,
+          state_region: prefs.state_region.trim() || null,
+          address_line: prefs.address_line.trim() || null,
+        }),
+      })
+      const loc =
+        data.preferred_locale === "fr" || data.preferred_locale === "en" ? data.preferred_locale : "ar"
+      setPrefs((p) => ({
+        ...p,
+        preferred_locale: loc,
+        country: data.country || "",
+        state_region: data.state_region || "",
+        address_line: data.address_line || "",
+      }))
+      syncStoredUser(profile.full_name, profile.email, loc)
+      if (typeof document !== "undefined") document.documentElement.lang = loc
+      toast.success("تم حفظ اللغة والمنطقة")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر حفظ التفضيلات")
+    } finally {
+      setSavingPrefs(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      toast.error("أدخل كلمة المرور الحالية لتأكيد الحذف")
+      return
+    }
+    setDeletingAccount(true)
+    try {
+      await fetchApi<{ message: string }>("/api/specialists/me", {
+        method: "DELETE",
+        body: JSON.stringify({ current_password: deletePassword }),
+      })
+      localStorage.removeItem("adhdAssistCurrentUser")
+      toast.success("تم حذف الحساب نهائياً")
+      setDeleteOpen(false)
+      setDeletePassword("")
+      router.push("/login?role=therapist")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "تعذّر حذف الحساب")
+    } finally {
+      setDeletingAccount(false)
+    }
   }
 
   const strength = passwordStrength(passwords.new_password)
@@ -169,10 +260,6 @@ function SettingsPage() {
 
   return (
     <div className="min-w-0">
-      <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
-      </Link>
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">الملف الشخصي والأمان</h1>
         <p className="text-sm text-muted-foreground mt-1">إدارة بيانات حساب المختص وكلمة المرور.</p>
@@ -482,7 +569,62 @@ function SettingsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">إعدادات اللغة والمنطقة ستتوفر قريبًا.</p>
+              <form className="space-y-4" onSubmit={handlePreferencesSave}>
+                <div className="grid gap-2">
+                  <Label htmlFor="preferred_locale">لغة الواجهة</Label>
+                  <Select
+                    value={prefs.preferred_locale}
+                    onValueChange={(v) => setPrefs((p) => ({ ...p, preferred_locale: v as SpecialistLocale }))}
+                  >
+                    <SelectTrigger id="preferred_locale" className="max-w-md">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ar">العربية</SelectItem>
+                      <SelectItem value="fr">Français</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-muted-foreground">
+                    تُحفظ في حسابك وتُطبَّق على اتجاه الصفحة (LTR للإنجليزية والفرنسية). ترجمة كاملة للمحتوى قيد التوسع.
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="country">البلد</Label>
+                    <Input
+                      id="country"
+                      value={prefs.country}
+                      onChange={(e) => setPrefs((p) => ({ ...p, country: e.target.value }))}
+                      placeholder="مثال: الجزائر"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="state_region">الولاية / الإقليم</Label>
+                    <Input
+                      id="state_region"
+                      value={prefs.state_region}
+                      onChange={(e) => setPrefs((p) => ({ ...p, state_region: e.target.value }))}
+                      placeholder="مثال: وهران"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="address_line">العنوان</Label>
+                  <Textarea
+                    id="address_line"
+                    rows={3}
+                    value={prefs.address_line}
+                    onChange={(e) => setPrefs((p) => ({ ...p, address_line: e.target.value }))}
+                    placeholder="الشارع، الرمز البريدي، المدينة…"
+                    className="resize-y min-h-[80px]"
+                  />
+                </div>
+                <Button type="submit" disabled={savingPrefs}>
+                  <Check className="h-4 w-4 mr-2" />
+                  {savingPrefs ? "جاري الحفظ…" : "حفظ اللغة والمنطقة"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
 
@@ -517,7 +659,7 @@ function SettingsPage() {
                     حذف نهائي لحسابك وجميع بيانات المرضى. لا يمكن التراجع عن ذلك.
                   </p>
                 </div>
-                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDeleteAccount}>
+                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" type="button" onClick={() => setDeleteOpen(true)}>
                   <Trash2 className="h-4 w-4 mr-1.5" />
                   حذف الحساب
                 </Button>
@@ -526,6 +668,36 @@ function SettingsPage() {
           </Card>
         </div>
       </div>
+
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>تأكيد حذف الحساب</DialogTitle>
+            <DialogDescription>
+              سيتم حذف حسابك وجميع المرضى والجلسات والبرامج المرتبطة بهذا الحساب بشكل نهائي. لا يمكن التراجع.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 py-2">
+            <Label htmlFor="delete_password">كلمة المرور الحالية</Label>
+            <Input
+              id="delete_password"
+              type="password"
+              autoComplete="current-password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)} disabled={deletingAccount}>
+              إلغاء
+            </Button>
+            <Button type="button" className="bg-red-600 hover:bg-red-700" disabled={deletingAccount} onClick={handleDeleteAccount}>
+              {deletingAccount ? "جاري الحذف…" : "حذف نهائي"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

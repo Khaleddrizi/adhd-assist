@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import Link from "next/link"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { fetchApi } from "@/lib/api"
@@ -20,7 +19,7 @@ import {
   Cell,
   LabelList,
 } from "recharts"
-import { ArrowLeft, BarChart3, TrendingUp, Users, CheckCircle2, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { BarChart3, TrendingUp, Users, CheckCircle2, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
 
 type PeriodKey = "7d" | "30d" | "3m"
 
@@ -123,10 +122,6 @@ function AnalyticsPage() {
 
   return (
     <div>
-      <Link href="/orthophoniste" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-6">
-        <ArrowLeft className="h-4 w-4" /> العودة للرئيسية
-      </Link>
-
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">التحليلات السريرية</h1>

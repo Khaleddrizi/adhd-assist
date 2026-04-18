@@ -4,23 +4,65 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Home, User, LogOut, Users, BarChart3 } from "lucide-react"
+import { Home, Settings, LogOut, Users, BarChart3 } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
+
+const PARENT_NAV_LABELS = {
+  ar: {
+    home: "الرئيسية",
+    children: "الأطفال",
+    reports: "التقارير",
+    settings: "الإعدادات",
+    portal: "بوابة ولي الأمر",
+  },
+  en: {
+    home: "Home",
+    children: "Children",
+    reports: "Reports",
+    settings: "Settings",
+    portal: "Parent portal",
+  },
+  fr: {
+    home: "Accueil",
+    children: "Enfants",
+    reports: "Rapports",
+    settings: "Paramètres",
+    portal: "Portail parent",
+  },
+} as const
+
+type ParentNavLocale = keyof typeof PARENT_NAV_LABELS
+
+function parentNavLocale(raw: string | undefined): ParentNavLocale {
+  if (raw === "en" || raw === "fr") return raw
+  return "ar"
+}
 
 export default function ParentDashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [currentUser, setCurrentUser] = useState<{ full_name?: string; email?: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<{
+    full_name?: string
+    email?: string
+    preferred_locale?: string
+    role?: string
+  } | null>(null)
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("adhdAssistCurrentUser")
       if (!raw) return
-      setCurrentUser(JSON.parse(raw))
+      const u = JSON.parse(raw)
+      setCurrentUser(u)
+      if (u.role === "parent" && typeof document !== "undefined") {
+        const loc = parentNavLocale(u.preferred_locale)
+        document.documentElement.lang = loc
+        document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
+      }
     } catch {
       //
     }
-  }, [])
+  }, [pathname])
 
   const displayName = currentUser?.full_name || currentUser?.email || "ولي أمر"
 
@@ -31,14 +73,19 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
     return n.slice(0, 2).toUpperCase()
   }, [currentUser?.full_name, currentUser?.email])
 
+  const navLabels = useMemo(() => {
+    if (currentUser?.role !== "parent") return PARENT_NAV_LABELS.ar
+    return PARENT_NAV_LABELS[parentNavLocale(currentUser.preferred_locale)]
+  }, [currentUser?.role, currentUser?.preferred_locale])
+
   const nav = useMemo<DashboardNavItem[]>(
     () => [
-      { href: "/dashboard", label: "Dashboard", icon: Home },
-      { href: "/dashboard/children", label: "Children", icon: Users },
-      { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
-      { href: "/dashboard/profile", label: "Profile", icon: User },
+      { href: "/dashboard", label: navLabels.home, icon: Home },
+      { href: "/dashboard/children", label: navLabels.children, icon: Users },
+      { href: "/dashboard/reports", label: navLabels.reports, icon: BarChart3 },
+      { href: "/dashboard/settings", label: navLabels.settings, icon: Settings },
     ],
-    [],
+    [navLabels],
   )
 
   const isNavItemActive = (item: DashboardNavItem) =>
@@ -65,7 +112,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
           EDUVOX
         </span>
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">بوابة ولي الأمر</p>
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{navLabels.portal}</p>
       </Link>
     </div>
   )
@@ -75,7 +122,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500 truncate block">
         EDUVOX
       </span>
-      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">بوابة ولي الأمر</p>
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">{navLabels.portal}</p>
     </div>
   )
 

@@ -48,8 +48,16 @@ export default function LoginPage() {
         accountType: toAccountType(user.role),
         role: user.role,
         auth_token: user.auth_token,
+        ...((user.role === "specialist" || user.role === "parent") && user.preferred_locale
+          ? { preferred_locale: user.preferred_locale }
+          : {}),
       }
       localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(storedUser))
+      if ((user.role === "specialist" || user.role === "parent") && typeof document !== "undefined") {
+        const loc = user.preferred_locale === "fr" || user.preferred_locale === "en" ? user.preferred_locale : "ar"
+        document.documentElement.lang = loc
+        document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
+      }
 
       setMessage({ type: "success", text: "تم تسجيل الدخول بنجاح! جاري التوجيه..." })
       const target = user.role === "specialist" ? "/orthophoniste" : user.role === "administration" ? "/administration" : "/dashboard"

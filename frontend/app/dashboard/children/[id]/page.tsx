@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getAuthHeaders, publicApiBase } from "@/lib/api"
-import { ArrowLeft, Star, KeyRound, BookOpen, Clock } from "lucide-react"
+import { Star, KeyRound, BookOpen, Clock } from "lucide-react"
 
 interface ApiChild {
   id: number
@@ -82,10 +82,6 @@ function ChildDetailsContent() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      <Link href="/dashboard/children" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary">
-        <ArrowLeft className="h-4 w-4" /> العودة إلى الأطفال
-      </Link>
-
       <Card className="surface-card">
         <CardContent className="pt-6">
           <div className="flex flex-wrap items-center justify-between gap-3">

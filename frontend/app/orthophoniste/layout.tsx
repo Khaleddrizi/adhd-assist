@@ -17,11 +17,17 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
     try {
       const raw = localStorage.getItem("adhdAssistCurrentUser")
       if (!raw) return
-      setCurrentUser(JSON.parse(raw))
+      const u = JSON.parse(raw)
+      setCurrentUser(u)
+      if (u.role === "specialist" && typeof document !== "undefined") {
+        const loc = u.preferred_locale === "fr" || u.preferred_locale === "en" ? u.preferred_locale : "ar"
+        document.documentElement.lang = loc
+        document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
+      }
     } catch {
       //
     }
-  }, [])
+  }, [pathname])
 
   const displayName = currentUser?.full_name || currentUser?.email || "مختص"
 

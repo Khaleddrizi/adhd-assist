@@ -38,6 +38,29 @@ _token_serializer = URLSafeTimedSerializer(AUTH_TOKEN_SECRET, salt="web-api-auth
 PROCESSING_STALE_MINUTES = int(os.getenv("PROGRAM_PROCESSING_STALE_MINUTES", "20"))
 
 
+def _delete_specialist_cascade(db, specialist_id: int) -> None:
+    """Delete specialist-owned data: sessions, Alexa users, patients, programs, questions; then the account."""
+    patient_ids = [p.id for p in db.query(PatientModel).filter(PatientModel.specialist_id == specialist_id).all()]
+    if patient_ids:
+        db.query(QuizSessionModel).filter(QuizSessionModel.patient_id.in_(patient_ids)).delete(synchronize_session=False)
+        uids = [u.id for u in db.query(UserModel).filter(UserModel.patient_id.in_(patient_ids)).all()]
+        if uids:
+            db.query(QuizSessionModel).filter(QuizSessionModel.user_id.in_(uids)).delete(synchronize_session=False)
+            db.query(UserModel).filter(UserModel.id.in_(uids)).delete(synchronize_session=False)
+    db.query(PatientModel).filter(PatientModel.specialist_id == specialist_id).update(
+        {"assigned_program_id": None},
+        synchronize_session=False,
+    )
+    prog_ids = [pr.id for pr in db.query(TrainingProgramModel).filter(TrainingProgramModel.specialist_id == specialist_id).all()]
+    if prog_ids:
+        db.query(QuestionModel).filter(QuestionModel.training_program_id.in_(prog_ids)).delete(synchronize_session=False)
+        db.query(TrainingProgramModel).filter(TrainingProgramModel.id.in_(prog_ids)).delete(synchronize_session=False)
+    db.query(PatientModel).filter(PatientModel.specialist_id == specialist_id).delete(synchronize_session=False)
+    spec = db.query(SpecialistModel).filter(SpecialistModel.id == specialist_id).first()
+    if spec:
+        db.delete(spec)
+
+
 def _verify_password(stored_hash: str, password: str) -> bool:
     ok = check_password_hash(stored_hash, password)
     if ok:
@@ -57,6 +80,10 @@ def _specialist_payload(s: SpecialistModel) -> dict:
         "full_name": s.full_name,
         "phone": s.phone,
         "is_active": bool(getattr(s, "is_active", True)),
+        "preferred_locale": getattr(s, "preferred_locale", None) or "ar",
+        "country": getattr(s, "country", None),
+        "state_region": getattr(s, "state_region", None),
+        "address_line": getattr(s, "address_line", None),
         "role": "specialist",
         "created_at": s.created_at.isoformat() if s.created_at else None,
     }
@@ -69,6 +96,10 @@ def _parent_payload(p: ParentModel) -> dict:
         "full_name": p.full_name,
         "phone": p.phone,
         "is_active": bool(getattr(p, "is_active", True)),
+        "preferred_locale": getattr(p, "preferred_locale", None) or "ar",
+        "country": getattr(p, "country", None),
+        "state_region": getattr(p, "state_region", None),
+        "address_line": getattr(p, "address_line", None),
         "role": "parent",
         "created_at": p.created_at.isoformat() if p.created_at else None,
     }
@@ -681,25 +712,38 @@ def create_web_api() -> Flask:
         if not sid:
             return _auth_required()
         data = request.get_json() or {}
-        email = (data.get("email") or "").strip().lower()
-        full_name = (data.get("full_name") or "").strip() or None
-        phone = (data.get("phone") or "").strip() or None
-        if not email:
-            return jsonify({"error": "email required"}), 400
-        if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
-            return jsonify({"error": "Invalid email format"}), 400
         with get_db() as db:
             repo = SpecialistRepository(db)
             specialist = repo.get_by_id(sid)
             if not specialist:
                 return jsonify({"error": "specialist not found"}), 404
-            existing = repo.get_by_email(email)
-            if existing and existing.id != sid:
-                return jsonify({"error": "email already registered"}), 409
-            specialist.email = email
-            specialist.full_name = full_name
-            specialist.phone = phone
+            if "email" in data:
+                email = (data.get("email") or "").strip().lower()
+                if not email:
+                    return jsonify({"error": "email required"}), 400
+                if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
+                    return jsonify({"error": "Invalid email format"}), 400
+                existing = repo.get_by_email(email)
+                if existing and existing.id != sid:
+                    return jsonify({"error": "email already registered"}), 409
+                specialist.email = email
+            if "full_name" in data:
+                specialist.full_name = (data.get("full_name") or "").strip() or None
+            if "phone" in data:
+                specialist.phone = (data.get("phone") or "").strip() or None
+            if "preferred_locale" in data:
+                loc = (data.get("preferred_locale") or "ar").strip().lower()
+                if loc not in ("ar", "fr", "en"):
+                    return jsonify({"error": "preferred_locale must be ar, fr, or en"}), 400
+                specialist.preferred_locale = loc
+            if "country" in data:
+                specialist.country = (data.get("country") or "").strip() or None
+            if "state_region" in data:
+                specialist.state_region = (data.get("state_region") or "").strip() or None
+            if "address_line" in data:
+                specialist.address_line = (data.get("address_line") or "").strip() or None
             db.commit()
+            db.refresh(specialist)
             return jsonify(_specialist_payload(specialist))
 
     @app.route("/api/specialists/change-password", methods=["PUT"])
@@ -724,6 +768,25 @@ def create_web_api() -> Flask:
             specialist.password_hash = generate_password_hash(new_password)
             db.commit()
             return jsonify({"message": "Password updated successfully"})
+
+    @app.route("/api/specialists/me", methods=["DELETE"])
+    def delete_specialist_me():
+        sid = _get_specialist_id()
+        if not sid:
+            return _auth_required()
+        data = request.get_json() or {}
+        current_password = data.get("current_password") or ""
+        if not current_password:
+            return jsonify({"error": "current_password required"}), 400
+        with get_db() as db:
+            specialist = SpecialistRepository(db).get_by_id(sid)
+            if not specialist:
+                return jsonify({"error": "specialist not found"}), 404
+            if not _verify_password(specialist.password_hash, current_password):
+                return jsonify({"error": "Current password is incorrect"}), 401
+            _delete_specialist_cascade(db, sid)
+            db.commit()
+            return jsonify({"message": "Account deleted"})
 
     @app.route("/api/doctor/dashboard-summary", methods=["GET"])
     def doctor_dashboard_summary():
@@ -1253,25 +1316,38 @@ def create_web_api() -> Flask:
         if not pid:
             return _auth_required()
         data = request.get_json() or {}
-        email = (data.get("email") or "").strip().lower()
-        full_name = (data.get("full_name") or "").strip() or None
-        phone = (data.get("phone") or "").strip() or None
-        if not email:
-            return jsonify({"error": "email required"}), 400
-        if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
-            return jsonify({"error": "Invalid email format"}), 400
         with get_db() as db:
             repo = ParentRepository(db)
             parent = repo.get_by_id(pid)
             if not parent:
                 return jsonify({"error": "parent not found"}), 404
-            existing = repo.get_by_email(email)
-            if existing and existing.id != pid:
-                return jsonify({"error": "email already registered"}), 409
-            parent.email = email
-            parent.full_name = full_name
-            parent.phone = phone
+            if "email" in data:
+                email = (data.get("email") or "").strip().lower()
+                if not email:
+                    return jsonify({"error": "email required"}), 400
+                if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
+                    return jsonify({"error": "Invalid email format"}), 400
+                existing = repo.get_by_email(email)
+                if existing and existing.id != pid:
+                    return jsonify({"error": "email already registered"}), 409
+                parent.email = email
+            if "full_name" in data:
+                parent.full_name = (data.get("full_name") or "").strip() or None
+            if "phone" in data:
+                parent.phone = (data.get("phone") or "").strip() or None
+            if "preferred_locale" in data:
+                loc = (data.get("preferred_locale") or "ar").strip().lower()
+                if loc not in ("ar", "fr", "en"):
+                    return jsonify({"error": "preferred_locale must be ar, fr, or en"}), 400
+                parent.preferred_locale = loc
+            if "country" in data:
+                parent.country = (data.get("country") or "").strip() or None
+            if "state_region" in data:
+                parent.state_region = (data.get("state_region") or "").strip() or None
+            if "address_line" in data:
+                parent.address_line = (data.get("address_line") or "").strip() or None
             db.commit()
+            db.refresh(parent)
             return jsonify(_parent_payload(parent))
 
     @app.route("/api/parents/change-password", methods=["PUT"])
@@ -1317,7 +1393,14 @@ def create_web_api() -> Flask:
             patient_ids = [p.id for p in patients]
             if patient_ids:
                 db.query(QuizSessionModel).filter(QuizSessionModel.patient_id.in_(patient_ids)).delete(synchronize_session=False)
-                db.query(UserModel).filter(UserModel.patient_id.in_(patient_ids)).delete(synchronize_session=False)
+                uids = [u.id for u in db.query(UserModel).filter(UserModel.patient_id.in_(patient_ids)).all()]
+                if uids:
+                    db.query(QuizSessionModel).filter(QuizSessionModel.user_id.in_(uids)).delete(synchronize_session=False)
+                    db.query(UserModel).filter(UserModel.id.in_(uids)).delete(synchronize_session=False)
+                db.query(PatientModel).filter(PatientModel.id.in_(patient_ids)).update(
+                    {"assigned_program_id": None},
+                    synchronize_session=False,
+                )
                 db.query(PatientModel).filter(PatientModel.id.in_(patient_ids)).delete(synchronize_session=False)
             db.delete(parent)
             db.commit()
