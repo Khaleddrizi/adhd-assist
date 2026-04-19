@@ -1,9 +1,10 @@
 /**
- * Flat message keys: common.*, sp.* (specialist), pa.* (parent).
- * usePortalT() prefixes sp./pa. automatically except for keys starting with "common.".
+ * Flat message keys: common.*, sp.* (specialist), pa.* (parent), ad.* (admin).
+ * usePortalI18n() prefixes sp./pa./ad. automatically except for keys starting with "common.".
  */
-import type { AppLocale } from "./types"
+import type { AppLocale, PortalRole } from "./types"
 import { PORTAL_PAGES_AR, PORTAL_PAGES_EN, PORTAL_PAGES_FR } from "./messages-portal-pages"
+import { ADMIN_PAGES_AR, ADMIN_PAGES_EN, ADMIN_PAGES_FR } from "./messages-admin-pages"
 
 export type MessageTable = Record<string, string>
 
@@ -291,6 +292,7 @@ const ar: MessageTable = {
   "pa.settings.langEn": "English",
   "pa.settings.roleBadge": "ولي أمر · بوابة EDUVOX",
   ...PORTAL_PAGES_AR,
+  ...ADMIN_PAGES_AR,
 }
 
 const en: MessageTable = {
@@ -578,6 +580,7 @@ const en: MessageTable = {
   "pa.settings.langEn": "English",
   "pa.settings.roleBadge": "Parent · EDUVOX portal",
   ...PORTAL_PAGES_EN,
+  ...ADMIN_PAGES_EN,
 }
 
 const fr: MessageTable = {
@@ -801,11 +804,12 @@ const fr: MessageTable = {
   "pa.settings.toastPrefsOk": "Langue et région enregistrées",
   "pa.settings.toastDeleteOk": "Compte supprimé",
   "pa.settings.roleBadge": "Parent · portail EDUVOX",
+  ...ADMIN_PAGES_FR,
 }
 
 export const MESSAGES: Record<AppLocale, MessageTable> = { ar, en, fr }
 
-export function readLocaleFromStorage(role: "specialist" | "parent"): AppLocale {
+export function readLocaleFromStorage(role: PortalRole): AppLocale {
   if (typeof window === "undefined") return "ar"
   try {
     const raw = localStorage.getItem("adhdAssistCurrentUser")
@@ -813,6 +817,7 @@ export function readLocaleFromStorage(role: "specialist" | "parent"): AppLocale 
     const u = JSON.parse(raw) as { role?: string; preferred_locale?: string }
     if (role === "specialist" && u.role !== "specialist") return "ar"
     if (role === "parent" && u.role !== "parent") return "ar"
+    if (role === "admin" && u.role !== "administration") return "ar"
     const loc = u.preferred_locale
     if (loc === "en" || loc === "fr") return loc
     return "ar"
@@ -821,8 +826,8 @@ export function readLocaleFromStorage(role: "specialist" | "parent"): AppLocale 
   }
 }
 
-export function resolveMessage(locale: AppLocale, role: "specialist" | "parent", key: string): string {
-  const prefix = role === "specialist" ? "sp" : "pa"
+export function resolveMessage(locale: AppLocale, role: PortalRole, key: string): string {
+  const prefix = role === "specialist" ? "sp" : role === "parent" ? "pa" : "ad"
   const tryKeys: string[] = []
   if (key.startsWith("common.")) tryKeys.push(key)
   else tryKeys.push(`${prefix}.${key}`)

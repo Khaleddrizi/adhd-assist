@@ -1,16 +1,45 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Shield, LayoutDashboard, Stethoscope, Users, Baby, ScrollText, LogOut } from "lucide-react"
+import {
+  Shield,
+  LayoutDashboard,
+  Stethoscope,
+  Users,
+  Baby,
+  ScrollText,
+  LogOut,
+  ShieldAlert,
+} from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem, type DashboardNavGroup } from "@/components/layout/app-dashboard-shell"
+import { PortalI18nProvider, usePortalI18n, notifyLocaleChanged } from "@/lib/i18n/i18n-context"
+import type { AppLocale } from "@/lib/i18n/types"
+import { cn } from "@/lib/utils"
+import { fetchApi } from "@/lib/api"
 
-export default function AdministrationLayout({ children }: { children: React.ReactNode }) {
+function setStoredLocale(next: AppLocale) {
+  try {
+    const raw = localStorage.getItem("adhdAssistCurrentUser")
+    if (!raw) return
+    const u = JSON.parse(raw) as Record<string, unknown>
+    u.preferred_locale = next
+    localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(u))
+    notifyLocaleChanged()
+  } catch {
+    //
+  }
+}
+
+function AdministrationLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t, locale } = usePortalI18n()
   const [currentUser, setCurrentUser] = useState<{ full_name?: string; email?: string } | null>(null)
+  const [localeBusy, setLocaleBusy] = useState(false)
 
   useEffect(() => {
     try {
@@ -20,28 +49,31 @@ export default function AdministrationLayout({ children }: { children: React.Rea
     } catch {
       //
     }
-  }, [])
+  }, [pathname])
 
   const navGroups = useMemo<DashboardNavGroup[]>(
     () => [
       {
-        label: "نظرة عامة",
-        items: [{ href: "/administration", label: "لوحة التحكم", icon: LayoutDashboard }],
+        label: t("layout.navGroupOverview"),
+        items: [{ href: "/administration", label: t("layout.navDashboard"), icon: LayoutDashboard }],
       },
       {
-        label: "المستخدمون",
+        label: t("layout.navGroupUsers"),
         items: [
-          { href: "/administration/doctors", label: "المختصون", icon: Stethoscope },
-          { href: "/administration/parents", label: "أولياء الأمور", icon: Users },
-          { href: "/administration/children", label: "الأطفال", icon: Baby },
+          { href: "/administration/doctors", label: t("layout.navDoctors"), icon: Stethoscope },
+          { href: "/administration/parents", label: t("layout.navParents"), icon: Users },
+          { href: "/administration/children", label: t("layout.navChildren"), icon: Baby },
         ],
       },
       {
-        label: "النظام",
-        items: [{ href: "/administration/audit", label: "سجل التدقيق", icon: ScrollText }],
+        label: t("layout.navGroupSystem"),
+        items: [
+          { href: "/administration/audit", label: t("layout.navAudit"), icon: ScrollText },
+          { href: "/administration/security", label: t("layout.navSecurity"), icon: ShieldAlert },
+        ],
       },
     ],
-    [],
+    [t],
   )
 
   const isNavItemActive = (item: DashboardNavItem) =>
@@ -57,7 +89,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
         : "border-transparent text-[#94a3b8] hover:bg-[#ffffff08]",
     ].join(" ")
 
-  const displayName = currentUser?.full_name || currentUser?.email || "مشرف"
+  const displayName = currentUser?.full_name || currentUser?.email || t("layout.displayFallback")
 
   const adminInitials = useMemo(() => {
     const n = (currentUser?.full_name || currentUser?.email || "Admin").trim()
@@ -71,6 +103,25 @@ export default function AdministrationLayout({ children }: { children: React.Rea
     router.replace("/login")
   }
 
+  const pickLocale = useCallback(
+    async (code: AppLocale) => {
+      if (code === locale || localeBusy) return
+      setLocaleBusy(true)
+      try {
+        await fetchApi("/api/administration/me", {
+          method: "PUT",
+          body: JSON.stringify({ preferred_locale: code }),
+        })
+        setStoredLocale(code)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : t("layout.toastLocaleErr"))
+      } finally {
+        setLocaleBusy(false)
+      }
+    },
+    [locale, localeBusy, t],
+  )
+
   const sidebarHeader = (
     <div className="border-b border-white/[0.08] px-6 py-6">
       <Link href="/administration" className="flex items-start gap-3 min-w-0">
@@ -81,8 +132,8 @@ export default function AdministrationLayout({ children }: { children: React.Rea
           <Shield className="h-5 w-5 text-[#93c5fd]" />
         </div>
         <div className="min-w-0 pt-0.5">
-          <span className="block text-lg font-semibold tracking-tight text-slate-100 truncate">لوحة الإدارة</span>
-          <p className="mt-1 text-[11px] leading-snug text-slate-500">إشراف المنصة</p>
+          <span className="block text-lg font-semibold tracking-tight text-slate-100 truncate">{t("layout.brandTitle")}</span>
+          <p className="mt-1 text-[11px] leading-snug text-slate-500">{t("layout.brandSubtitle")}</p>
         </div>
       </Link>
     </div>
@@ -96,7 +147,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
       >
         <Shield className="h-4 w-4 text-[#93c5fd]" />
       </div>
-      <span className="truncate text-base font-semibold text-slate-100">لوحة الإدارة</span>
+      <span className="truncate text-base font-semibold text-slate-100">{t("layout.brandTitle")}</span>
     </div>
   )
 
@@ -111,6 +162,28 @@ export default function AdministrationLayout({ children }: { children: React.Rea
         </div>
         <p className="truncate text-sm text-[#94a3b8]">{displayName}</p>
       </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1 rounded-md border border-white/10 bg-black/20 px-1 py-1">
+        {(["ar", "fr", "en"] as const).map((code) => {
+          const short = code === "ar" ? t("layout.localeAr") : code === "fr" ? t("layout.localeFr") : t("layout.localeEn")
+          const active = locale === code
+          return (
+            <button
+              key={code}
+              type="button"
+              disabled={localeBusy}
+              onClick={() => void pickLocale(code)}
+              className={cn(
+                "rounded px-2 py-0.5 text-[11px] font-semibold transition-colors disabled:opacity-50",
+                active
+                  ? "bg-[#60a5fa]/20 text-[#93c5fd]"
+                  : "text-[#64748b] hover:bg-white/5 hover:text-slate-200",
+              )}
+            >
+              {short}
+            </button>
+          )
+        })}
+      </div>
       <Button
         variant="outline"
         size="sm"
@@ -118,7 +191,7 @@ export default function AdministrationLayout({ children }: { children: React.Rea
         onClick={logout}
       >
         <LogOut className="mr-2 h-4 w-4" />
-        تسجيل الخروج
+        {t("layout.logout")}
       </Button>
     </div>
   )
@@ -143,5 +216,13 @@ export default function AdministrationLayout({ children }: { children: React.Rea
     >
       {children}
     </AppDashboardShell>
+  )
+}
+
+export default function AdministrationLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PortalI18nProvider role="admin">
+      <AdministrationLayoutInner>{children}</AdministrationLayoutInner>
+    </PortalI18nProvider>
   )
 }

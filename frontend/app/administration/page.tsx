@@ -18,6 +18,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
+import type { AppLocale } from "@/lib/i18n/types"
 
 interface AdminOverview {
   total_doctors: number
@@ -60,12 +62,14 @@ function auditDotClass(action: string) {
   return "bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.25)]"
 }
 
-function formatAuditDateTime(iso: string | null) {
-  if (!iso) return { date: "—", time: "" }
+function formatAuditDateTime(iso: string | null, locale: AppLocale, dash: string) {
+  if (!iso) return { date: dash, time: "" }
   const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return { date: dash, time: "" }
+  const tag = locale === "ar" ? "ar" : locale === "fr" ? "fr" : "en"
   return {
-    date: d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }),
-    time: d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }),
+    date: d.toLocaleDateString(tag, { month: "short", day: "numeric", year: "numeric" }),
+    time: d.toLocaleTimeString(tag, { hour: "2-digit", minute: "2-digit" }),
   }
 }
 
@@ -106,6 +110,7 @@ function KpiCard(props: {
 }
 
 function AdministrationHome() {
+  const { t, locale } = usePortalI18n()
   const [overview, setOverview] = useState<AdminOverview | null>(null)
   const [incidents, setIncidents] = useState<IncidentsPayload | null>(null)
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
@@ -156,13 +161,13 @@ function AdministrationHome() {
   const alexaZero = (overview?.total_alexa_users ?? 0) === 0
   const sessionsZero = (overview?.sessions_today ?? 0) === 0
 
+  const dash = t("common.dash")
+
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">لوحة الإدارة</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          إدارة الحسابات، مراقبة نشاط النظام، وحماية بيانات المنصة.
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">{t("home.title")}</h1>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("home.subtitle")}</p>
       </div>
 
       {/* System status banner */}
@@ -173,62 +178,64 @@ function AdministrationHome() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </span>
-            <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
-              كل الأنظمة تعمل — المنصة تعمل بشكل طبيعي
-            </p>
+            <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">{t("home.bannerAllOk")}</p>
           </div>
-          <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/80 sm:text-right">آخر فحص: الآن</p>
+          <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/80 sm:text-right">{t("home.bannerAllOkMeta")}</p>
         </div>
       ) : orphanList.length > 0 ? (
         <div className="flex w-full flex-col gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/50 dark:bg-red-950/30">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" aria-hidden />
             <p className="text-sm font-medium text-red-950 dark:text-red-100">
-              {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — أطفال يحتاجون ربطًا بولي أمر
+              {totalIncidents === 1
+                ? t("home.bannerOrphansOne")
+                : t("home.bannerOrphans").replace("{count}", String(totalIncidents))}
             </p>
           </div>
-          <p className="text-xs text-red-800/90 dark:text-red-300/80 sm:text-right">آخر فحص: الآن</p>
+          <p className="text-xs text-red-800/90 dark:text-red-300/80 sm:text-right">{t("home.bannerAllOkMeta")}</p>
         </div>
       ) : (
         <div className="flex w-full flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-amber-800/60 dark:bg-amber-950/25">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
             <p className="text-sm font-medium text-amber-950 dark:text-amber-100">
-              {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — يتطلب مراجعة
+              {totalIncidents === 1
+                ? t("home.bannerGenericOne")
+                : t("home.bannerGeneric").replace("{count}", String(totalIncidents))}
             </p>
           </div>
-          <p className="text-xs text-amber-800/90 dark:text-amber-300/80 sm:text-right">آخر فحص: الآن</p>
+          <p className="text-xs text-amber-800/90 dark:text-amber-300/80 sm:text-right">{t("home.bannerAllOkMeta")}</p>
         </div>
       )}
 
-      {loading ? <p className="text-sm text-slate-500">جاري التحميل…</p> : null}
+      {loading ? <p className="text-sm text-slate-500">{t("home.loading")}</p> : null}
 
       {/* KPI rows */}
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard
-            label="المختصون"
+            label={t("home.kpiDoctors")}
             value={overview?.total_doctors ?? 0}
             valueClassName="text-blue-600 dark:text-blue-400"
-            subtitle="مختصون مسجّلون"
+            subtitle={t("home.kpiDoctorsSub")}
             icon={Stethoscope}
             iconWrapClass="bg-blue-500/10"
             iconClass="text-blue-600 dark:text-blue-400"
           />
           <KpiCard
-            label="أولياء الأمور"
+            label={t("home.kpiParents")}
             value={overview?.total_parents ?? 0}
             valueClassName="text-teal-600 dark:text-teal-400"
-            subtitle="حسابات عائلية"
+            subtitle={t("home.kpiParentsSub")}
             icon={Users}
             iconWrapClass="bg-teal-500/10"
             iconClass="text-teal-600 dark:text-teal-400"
           />
           <KpiCard
-            label="الأطفال"
+            label={t("home.kpiChildren")}
             value={overview?.total_children ?? 0}
             valueClassName="text-purple-600 dark:text-purple-400"
-            subtitle="مرضى في النظام"
+            subtitle={t("home.kpiChildrenSub")}
             icon={Baby}
             iconWrapClass="bg-purple-500/10"
             iconClass="text-purple-600 dark:text-purple-400"
@@ -236,33 +243,35 @@ function AdministrationHome() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard
-            label="مستخدمو أليكسا"
+            label={t("home.kpiAlexa")}
             value={overview?.total_alexa_users ?? 0}
             valueClassName={alexaZero ? "text-[#d1d5db] dark:text-slate-500" : "text-amber-600 dark:text-amber-400"}
-            subtitle="حسابات أليكسا المرتبطة"
+            subtitle={t("home.kpiAlexaSub")}
             icon={Bot}
             iconWrapClass="bg-amber-500/10"
             iconClass={alexaZero ? "text-[#d1d5db] dark:text-slate-500" : "text-amber-600 dark:text-amber-400"}
           />
           <KpiCard
-            label="جلسات اليوم"
+            label={t("home.kpiSessions")}
             value={overview?.sessions_today ?? 0}
             valueClassName={sessionsZero ? "text-[#d1d5db] dark:text-slate-500" : "text-emerald-600 dark:text-emerald-400"}
-            subtitle="جلسات اختبار منذ منتصف الليل (UTC)"
+            subtitle={t("home.kpiSessionsSub")}
             icon={Activity}
             iconWrapClass="bg-emerald-500/10"
             iconClass={sessionsZero ? "text-[#d1d5db] dark:text-slate-500" : "text-emerald-600 dark:text-emerald-400"}
           />
           <KpiCard
-            label="أطفال بلا ولي"
+            label={t("home.kpiOrphans")}
             value={orphanCount}
             valueClassName={
               orphanCount === 0 ? "text-[#d1d5db] dark:text-slate-500" : "text-red-600 dark:text-red-400"
             }
             subtitle={
               orphanCount === 0
-                ? "لا أطفال غير مرتبطين"
-                : `${orphanCount} ${orphanCount === 1 ? "طفل يحتاج" : "أطفال يحتاجون"} ربطًا بولي أمر`
+                ? t("home.kpiOrphansSubNone")
+                : orphanCount === 1
+                  ? t("home.kpiOrphansSubOne")
+                  : t("home.kpiOrphansSubMany").replace("{count}", String(orphanCount))
             }
             subtitleClassName={
               orphanCount === 0 ? "text-emerald-600 dark:text-emerald-400" : "font-medium text-red-600 dark:text-red-400"
@@ -281,23 +290,25 @@ function AdministrationHome() {
           <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
               <Shield className="h-5 w-5 text-indigo-500" />
-              ملخص الحوادث
+              {t("home.incidentsTitle")}
             </CardTitle>
             <Link
               href={incidentViewHref}
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
             >
-              عرض الكل ←
+              {t("home.viewAll")}
             </Link>
           </CardHeader>
           <CardContent className="space-y-0 pt-4">
             {totalIncidents === 0 ? (
               <div className="mb-4 rounded-md border border-emerald-200 bg-[#ecfdf5] px-3 py-2 text-sm font-medium text-emerald-900 dark:border-emerald-800/50 dark:bg-emerald-950/30 dark:text-emerald-100">
-                ٠ حوادث مفتوحة — المنصة بصحة جيدة
+                {t("home.incidentsZeroBanner")}
               </div>
             ) : (
               <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-950 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-100">
-                {totalIncidents} حادث{totalIncidents === 1 ? "" : "ات"} مفتوحة — يتطلب انتباهًا
+                {totalIncidents === 1
+                  ? t("home.incidentsOpenBannerOne")
+                  : t("home.incidentsOpenBannerMany").replace("{count}", String(totalIncidents))}
               </div>
             )}
 
@@ -312,7 +323,7 @@ function AdministrationHome() {
                 <Stethoscope className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">مشاكل المختصين</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("home.doctorsIssues")}</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -322,8 +333,8 @@ function AdministrationHome() {
                   )}
                 >
                   {disabledDoctors.length === 0
-                    ? "٠ غير محلولة · الوضع سليم"
-                    : `${disabledDoctors.length} غير محلولة · يتطلب مراجعة`}
+                    ? t("home.doctorsIssuesOk")
+                    : t("home.doctorsIssuesBad").replace("{count}", String(disabledDoctors.length))}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -340,7 +351,7 @@ function AdministrationHome() {
                 <Users className="h-4 w-4 text-teal-600 dark:text-teal-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">مشاكل أولياء الأمور</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("home.parentsIssues")}</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -350,8 +361,8 @@ function AdministrationHome() {
                   )}
                 >
                   {disabledParents.length === 0
-                    ? "٠ غير محلولة · الوضع سليم"
-                    : `${disabledParents.length} غير محلولة · يتطلب مراجعة`}
+                    ? t("home.parentsIssuesOk")
+                    : t("home.parentsIssuesBad").replace("{count}", String(disabledParents.length))}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -368,7 +379,7 @@ function AdministrationHome() {
                 <Baby className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">أطفال بلا ولي</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("home.childrenOrphans")}</p>
                 <p
                   className={cn(
                     "text-xs",
@@ -378,8 +389,8 @@ function AdministrationHome() {
                   )}
                 >
                   {orphanList.length === 0
-                    ? "٠ غير مرتبطين · الكل معيّن"
-                    : `${orphanList.length} غير مرتبطين · يحتاج تعيينًا`}
+                    ? t("home.childrenOrphansOk")
+                    : t("home.childrenOrphansBad").replace("{count}", String(orphanList.length))}
                 </p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
@@ -392,19 +403,19 @@ function AdministrationHome() {
           <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
             <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
               <ScrollText className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-              آخر سجل التدقيق
+              {t("home.auditRecent")}
             </CardTitle>
             <Link href="/administration/audit" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-              عرض الكل ←
+              {t("home.viewAll")}
             </Link>
           </CardHeader>
           <CardContent className="pt-4">
             {!auditLogs.length ? (
-              <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">لا نشاط حديث</p>
+              <p className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">{t("home.auditEmpty")}</p>
             ) : (
               <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                 {auditLogs.map((log) => {
-                  const { date, time } = formatAuditDateTime(log.created_at)
+                  const { date, time } = formatAuditDateTime(log.created_at, locale, dash)
                   return (
                     <li key={log.id} className="flex gap-3 py-3 first:pt-0">
                       <div className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", auditDotClass(log.action))} />

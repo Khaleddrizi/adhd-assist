@@ -27,6 +27,7 @@ import {
   ClinicalFocusPill,
   severityLevelDisplay,
 } from "@/components/admin/admin-entity-pages"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
 import {
   AlertTriangle,
   ArrowRightLeft,
@@ -69,6 +70,7 @@ const actionBtn =
   "h-auto min-h-0 gap-1 rounded-md px-2.5 py-[5px] text-[11px] font-semibold leading-tight"
 
 function ChildrenPageContent() {
+  const { t } = usePortalI18n()
   const [items, setItems] = useState<AdminChild[]>([])
   const [search, setSearch] = useState("")
   const [parents, setParents] = useState<OptionItem[]>([])
@@ -133,6 +135,16 @@ function ChildrenPageContent() {
     setItems(data)
   }
 
+  const severityLabels = useMemo(
+    () => ({
+      mild: t("common.severityMild"),
+      moderate: t("common.severityModerate"),
+      severe: t("common.severitySevere"),
+      empty: t("common.dash"),
+    }),
+    [t],
+  )
+
   const openTransferModal = (row: AdminChild) => {
     setTransferRow(row)
     setTransferParentId(
@@ -149,12 +161,12 @@ function ChildrenPageContent() {
 
   const applyTransfer = async () => {
     if (!transferRow || !transferDoctorId) {
-      toast.error("اختر طبيباً")
+      toast.error(t("children.toastPickDoctor"))
       return
     }
     const orphan = isOrphanChild(transferRow)
     if (orphan && (transferParentId === "none" || !transferParentId)) {
-      toast.error("اختر ولي أمراً لربط هذا الطفل")
+      toast.error(t("children.toastPickParent"))
       return
     }
 
@@ -174,7 +186,7 @@ function ChildrenPageContent() {
     }
 
     if (Object.keys(body).length === 0) {
-      toast.message("لا تغييرات لتطبيقها")
+      toast.message(t("children.toastNoChanges"))
       return
     }
 
@@ -184,11 +196,11 @@ function ChildrenPageContent() {
         method: "PUT",
         body: JSON.stringify(body),
       })
-      toast.success("تم تحديث التعيينات")
+      toast.success(t("children.toastTransferOk"))
       closeTransferModal()
       await reload()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "فشل النقل")
+      toast.error(e instanceof Error ? e.message : t("children.toastTransferErr"))
     } finally {
       setTransferSaving(false)
     }
@@ -198,23 +210,20 @@ function ChildrenPageContent() {
 
   const currentParentLabel = transferRow
     ? isOrphanChild(transferRow)
-      ? "لا يوجد (طفل بلا ولي)"
+      ? t("entity.transferNoParentLabel")
       : transferRow.parent_name
     : ""
   const currentDoctorLabel = transferRow?.doctor_name || "—"
 
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
-      <AdminManagementHeader
-        title="إدارة الأطفال"
-        description="مراقبة ارتباط الطفل، التشخيص، ونشاط التعلّم."
-      />
+      <AdminManagementHeader title={t("children.title")} description={t("children.description")} />
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminEntityKpiCard
-          label="إجمالي الأطفال"
+          label={t("children.kpiTotal")}
           value={items.length}
-          subtitle="ملفات مسجّلة في النظام"
+          subtitle={t("children.kpiTotalSub")}
           icon={Baby}
           iconWrapClass="bg-purple-500/10"
           iconClass="text-purple-600 dark:text-purple-400"
@@ -222,9 +231,9 @@ function ChildrenPageContent() {
         />
         {orphanCount === 0 ? (
           <AdminEntityKpiCard
-            label="أطفال بلا ولي"
+            label={t("children.kpiOrphans")}
             value={0}
-            subtitle="كل الأطفال مرتبطون"
+            subtitle={t("children.kpiOrphansOkSub")}
             iconWrapClass="bg-emerald-500/15"
             cardClassName="border-emerald-200 bg-[#ecfdf5] dark:border-emerald-800/50 dark:bg-emerald-950/30"
             customIcon={<CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
@@ -233,12 +242,12 @@ function ChildrenPageContent() {
           />
         ) : (
           <AdminEntityKpiCard
-            label="أطفال بلا ولي"
+            label={t("children.kpiOrphans")}
             value={orphanCount}
             subtitle={
               orphanCount === 1
-                ? "طفل واحد بلا ولي أمر — عاجل"
-                : `${orphanCount} أطفال بلا ولي أمر — عاجل`
+                ? t("children.kpiOrphansBadOne")
+                : t("children.kpiOrphansBadMany").replace("{count}", String(orphanCount))
             }
             iconWrapClass="bg-red-500/10"
             customIcon={<AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" aria-hidden />}
@@ -248,9 +257,9 @@ function ChildrenPageContent() {
           />
         )}
         <AdminEntityKpiCard
-          label="متوسط الجلسات لكل طفل"
+          label={t("children.kpiAvgSessions")}
           value={avgSessions}
-          subtitle="متوسط الجلسات المكتملة لجميع الأطفال"
+          subtitle={t("children.kpiAvgSessionsSub")}
           icon={LineChart}
           iconWrapClass="bg-amber-500/10"
           iconClass="text-amber-600 dark:text-amber-400"
@@ -263,22 +272,24 @@ function ChildrenPageContent() {
           variant="success"
           icon={<CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
         >
-          لا مشاكل مفتوحة لربط الأطفال — الجميع مرتبطون
+          {t("children.stripOk")}
         </AdminIssuesStrip>
       ) : (
         <AdminIssuesStrip
           variant="danger"
           icon={<AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" aria-hidden />}
         >
-          {`${orphanCount} ${orphanCount === 1 ? "طفل غير مرتبط" : "أطفال غير مرتبطين"} — عيّن ولي أمراً فوراً`}
+          {orphanCount === 1
+            ? t("children.stripBadOne")
+            : t("children.stripBadMany").replace("{count}", String(orphanCount))}
         </AdminIssuesStrip>
       )}
 
       <Card className="overflow-hidden border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <AdminDirectoryToolbar
-          title="سجل الأطفال"
+          title={t("children.directoryTitle")}
           titleIcon={<Baby className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
-          searchPlaceholder="بحث باسم الطفل…"
+          searchPlaceholder={t("children.searchPh")}
           search={search}
           onSearchChange={setSearch}
           filterActive={orphansOnly}
@@ -289,20 +300,20 @@ function ChildrenPageContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                  <TableHead className={th}>الطفل</TableHead>
-                  <TableHead className={th}>العمر / الشدة</TableHead>
-                  <TableHead className={th}>الطبيب</TableHead>
-                  <TableHead className={th}>ولي الأمر</TableHead>
-                  <TableHead className={th}>الجلسات</TableHead>
-                  <TableHead className={th}>الحالة</TableHead>
-                  <TableHead className={cn(th, "text-right")}>إجراءات</TableHead>
+                  <TableHead className={th}>{t("children.colChild")}</TableHead>
+                  <TableHead className={th}>{t("children.colAgeSeverity")}</TableHead>
+                  <TableHead className={th}>{t("children.colDoctor")}</TableHead>
+                  <TableHead className={th}>{t("children.colParent")}</TableHead>
+                  <TableHead className={th}>{t("children.colSessions")}</TableHead>
+                  <TableHead className={th}>{t("children.colStatus")}</TableHead>
+                  <TableHead className={cn(th, "text-right")}>{t("children.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.map((row) => {
                   const orphan = isOrphanChild(row)
-                  const sev = severityLevelDisplay(row.diagnostic)
-                  const ageLabel = row.age != null ? `${row.age} سنة` : "—"
+                  const sev = severityLevelDisplay(row.diagnostic, severityLabels)
+                  const ageLabel = row.age != null ? `${row.age} ${t("common.age")}` : t("common.dash")
                   const noDoctor = !row.doctor_name || row.doctor_name === "—"
                   const sessionsZero = (row.sessions_count || 0) === 0
                   return (
@@ -328,7 +339,7 @@ function ChildrenPageContent() {
                                 {row.alexa_code}
                               </span>
                             ) : (
-                              <span className="mt-0.5 block text-[11px] italic text-slate-400">لا رمز أليكسا</span>
+                              <span className="mt-0.5 block text-[11px] italic text-slate-400">{t("entity.noAlexaCode")}</span>
                             )}
                           </div>
                         </div>
@@ -344,7 +355,7 @@ function ChildrenPageContent() {
                       </TableCell>
                       <TableCell className="max-w-[200px]">
                         {noDoctor ? (
-                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">لا طبيب</span>
+                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">{t("entity.noDoctor")}</span>
                         ) : (
                           <div className="flex items-center gap-2 min-w-0">
                             <Stethoscope className="h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden />
@@ -356,7 +367,7 @@ function ChildrenPageContent() {
                       </TableCell>
                       <TableCell className="max-w-[200px]">
                         {orphan ? (
-                          <span className="text-[13px] italic text-red-600 dark:text-red-400">⚠ بلا ولي أمر</span>
+                          <span className="text-[13px] italic text-red-600 dark:text-red-400">{t("entity.orphanNoParent")}</span>
                         ) : (
                           <div className="flex items-center gap-2 min-w-0">
                             <UserRound className="h-3.5 w-3.5 shrink-0 text-slate-500" aria-hidden />
@@ -391,7 +402,7 @@ function ChildrenPageContent() {
                           >
                             <Link href={`/orthophoniste/patient/${row.id}`}>
                               <Eye className="h-3 w-3 shrink-0" />
-                              التفاصيل
+                              {t("entity.details")}
                             </Link>
                           </Button>
                           <Button
@@ -403,7 +414,7 @@ function ChildrenPageContent() {
                             onClick={() => openTransferModal(row)}
                           >
                             <ArrowRightLeft className="h-3 w-3 shrink-0" />
-                            إعادة تعيين
+                            {t("children.transfer")}
                           </Button>
                         </div>
                       </TableCell>
@@ -413,7 +424,7 @@ function ChildrenPageContent() {
                 {!filteredItems.length ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-10 text-center text-sm text-slate-500">
-                      لا يوجد أطفال.
+                      {t("children.empty")}
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -431,29 +442,29 @@ function ChildrenPageContent() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{transferRow ? `إعادة تعيين الطفل: ${transferRow.name}` : "إعادة تعيين الطفل"}</DialogTitle>
-            <DialogDescription>
-              تحديث تعيين ولي الأمر و/أو الأخصائي. تُسجّل التغييرات في سجل التدقيق.
-            </DialogDescription>
+            <DialogTitle>
+              {transferRow ? t("children.dialogTitleNamed").replace("{name}", transferRow.name) : t("children.dialogTitle")}
+            </DialogTitle>
+            <DialogDescription>{t("children.dialogDesc")}</DialogDescription>
           </DialogHeader>
 
           {transferRow ? (
             <div className="grid gap-5 py-2">
               <div className="grid gap-2">
-                <Label className="text-xs text-muted-foreground">ولي الأمر الحالي</Label>
+                <Label className="text-xs text-muted-foreground">{t("children.currentParent")}</Label>
                 <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/50">
                   {currentParentLabel}
                 </p>
                 <Label htmlFor="new-parent" className="text-xs font-semibold">
-                  ولي أمر جديد
+                  {t("children.newParent")}
                 </Label>
                 <Select value={transferParentId} onValueChange={setTransferParentId}>
                   <SelectTrigger id="new-parent" className="w-full">
-                    <SelectValue placeholder="اختر ولي أمر…" />
+                    <SelectValue placeholder={t("children.parentPh")} />
                   </SelectTrigger>
                   <SelectContent>
                     {isOrphanChild(transferRow) ? (
-                      <SelectItem value="none">اختر ولي أمراً…</SelectItem>
+                      <SelectItem value="none">{t("children.parentPh")}</SelectItem>
                     ) : null}
                     {parents.map((p) => (
                       <SelectItem key={p.id} value={String(p.id)}>
@@ -465,16 +476,16 @@ function ChildrenPageContent() {
               </div>
 
               <div className="grid gap-2">
-                <Label className="text-xs text-muted-foreground">الطبيب الحالي</Label>
+                <Label className="text-xs text-muted-foreground">{t("children.currentDoctor")}</Label>
                 <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900/50">
                   {currentDoctorLabel}
                 </p>
                 <Label htmlFor="new-doctor" className="text-xs font-semibold">
-                  طبيب جديد
+                  {t("children.newDoctor")}
                 </Label>
                 <Select value={transferDoctorId} onValueChange={setTransferDoctorId}>
                   <SelectTrigger id="new-doctor" className="w-full">
-                    <SelectValue placeholder="اختر طبيباً…" />
+                    <SelectValue placeholder={t("children.doctorPh")} />
                   </SelectTrigger>
                   <SelectContent>
                     {doctors.map((d) => (
@@ -490,7 +501,7 @@ function ChildrenPageContent() {
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="secondary" className="text-slate-700" onClick={closeTransferModal}>
-              إلغاء
+              {t("children.cancel")}
             </Button>
             <Button
               type="button"
@@ -498,7 +509,7 @@ function ChildrenPageContent() {
               onClick={applyTransfer}
               disabled={transferSaving || !transferDoctorId}
             >
-              {transferSaving ? "جاري التطبيق…" : "تطبيق النقل"}
+              {transferSaving ? t("children.applySaving") : t("children.apply")}
             </Button>
           </DialogFooter>
         </DialogContent>

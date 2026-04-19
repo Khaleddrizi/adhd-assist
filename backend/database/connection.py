@@ -46,6 +46,7 @@ def init_db() -> None:
             "ALTER TABLE parents ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE",
             "ALTER TABLE administrators ADD COLUMN IF NOT EXISTS phone VARCHAR(30)",
             "ALTER TABLE administrators ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE",
+            "ALTER TABLE administrators ADD COLUMN IF NOT EXISTS preferred_locale VARCHAR(10) DEFAULT 'ar'",
             "ALTER TABLE specialists ADD COLUMN IF NOT EXISTS preferred_locale VARCHAR(10) DEFAULT 'ar'",
             "ALTER TABLE specialists ADD COLUMN IF NOT EXISTS country VARCHAR(120)",
             "ALTER TABLE specialists ADD COLUMN IF NOT EXISTS state_region VARCHAR(120)",

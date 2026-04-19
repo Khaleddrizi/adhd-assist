@@ -20,6 +20,7 @@ import {
 } from "@/components/admin/admin-entity-pages"
 import { AlertTriangle, Baby, CheckCircle2, Lock, Plus, ShieldCheck, UserRound, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
 
 interface AdminParent {
   id: number
@@ -41,6 +42,7 @@ const actionBtn =
   "h-auto min-h-0 gap-1 rounded-md px-2.5 py-[5px] text-[11px] font-semibold leading-tight"
 
 function ParentsPageContent() {
+  const { t, locale } = usePortalI18n()
   const [items, setItems] = useState<AdminParent[]>([])
   const [allChildren, setAllChildren] = useState<ChildRef[]>([])
   const [search, setSearch] = useState("")
@@ -110,26 +112,22 @@ function ParentsPageContent() {
   }, [filteredItems])
 
   const toggleStatus = async (row: AdminParent) => {
-    const ok = window.confirm(
-      `${row.is_active ? "تعطيل" : "تفعيل"} حساب ولي الأمر هذا؟\n\nسيُسجّل الإجراء في سجل التدقيق.`,
-    )
+    const ok = window.confirm(row.is_active ? t("parents.confirmDisable") : t("parents.confirmEnable"))
     if (!ok) return
     try {
       await fetchApi(`/api/administration/parents/${row.id}/status`, {
         method: "PUT",
         body: JSON.stringify({ is_active: !row.is_active }),
       })
-      toast.success(`تم ${!row.is_active ? "تفعيل" : "تعطيل"} ولي الأمر بنجاح. راجع سجل التدقيق.`)
+      toast.success(t("parents.toastStatusOk"))
       await reload()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة ولي الأمر")
+      toast.error(e instanceof Error ? e.message : t("parents.toastStatusErr"))
     }
   }
 
   const resetPassword = async (row: AdminParent) => {
-    const ok = window.confirm(
-      "إنشاء كلمة مرور مؤقتة لولي الأمر هذا؟\n\nسيُسجّل الإجراء في سجل التدقيق.",
-    )
+    const ok = window.confirm(t("parents.confirmResetPw"))
     if (!ok) return
     try {
       const res = await fetchApi<{ temporary_password: string }>(
@@ -137,9 +135,9 @@ function ParentsPageContent() {
         { method: "POST" },
       )
       await navigator.clipboard.writeText(res.temporary_password)
-      toast.success("تم نسخ كلمة المرور المؤقتة. راجع سجل التدقيق.")
+      toast.success(t("parents.toastPwCopied"))
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذّر إعادة تعيين كلمة مرور ولي الأمر")
+      toast.error(e instanceof Error ? e.message : t("parents.toastPwErr"))
     }
   }
 
@@ -148,13 +146,13 @@ function ParentsPageContent() {
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <AdminManagementHeader
-        title="إدارة أولياء الأمور"
-        description="فحص حسابات أولياء الأمور والأطفال المرتبطين."
+        title={t("parents.title")}
+        description={t("parents.description")}
         action={
           <Button asChild className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             <Link href="/register?role=parent" target="_blank" rel="noopener noreferrer">
               <Plus className="h-4 w-4" />
-              إضافة ولي أمر
+              {t("parents.addCta")}
             </Link>
           </Button>
         }
@@ -162,18 +160,18 @@ function ParentsPageContent() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminEntityKpiCard
-          label="إجمالي أولياء الأمور"
+          label={t("parents.kpiTotal")}
           value={items.length}
-          subtitle="حسابات عائلية مسجّلة"
+          subtitle={t("parents.kpiTotalSub")}
           icon={UserRound}
           iconWrapClass="bg-teal-500/10"
           iconClass="text-teal-600 dark:text-teal-400"
           valueClassName="text-teal-700 dark:text-teal-300"
         />
         <AdminEntityKpiCard
-          label="أطفال مرتبطون"
+          label={t("parents.kpiLinked")}
           value={linkedChildrenTotal}
-          subtitle="إجمالي الأطفال المرتبطين بأي ولي أمر"
+          subtitle={t("parents.kpiLinkedSub")}
           icon={Baby}
           iconWrapClass="bg-blue-500/10"
           iconClass="text-blue-600 dark:text-blue-400"
@@ -181,9 +179,9 @@ function ParentsPageContent() {
         />
         {unlinkedParentsCount === 0 ? (
           <AdminEntityKpiCard
-            label="أولياء أمور بلا أطفال"
+            label={t("parents.kpiUnlinkedOk")}
             value={0}
-            subtitle="كل أولياء الأمور لديهم أطفال"
+            subtitle={t("parents.kpiUnlinkedOkSub")}
             iconWrapClass="bg-emerald-500/10"
             customIcon={<CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
             valueClassName="text-emerald-600 dark:text-emerald-400"
@@ -191,12 +189,12 @@ function ParentsPageContent() {
           />
         ) : (
           <AdminEntityKpiCard
-            label="أولياء أمور بلا أطفال"
+            label={t("parents.kpiUnlinkedOk")}
             value={unlinkedParentsCount}
             subtitle={
               unlinkedParentsCount === 1
-                ? "ولي أمر واحد بلا أطفال مرتبطين"
-                : `${unlinkedParentsCount} أولياء أمور بلا أطفال مرتبطين`
+                ? t("parents.kpiUnlinkedBadOne")
+                : t("parents.kpiUnlinkedBadMany").replace("{count}", String(unlinkedParentsCount))
             }
             iconWrapClass="bg-red-500/10"
             customIcon={<AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" aria-hidden />}
@@ -212,22 +210,24 @@ function ParentsPageContent() {
           variant="success"
           icon={<ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
         >
-          لا مشاكل مفتوحة لحسابات أولياء الأمور — كل الحسابات سليمة
+          {t("parents.stripOk")}
         </AdminIssuesStrip>
       ) : (
         <AdminIssuesStrip
           variant="warning"
           icon={<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />}
         >
-          {`${disabledCount} حساب${disabledCount === 1 ? "" : "ات"} ولي أمر بها مشاكل مفتوحة`}
+          {disabledCount === 1
+            ? t("parents.stripWarnOne")
+            : t("parents.stripWarnMany").replace("{count}", String(disabledCount))}
         </AdminIssuesStrip>
       )}
 
       <Card className="overflow-hidden border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <AdminDirectoryToolbar
-          title="دليل أولياء الأمور"
+          title={t("parents.directoryTitle")}
           titleIcon={<Users className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
-          searchPlaceholder="بحث بالاسم أو البريد…"
+          searchPlaceholder={t("parents.searchPh")}
           search={search}
           onSearchChange={setSearch}
           filterActive={inactiveOnly}
@@ -238,12 +238,12 @@ function ParentsPageContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                  <TableHead className={th}>ولي الأمر</TableHead>
-                  <TableHead className={th}>البريد</TableHead>
-                  <TableHead className={th}>الهاتف</TableHead>
-                  <TableHead className={th}>الأطفال</TableHead>
-                  <TableHead className={th}>الحالة</TableHead>
-                  <TableHead className={cn(th, "text-right")}>إجراءات</TableHead>
+                  <TableHead className={th}>{t("parents.colParent")}</TableHead>
+                  <TableHead className={th}>{t("parents.colEmail")}</TableHead>
+                  <TableHead className={th}>{t("parents.colPhone")}</TableHead>
+                  <TableHead className={th}>{t("parents.colChildren")}</TableHead>
+                  <TableHead className={th}>{t("parents.colStatus")}</TableHead>
+                  <TableHead className={cn(th, "text-right")}>{t("parents.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,7 +271,8 @@ function ParentsPageContent() {
                           <div className="min-w-0">
                             <p className="text-[13px] font-bold text-slate-900 dark:text-white">{name}</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              انضم {formatJoinedDate(row.created_at)}
+                              {t("entity.joinedPrefix")}
+                              {formatJoinedDate(row.created_at, locale, t("entity.unknownDate"))}
                             </p>
                           </div>
                         </div>
@@ -288,7 +289,7 @@ function ParentsPageContent() {
                         {row.phone ? (
                           <span className="text-[13px] text-slate-700 dark:text-slate-300">{row.phone}</span>
                         ) : (
-                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">لا هاتف</span>
+                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">{t("entity.noPhone")}</span>
                         )}
                       </TableCell>
                       <TableCell className="max-w-[280px]">
@@ -297,7 +298,7 @@ function ParentsPageContent() {
                             {row.children_count}
                           </span>
                           {noKids ? (
-                            <span className="text-[12px] italic text-red-600 dark:text-red-400">— لا أطفال</span>
+                            <span className="text-[12px] italic text-red-600 dark:text-red-400">{t("entity.noChildrenChip")}</span>
                           ) : (
                             childNames.map((n, idx) => (
                               <span
@@ -326,7 +327,7 @@ function ParentsPageContent() {
                               onClick={() => toggleStatus(row)}
                             >
                               <AlertTriangle className="h-3 w-3 shrink-0" />
-                              تعطيل
+                              {t("entity.disable")}
                             </Button>
                           ) : (
                             <Button
@@ -337,7 +338,7 @@ function ParentsPageContent() {
                               )}
                               onClick={() => toggleStatus(row)}
                             >
-                              تفعيل
+                              {t("entity.enable")}
                             </Button>
                           )}
                           <Button
@@ -349,7 +350,7 @@ function ParentsPageContent() {
                             onClick={() => resetPassword(row)}
                           >
                             <Lock className="h-3 w-3 shrink-0" />
-                            إعادة كلمة المرور
+                            {t("entity.resetPassword")}
                           </Button>
                         </div>
                       </TableCell>
@@ -359,7 +360,7 @@ function ParentsPageContent() {
                 {!displayParents.length ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                      لا يوجد أولياء أمور.
+                      {t("parents.empty")}
                     </TableCell>
                   </TableRow>
                 ) : null}

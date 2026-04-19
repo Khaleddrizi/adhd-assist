@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { fetchApi } from "@/lib/api"
 import { Baby, Download, Filter, List, Shield, Stethoscope, UserRound } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
+import type { AppLocale } from "@/lib/i18n/types"
 
 interface AuditLog {
   id: number
@@ -23,23 +25,6 @@ interface AuditLog {
 
 type EventCategory = "login" | "create" | "update" | "delete"
 type QuickChip = "all" | EventCategory
-
-const ACTION_OPTIONS = [
-  { value: "all", label: "كل الإجراءات" },
-  { value: "doctor_status_update", label: "تحديث حالة طبيب" },
-  { value: "parent_created", label: "إنشاء ولي أمر" },
-  { value: "child_transfer", label: "نقل طفل" },
-  { value: "admin_login", label: "دخول مسؤول" },
-  { value: "password_reset", label: "إعادة تعيين كلمة المرور" },
-] as const
-
-const TARGET_OPTIONS = [
-  { value: "all", label: "كل أنواع الأهداف" },
-  { value: "doctor", label: "طبيب" },
-  { value: "parent", label: "ولي أمر" },
-  { value: "child", label: "طفل" },
-  { value: "admin", label: "مسؤول" },
-] as const
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50] as const
 
@@ -58,7 +43,10 @@ function inferEventCategory(action: string): EventCategory {
   return "update"
 }
 
-function categoryStyle(cat: EventCategory): {
+function categoryStyle(
+  cat: EventCategory,
+  t: (key: string) => string,
+): {
   label: string
   badge: string
   dot: string
@@ -67,28 +55,28 @@ function categoryStyle(cat: EventCategory): {
   switch (cat) {
     case "login":
       return {
-        label: "دخول",
+        label: t("audit.catLogin"),
         badge: "bg-blue-100 text-blue-800 ring-blue-200/80 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-500/30",
         dot: "bg-[#1a8fe3]",
         border: "border-l-[#1a8fe3]",
       }
     case "create":
       return {
-        label: "إنشاء",
+        label: t("audit.catCreate"),
         badge: "bg-emerald-100 text-emerald-800 ring-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/30",
         dot: "bg-[#16a34a]",
         border: "border-l-[#16a34a]",
       }
     case "delete":
       return {
-        label: "حذف",
+        label: t("audit.catDelete"),
         badge: "bg-red-100 text-red-800 ring-red-200/80 dark:bg-red-500/15 dark:text-red-300 dark:ring-red-500/30",
         dot: "bg-[#dc2626]",
         border: "border-l-[#dc2626]",
       }
     default:
       return {
-        label: "تحديث",
+        label: t("audit.catUpdate"),
         badge: "bg-amber-100 text-amber-900 ring-amber-200/80 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-500/30",
         dot: "bg-[#d97706]",
         border: "border-l-[#d97706]",
@@ -96,15 +84,16 @@ function categoryStyle(cat: EventCategory): {
   }
 }
 
-function formatAuditTime(iso: string | null): string {
+function formatAuditTime(iso: string | null, locale: AppLocale, todayLabel: string): string {
   if (!iso) return "—"
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return "—"
   const now = new Date()
   const isToday =
     d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate()
-  const hm = d.toLocaleTimeString("ar", { hour: "2-digit", minute: "2-digit" })
-  if (isToday) return `اليوم · ${hm}`
+  const tag = locale === "ar" ? "ar" : locale === "fr" ? "fr" : "en"
+  const hm = d.toLocaleTimeString(tag, { hour: "2-digit", minute: "2-digit" })
+  if (isToday) return `${todayLabel} · ${hm}`
   const dd = String(d.getDate()).padStart(2, "0")
   const mm = String(d.getMonth() + 1).padStart(2, "0")
   return `${dd}/${mm} · ${hm}`
@@ -151,6 +140,7 @@ function escapeCsvCell(s: string) {
 }
 
 function AuditPageContent() {
+  const { t, locale } = usePortalI18n()
   const [baseLogs, setBaseLogs] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
   const [draftAction, setDraftAction] = useState<string>("all")
@@ -214,11 +204,36 @@ function AuditPageContent() {
 
   useEffect(() => {
     if (hasActiveFilters) return
-    const t = window.setInterval(() => {
+    const poll = window.setInterval(() => {
       loadFromServer()
     }, 25000)
-    return () => window.clearInterval(t)
+    return () => window.clearInterval(poll)
   }, [hasActiveFilters, loadFromServer])
+
+  const actionOptions = useMemo(
+    () =>
+      [
+        { value: "all", label: t("audit.actionAll") },
+        { value: "doctor_status_update", label: t("audit.actionDoctorStatus") },
+        { value: "parent_created", label: t("audit.actionParentCreated") },
+        { value: "child_transfer", label: t("audit.actionChildTransfer") },
+        { value: "admin_login", label: t("audit.actionAdminLogin") },
+        { value: "password_reset", label: t("audit.actionPasswordReset") },
+      ] as const,
+    [t],
+  )
+
+  const targetOptions = useMemo(
+    () =>
+      [
+        { value: "all", label: t("audit.targetAll") },
+        { value: "doctor", label: t("audit.targetDoctor") },
+        { value: "parent", label: t("audit.targetParent") },
+        { value: "child", label: t("audit.targetChild") },
+        { value: "admin", label: t("audit.targetAdmin") },
+      ] as const,
+    [t],
+  )
 
   const filteredLogs = useMemo(() => {
     if (quickChip === "all") return baseLogs
@@ -259,12 +274,19 @@ function AuditPageContent() {
   }
 
   const exportCsv = () => {
-    const headers = ["النوع", "الإجراء", "نوع الهدف", "معرّف الهدف", "الوقت", "التفاصيل"]
+    const headers = [
+      t("audit.csvType"),
+      t("audit.csvAction"),
+      t("audit.csvTargetType"),
+      t("audit.csvTargetId"),
+      t("audit.csvTime"),
+      t("audit.csvDetails"),
+    ]
     const lines = [
       headers.join(","),
       ...filteredLogs.map((log) => {
         const cat = inferEventCategory(log.action)
-        const st = categoryStyle(cat)
+        const st = categoryStyle(cat, t)
         const { raw } = detailsPill(log.details, 99999)
         return [
           escapeCsvCell(st.label),
@@ -287,22 +309,43 @@ function AuditPageContent() {
 
   const th = "text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
 
-  const chipDefs: { key: QuickChip; label: string; dotClass: string; activeClass: string }[] = [
-    { key: "all", label: "الكل", dotClass: "bg-slate-400", activeClass: "bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white" },
-    { key: "create", label: "إنشاء", dotClass: "bg-[#16a34a]", activeClass: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100" },
-    { key: "login", label: "دخول", dotClass: "bg-[#1a8fe3]", activeClass: "bg-blue-100 text-blue-900 dark:bg-blue-950/50 dark:text-blue-100" },
-    { key: "update", label: "تحديث", dotClass: "bg-[#d97706]", activeClass: "bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100" },
-    { key: "delete", label: "حذف", dotClass: "bg-[#dc2626]", activeClass: "bg-red-100 text-red-900 dark:bg-red-950/40 dark:text-red-100" },
-  ]
+  const chipDefs = useMemo(
+    (): { key: QuickChip; label: string; dotClass: string; activeClass: string }[] => [
+      { key: "all", label: t("audit.chipAll"), dotClass: "bg-slate-400", activeClass: "bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white" },
+      {
+        key: "create",
+        label: t("audit.chipCreate"),
+        dotClass: "bg-[#16a34a]",
+        activeClass: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-100",
+      },
+      {
+        key: "login",
+        label: t("audit.chipLogin"),
+        dotClass: "bg-[#1a8fe3]",
+        activeClass: "bg-blue-100 text-blue-900 dark:bg-blue-950/50 dark:text-blue-100",
+      },
+      {
+        key: "update",
+        label: t("audit.chipUpdate"),
+        dotClass: "bg-[#d97706]",
+        activeClass: "bg-amber-100 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100",
+      },
+      {
+        key: "delete",
+        label: t("audit.chipDelete"),
+        dotClass: "bg-[#dc2626]",
+        activeClass: "bg-red-100 text-red-900 dark:bg-red-950/40 dark:text-red-100",
+      },
+    ],
+    [t],
+  )
 
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">سجل التدقيق</h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            تتبّع إجراءات الإدارة وأحداث الأمان.
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">{t("audit.title")}</h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{t("audit.subtitle")}</p>
         </div>
         <Button
           type="button"
@@ -312,7 +355,7 @@ function AuditPageContent() {
           onClick={exportCsv}
         >
           <Download className="h-3.5 w-3.5" />
-          تصدير CSV
+          {t("audit.exportCsv")}
         </Button>
       </div>
 
@@ -320,21 +363,21 @@ function AuditPageContent() {
         <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-slate-500" aria-hidden />
-            <span className="text-[13px] font-bold text-slate-900 dark:text-white">عوامل التصفية</span>
+            <span className="text-[13px] font-bold text-slate-900 dark:text-white">{t("audit.filtersTitle")}</span>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="grid gap-1.5">
               <label className="sr-only" htmlFor="audit-action">
-                الإجراء
+                {t("audit.actionSr")}
               </label>
               <Select value={draftAction} onValueChange={setDraftAction}>
                 <SelectTrigger id="audit-action" className="h-10 w-full bg-slate-50 dark:bg-slate-800/80">
-                  <SelectValue placeholder="كل الإجراءات" />
+                  <SelectValue placeholder={t("audit.actionAll")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {ACTION_OPTIONS.map((o) => (
+                  {actionOptions.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
                       {o.label}
                     </SelectItem>
@@ -344,14 +387,14 @@ function AuditPageContent() {
             </div>
             <div className="grid gap-1.5">
               <label className="sr-only" htmlFor="audit-target">
-                نوع الهدف
+                {t("audit.targetSr")}
               </label>
               <Select value={draftTarget} onValueChange={setDraftTarget}>
                 <SelectTrigger id="audit-target" className="h-10 w-full bg-slate-50 dark:bg-slate-800/80">
-                  <SelectValue placeholder="كل أنواع الأهداف" />
+                  <SelectValue placeholder={t("audit.targetAll")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {TARGET_OPTIONS.map((o) => (
+                  {targetOptions.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
                       {o.label}
                     </SelectItem>
@@ -361,7 +404,7 @@ function AuditPageContent() {
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
               <Input
-                placeholder="بحث في التفاصيل…"
+                placeholder={t("audit.searchPh")}
                 value={draftSearch}
                 onChange={(e) => setDraftSearch(e.target.value)}
                 className="h-10 bg-slate-50 dark:bg-slate-800/80"
@@ -369,10 +412,10 @@ function AuditPageContent() {
             </div>
             <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
               <Button type="button" className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={applyFilters}>
-                تطبيق
+                {t("audit.apply")}
               </Button>
               <Button type="button" variant="outline" className="flex-1 border-slate-200 dark:border-slate-600" onClick={resetFilters}>
-                إعادة ضبط
+                {t("audit.reset")}
               </Button>
             </div>
           </div>
@@ -407,7 +450,7 @@ function AuditPageContent() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <List className="h-5 w-5 text-slate-600 dark:text-slate-400" aria-hidden />
-              <span className="text-base font-semibold text-slate-900 dark:text-white">السجلات</span>
+              <span className="text-base font-semibold text-slate-900 dark:text-white">{t("audit.logsTitle")}</span>
             </div>
             {!hasActiveFilters ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
@@ -415,34 +458,34 @@ function AuditPageContent() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                مباشر
+                {t("audit.live")}
               </span>
             ) : (
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                عرض مُصفّى
+                {t("audit.filtered")}
               </span>
             )}
           </div>
           <p className="text-[13px] text-slate-500 dark:text-slate-400">
-            عرض {filteredLogs.length} {filteredLogs.length === 1 ? "سجل" : "سجلات"}
+            {filteredLogs.length === 1
+              ? t("audit.showingOne")
+              : t("audit.showingMany").replace("{count}", String(filteredLogs.length))}
           </p>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <p className="p-8 text-center text-sm text-slate-500">جاري التحميل…</p>
+            <p className="p-8 text-center text-sm text-slate-500">{t("audit.loading")}</p>
           ) : !filteredLogs.length ? (
             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
               <List className="h-7 w-7 text-slate-400" aria-hidden />
-              <p className="mt-3 text-[13px] text-slate-600 dark:text-slate-400">لا توجد سجلات تدقيق</p>
-              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                جرّب تعديل عوامل التصفية أو أعد المحاولة لاحقاً.
-              </p>
+              <p className="mt-3 text-[13px] text-slate-600 dark:text-slate-400">{t("audit.emptyTitle")}</p>
+              <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{t("audit.emptyHint")}</p>
               <button
                 type="button"
                 className="mt-4 text-[12px] font-medium text-blue-600 hover:underline dark:text-blue-400"
                 onClick={clearFiltersOnly}
               >
-                مسح عوامل التصفية
+                {t("audit.clearFilters")}
               </button>
             </div>
           ) : (
@@ -451,17 +494,17 @@ function AuditPageContent() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                      <TableHead className={th}>النوع</TableHead>
-                      <TableHead className={th}>الإجراء</TableHead>
-                      <TableHead className={th}>الهدف</TableHead>
-                      <TableHead className={th}>الوقت</TableHead>
-                      <TableHead className={th}>التفاصيل</TableHead>
+                      <TableHead className={th}>{t("audit.colType")}</TableHead>
+                      <TableHead className={th}>{t("audit.colAction")}</TableHead>
+                      <TableHead className={th}>{t("audit.colTarget")}</TableHead>
+                      <TableHead className={th}>{t("audit.colTime")}</TableHead>
+                      <TableHead className={th}>{t("audit.colDetails")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pageSlice.map((log) => {
                       const cat = inferEventCategory(log.action)
-                      const st = categoryStyle(cat)
+                      const st = categoryStyle(cat, t)
                       const { Icon, wrap } = targetIconSquare(log.target_type)
                       const pill = detailsPill(log.details)
                       return (
@@ -503,7 +546,7 @@ function AuditPageContent() {
                             </div>
                           </TableCell>
                           <TableCell className="whitespace-nowrap text-[13px] text-slate-700 dark:text-slate-300">
-                            {formatAuditTime(log.created_at)}
+                            {formatAuditTime(log.created_at, locale, t("audit.today"))}
                           </TableCell>
                           <TableCell className="max-w-[220px]">
                             <span
@@ -530,14 +573,14 @@ function AuditPageContent() {
                     disabled={safePage <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
-                    ← السابق
+                    {t("audit.prev")}
                   </Button>
                   <span className="flex items-center gap-2 text-[12px] text-slate-600 dark:text-slate-400">
-                    صفحة{" "}
+                    {t("audit.pageOf")}{" "}
                     <span className="inline-flex min-w-[2rem] justify-center rounded-full bg-blue-100 px-2 py-0.5 text-[12px] font-bold text-blue-800 dark:bg-blue-950/60 dark:text-blue-200">
                       {safePage}
                     </span>{" "}
-                    من {totalPages}
+                    {t("audit.of")} {totalPages}
                   </span>
                   <Button
                     type="button"
@@ -547,11 +590,11 @@ function AuditPageContent() {
                     disabled={safePage >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   >
-                    التالي →
+                    {t("audit.next")}
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">صفوف لكل صفحة:</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{t("audit.rowsPerPage")}</span>
                   <Select
                     value={String(pageSize)}
                     onValueChange={(v) => {

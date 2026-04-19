@@ -7,10 +7,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Filter, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
+import type { AppLocale } from "@/lib/i18n/types"
 
-export function formatJoinedDate(iso: string | null): string {
-  if (!iso) return "تاريخ غير معروف"
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
+export function formatJoinedDate(iso: string | null, locale: AppLocale, unknownLabel: string): string {
+  if (!iso) return unknownLabel
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return unknownLabel
+  const tag = locale === "ar" ? "ar" : locale === "fr" ? "fr" : "en"
+  return d.toLocaleDateString(tag, { month: "short", day: "numeric", year: "numeric" })
 }
 
 export function isWithinDays(iso: string | null, days: number): boolean {
@@ -135,6 +140,7 @@ export function AdminDirectoryToolbar(props: {
   filterActive?: boolean
   onFilterClick: () => void
 }) {
+  const { t } = usePortalI18n()
   const { title, titleIcon, searchPlaceholder, search, onSearchChange, filterActive, onFilterClick } = props
   return (
     <div className="flex flex-col gap-4 border-b border-slate-100 px-4 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -164,7 +170,7 @@ export function AdminDirectoryToolbar(props: {
           onClick={onFilterClick}
         >
           <Filter className="h-3.5 w-3.5" />
-          تصفية
+          {t("entity.filter")}
         </Button>
       </div>
     </div>
@@ -172,6 +178,7 @@ export function AdminDirectoryToolbar(props: {
 }
 
 export function StatusPill(props: { kind: "active" | "disabled" | "pending" }) {
+  const { t } = usePortalI18n()
   const { kind } = props
   const map = {
     active:
@@ -180,7 +187,8 @@ export function StatusPill(props: { kind: "active" | "disabled" | "pending" }) {
     pending:
       "bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/25",
   } as const
-  const label = kind === "active" ? "نشط" : kind === "disabled" ? "معطّل" : "قيد الانتظار"
+  const label =
+    kind === "active" ? t("entity.statusActive") : kind === "disabled" ? t("entity.statusDisabled") : t("entity.statusPending")
   return (
     <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold", map[kind])}>{label}</span>
   )
@@ -211,8 +219,10 @@ export function clinicalFocusKind(avgAccuracy: number, sessionCount: number): "o
 }
 
 export function ClinicalFocusPill(props: { avgAccuracy: number; sessionCount: number }) {
+  const { t } = usePortalI18n()
   const kind = clinicalFocusKind(props.avgAccuracy, props.sessionCount)
-  const label = kind === "ok" ? "على المسار" : kind === "watch" ? "مراقبة" : "يحتاج انتباهًا"
+  const label =
+    kind === "ok" ? t("entity.focusOk") : kind === "watch" ? t("entity.focusWatch") : t("entity.focusRisk")
   const cls =
     kind === "ok"
       ? "bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-500/30"
@@ -232,8 +242,13 @@ export function severityDotAndLabel(diagnostic: string | null): { dotClass: stri
   return { dotClass: "bg-slate-500", label: raw }
 }
 
+export type SeverityLevelLabels = { mild: string; moderate: string; severe: string; empty: string }
+
 /** Dot + label + Tailwind text color for the ADHD level line (Mild / Moderate / Severe). */
-export function severityLevelDisplay(diagnostic: string | null): {
+export function severityLevelDisplay(
+  diagnostic: string | null,
+  L: SeverityLevelLabels,
+): {
   dotClass: string
   label: string
   textClass: string
@@ -243,25 +258,25 @@ export function severityLevelDisplay(diagnostic: string | null): {
   if (lower.includes("severe"))
     return {
       dotClass: "bg-red-500",
-      label: "شديد",
+      label: L.severe,
       textClass: "text-red-600 dark:text-red-400",
     }
   if (lower.includes("moderate"))
     return {
       dotClass: "bg-orange-500",
-      label: "متوسط",
+      label: L.moderate,
       textClass: "text-orange-600 dark:text-orange-400",
     }
   if (lower.includes("mild"))
     return {
       dotClass: "bg-amber-500",
-      label: "خفيف",
+      label: L.mild,
       textClass: "text-amber-600 dark:text-amber-400",
     }
   if (!raw)
     return {
       dotClass: "bg-slate-400",
-      label: "—",
+      label: L.empty,
       textClass: "text-slate-500 dark:text-slate-400",
     }
   return {

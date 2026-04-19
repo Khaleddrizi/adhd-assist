@@ -22,7 +22,7 @@ export interface AuthUser {
   accountType?: "therapist" | "parent" | "administration"
   auth_token?: string
   created_at?: string | null
-  /** Specialist or parent UI language (from backend after login / settings). */
+  /** UI language from backend after login / settings (specialist, parent, administration). */
   preferred_locale?: SpecialistLocale
 }
 

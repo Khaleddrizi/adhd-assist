@@ -151,6 +151,7 @@ def _admin_payload(a: AdministratorModel) -> dict:
         "full_name": a.full_name,
         "phone": a.phone,
         "is_active": bool(getattr(a, "is_active", True)),
+        "preferred_locale": getattr(a, "preferred_locale", None) or "ar",
         "role": "administration",
         "created_at": a.created_at.isoformat() if a.created_at else None,
     }
@@ -456,6 +457,26 @@ def create_web_api() -> Flask:
             admin = AdministratorRepository(db).get_by_id(aid)
             if not admin:
                 return jsonify({"error": "administrator not found"}), 404
+            return jsonify(_admin_payload(admin))
+
+    @app.route("/api/administration/me", methods=["PUT"])
+    def update_admin_me():
+        aid = _get_admin_id()
+        if not aid:
+            return _auth_required()
+        data = request.get_json() or {}
+        if "preferred_locale" not in data:
+            return jsonify({"error": "preferred_locale required"}), 400
+        loc = (data.get("preferred_locale") or "ar").strip().lower()
+        if loc not in ("ar", "fr", "en"):
+            return jsonify({"error": "preferred_locale must be ar, fr, or en"}), 400
+        with get_db() as db:
+            admin = AdministratorRepository(db).get_by_id(aid)
+            if not admin:
+                return jsonify({"error": "administrator not found"}), 404
+            admin.preferred_locale = loc
+            db.commit()
+            db.refresh(admin)
             return jsonify(_admin_payload(admin))
 
     @app.route("/api/administration/overview", methods=["GET"])

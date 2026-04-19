@@ -28,6 +28,7 @@ import {
   Users,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
 
 interface AdminDoctor {
   id: number
@@ -40,6 +41,7 @@ interface AdminDoctor {
 }
 
 function DoctorsPageContent() {
+  const { t, locale } = usePortalI18n()
   const [items, setItems] = useState<AdminDoctor[]>([])
   const [search, setSearch] = useState("")
   const [inactiveOnly, setInactiveOnly] = useState(false)
@@ -71,26 +73,22 @@ function DoctorsPageContent() {
   }, [items, inactiveOnly])
 
   const toggleStatus = async (doctor: AdminDoctor) => {
-    const ok = window.confirm(
-      `${doctor.is_active ? "تعطيل" : "تفعيل"} حساب هذا المختص؟\n\nسيُسجّل الإجراء في سجل التدقيق.`,
-    )
+    const ok = window.confirm(doctor.is_active ? t("doctors.confirmDisable") : t("doctors.confirmEnable"))
     if (!ok) return
     try {
       await fetchApi(`/api/administration/doctors/${doctor.id}/status`, {
         method: "PUT",
         body: JSON.stringify({ is_active: !doctor.is_active }),
       })
-      toast.success(`تم ${!doctor.is_active ? "تفعيل" : "تعطيل"} المختص بنجاح. راجع سجل التدقيق.`)
+      toast.success(t("doctors.toastStatusOk"))
       await reload()
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة المختص")
+      toast.error(e instanceof Error ? e.message : t("doctors.toastStatusErr"))
     }
   }
 
   const resetPassword = async (doctor: AdminDoctor) => {
-    const ok = window.confirm(
-      "إنشاء كلمة مرور مؤقتة لهذا المختص؟\n\nسيُسجّل الإجراء في سجل التدقيق.",
-    )
+    const ok = window.confirm(t("doctors.confirmResetPw"))
     if (!ok) return
     try {
       const res = await fetchApi<{ temporary_password: string }>(
@@ -98,9 +96,9 @@ function DoctorsPageContent() {
         { method: "POST" },
       )
       await navigator.clipboard.writeText(res.temporary_password)
-      toast.success("تم نسخ كلمة المرور المؤقتة. راجع سجل التدقيق.")
+      toast.success(t("doctors.toastPwCopied"))
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذّر إعادة تعيين كلمة المرور")
+      toast.error(e instanceof Error ? e.message : t("doctors.toastPwErr"))
     }
   }
 
@@ -109,13 +107,13 @@ function DoctorsPageContent() {
   return (
     <div className="mx-auto min-w-0 max-w-7xl space-y-6">
       <AdminManagementHeader
-        title="إدارة المختصين"
-        description="مراجعة حسابات المختصين وحمل المرضى المعيّن."
+        title={t("doctors.title")}
+        description={t("doctors.description")}
         action={
           <Button asChild className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90">
             <Link href="/register?role=specialist" target="_blank" rel="noopener noreferrer">
               <Plus className="h-4 w-4" />
-              إضافة مختص
+              {t("doctors.addCta")}
             </Link>
           </Button>
         }
@@ -123,9 +121,9 @@ function DoctorsPageContent() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminEntityKpiCard
-          label="إجمالي المختصين"
+          label={t("doctors.kpiTotal")}
           value={items.length}
-          subtitle="مختصون مسجّلون على المنصة"
+          subtitle={t("doctors.kpiTotalSub")}
           iconWrapClass="bg-blue-500/10"
           customIcon={
             <span className="flex items-center justify-center gap-px text-blue-600 dark:text-blue-400" aria-hidden>
@@ -135,17 +133,17 @@ function DoctorsPageContent() {
           }
         />
         <AdminEntityKpiCard
-          label="إجمالي الأطفال المعيّنين"
+          label={t("doctors.kpiPatients")}
           value={totalPatients}
-          subtitle="أطفال مرتبطون بالمختصين"
+          subtitle={t("doctors.kpiPatientsSub")}
           icon={Users}
           iconWrapClass="bg-teal-500/10"
           iconClass="text-teal-600 dark:text-teal-400"
         />
         <AdminEntityKpiCard
-          label="متوسط الأطفال لكل مختص"
+          label={t("doctors.kpiAvg")}
           value={avgPerDoctor}
-          subtitle="متوسط حمل المرضى لكل مختص"
+          subtitle={t("doctors.kpiAvgSub")}
           icon={BarChart3}
           iconWrapClass="bg-purple-500/10"
           iconClass="text-purple-600 dark:text-purple-400"
@@ -157,22 +155,24 @@ function DoctorsPageContent() {
           variant="success"
           icon={<ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
         >
-          لا مشاكل مفتوحة لحسابات المختصين — كل الحسابات سليمة
+          {t("doctors.stripOk")}
         </AdminIssuesStrip>
       ) : (
         <AdminIssuesStrip
           variant="warning"
           icon={<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />}
         >
-          {disabledCount} حساب{disabledCount === 1 ? "" : "ات"} مختص بها مشاكل مفتوحة — راجع أدناه
+          {disabledCount === 1
+            ? t("doctors.stripWarnOne")
+            : t("doctors.stripWarnMany").replace("{count}", String(disabledCount))}
         </AdminIssuesStrip>
       )}
 
       <Card className="overflow-hidden border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
         <AdminDirectoryToolbar
-          title="دليل المختصين"
+          title={t("doctors.directoryTitle")}
           titleIcon={<Stethoscope className="h-5 w-5 shrink-0 text-primary" aria-hidden />}
-          searchPlaceholder="بحث بالاسم أو البريد…"
+          searchPlaceholder={t("doctors.searchPh")}
           search={search}
           onSearchChange={setSearch}
           filterActive={inactiveOnly}
@@ -183,12 +183,12 @@ function DoctorsPageContent() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-100 hover:bg-transparent dark:border-slate-800">
-                  <TableHead className={th}>المختص</TableHead>
-                  <TableHead className={th}>البريد</TableHead>
-                  <TableHead className={th}>الهاتف</TableHead>
-                  <TableHead className={th}>المرضى</TableHead>
-                  <TableHead className={th}>الحالة</TableHead>
-                  <TableHead className={cn(th, "text-right")}>إجراءات</TableHead>
+                  <TableHead className={th}>{t("doctors.colSpecialist")}</TableHead>
+                  <TableHead className={th}>{t("doctors.colEmail")}</TableHead>
+                  <TableHead className={th}>{t("doctors.colPhone")}</TableHead>
+                  <TableHead className={th}>{t("doctors.colPatients")}</TableHead>
+                  <TableHead className={th}>{t("doctors.colStatus")}</TableHead>
+                  <TableHead className={cn(th, "text-right")}>{t("doctors.colActions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -211,7 +211,8 @@ function DoctorsPageContent() {
                           <div className="min-w-0">
                             <p className="text-[13px] font-bold text-slate-900 dark:text-white">{name}</p>
                             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                              انضم {formatJoinedDate(row.created_at)}
+                              {t("entity.joinedPrefix")}
+                              {formatJoinedDate(row.created_at, locale, t("entity.unknownDate"))}
                             </p>
                           </div>
                         </div>
@@ -228,7 +229,7 @@ function DoctorsPageContent() {
                         {row.phone ? (
                           <span className="text-[13px] text-slate-700 dark:text-slate-300">{row.phone}</span>
                         ) : (
-                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">لا هاتف</span>
+                          <span className="text-[13px] italic text-slate-400 dark:text-slate-500">{t("entity.noPhone")}</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -249,7 +250,7 @@ function DoctorsPageContent() {
                               onClick={() => toggleStatus(row)}
                             >
                               <AlertTriangle className="h-3.5 w-3.5" />
-                              تعطيل
+                              {t("entity.disable")}
                             </Button>
                           ) : (
                             <Button
@@ -258,7 +259,7 @@ function DoctorsPageContent() {
                               className="h-8 gap-1 border-emerald-400 bg-transparent text-emerald-700 hover:bg-emerald-50 dark:border-emerald-600 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
                               onClick={() => toggleStatus(row)}
                             >
-                              تفعيل
+                              {t("entity.enable")}
                             </Button>
                           )}
                           <Button
@@ -268,7 +269,7 @@ function DoctorsPageContent() {
                             onClick={() => resetPassword(row)}
                           >
                             <Lock className="h-3.5 w-3.5" />
-                            إعادة كلمة المرور
+                            {t("entity.resetPassword")}
                           </Button>
                         </div>
                       </TableCell>
@@ -278,7 +279,7 @@ function DoctorsPageContent() {
                 {!filteredItems.length ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-sm text-slate-500">
-                      لا يوجد مختصون.
+                      {t("doctors.empty")}
                     </TableCell>
                   </TableRow>
                 ) : null}
