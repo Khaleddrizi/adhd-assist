@@ -17,6 +17,7 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from backend.database.connection import get_db, init_db
@@ -30,6 +31,7 @@ from backend.database.repositories import (
     SessionRepository,
     TrainingProgramRepository,
     QuestionRepository,
+    create_standalone_parent_with_shadow,
 )
 
 logger = logging.getLogger("AlexaQuiz.WebAPI")
@@ -130,6 +132,7 @@ def _parent_payload(p: ParentModel) -> dict:
         "state_region": getattr(p, "state_region", None),
         "address_line": getattr(p, "address_line", None),
         "role": "parent",
+        "account_kind": getattr(p, "account_kind", None) or "linked",
         "created_at": p.created_at.isoformat() if p.created_at else None,
     }
 
@@ -316,6 +319,35 @@ def _mark_stale_processing_programs(db, specialist_id: int | None = None) -> Non
     db.flush()
 
 
+def _parent_account_kind(parent: ParentModel) -> str:
+    return (getattr(parent, "account_kind", None) or "linked").strip().lower()
+
+
+def _parent_standalone_library_sid(parent: ParentModel) -> int | None:
+    if _parent_account_kind(parent) != "standalone":
+        return None
+    sid = getattr(parent, "content_specialist_id", None)
+    return int(sid) if isinstance(sid, int) else None
+
+
+def _resolve_specialist_id_for_new_parent_child(db: Session, parent: ParentModel) -> tuple[int | None, str | None]:
+    """Returns (specialist_id, error_message)."""
+    if _parent_account_kind(parent) == "standalone":
+        sid = getattr(parent, "content_specialist_id", None)
+        if not sid:
+            return None, "Account is not ready for adding children. Please contact support."
+        return int(sid), None
+    first = (
+        db.query(PatientModel)
+        .filter(PatientModel.parent_id == parent.id)
+        .order_by(PatientModel.id.asc())
+        .first()
+    )
+    if not first:
+        return None, "Your clinician must add your first child before you can add more children from here."
+    return int(first.specialist_id), None
+
+
 def create_web_api() -> Flask:
     app = Flask(__name__)
     # Render runs this module directly (run.py with PORT); ensure schema patches run
@@ -374,7 +406,34 @@ def create_web_api() -> Flask:
                 db.commit()
                 return jsonify(_payload_with_auth(_specialist_payload(s), s.id, "specialist")), 201
             elif role == "parent":
-                return jsonify({"error": "Parent self-registration is disabled. Parent accounts are created by doctors only."}), 403
+                kind = (data.get("account_kind") or "").strip().lower()
+                if kind != "standalone":
+                    return jsonify(
+                        {
+                            "error": "Parent self-registration requires account_kind=standalone. "
+                            "Clinician-linked parent accounts are created by the specialist."
+                        }
+                    ), 403
+                if len(password) < 6:
+                    return jsonify({"error": "password must be at least 6 characters"}), 400
+                parent_repo = ParentRepository(db)
+                if parent_repo.get_by_email(email):
+                    return jsonify({"error": "email already registered"}), 409
+                spec_repo = SpecialistRepository(db)
+                if spec_repo.get_by_email(email):
+                    return jsonify({"error": "email already registered"}), 409
+                admin_repo = AdministratorRepository(db)
+                if admin_repo.get_by_email(email):
+                    return jsonify({"error": "email already registered"}), 409
+                p = create_standalone_parent_with_shadow(
+                    db,
+                    email,
+                    generate_password_hash(password),
+                    full_name,
+                    phone=phone,
+                )
+                db.commit()
+                return jsonify(_payload_with_auth(_parent_payload(p), p.id, "parent")), 201
             elif role == "administration":
                 repo = AdministratorRepository(db)
                 if repo.get_by_email(email):
@@ -488,7 +547,7 @@ def create_web_api() -> Flask:
             now = datetime.now(timezone.utc)
             today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
             payload = {
-                "total_doctors": db.query(SpecialistModel).count(),
+                "total_doctors": db.query(SpecialistModel).filter(SpecialistModel.is_shadow.is_(False)).count(),
                 "total_parents": db.query(ParentModel).count(),
                 "total_children": db.query(PatientModel).count(),
                 "total_alexa_users": db.query(UserModel).count(),
@@ -504,7 +563,7 @@ def create_web_api() -> Flask:
             return _auth_required()
         q = (request.args.get("q") or "").strip().lower()
         with get_db() as db:
-            query = db.query(SpecialistModel)
+            query = db.query(SpecialistModel).filter(SpecialistModel.is_shadow.is_(False))
             if q:
                 query = query.filter(
                     or_(
@@ -551,6 +610,7 @@ def create_web_api() -> Flask:
                     "created_at": p.created_at.isoformat() if p.created_at else None,
                     "children_count": db.query(PatientModel).filter(PatientModel.parent_id == p.id).count(),
                     "is_active": bool(getattr(p, "is_active", True)),
+                    "account_kind": getattr(p, "account_kind", None) or "linked",
                 }
                 for p in parents
             ])
@@ -974,7 +1034,13 @@ def create_web_api() -> Flask:
             if not parent:
                 temp_password = secrets.token_urlsafe(12)
                 password_hash = generate_password_hash(temp_password)
-                parent = parent_repo.create(parent_email, password_hash, parent_name, phone=parent_phone)
+                parent = parent_repo.create(
+                    parent_email,
+                    password_hash,
+                    parent_name,
+                    phone=parent_phone,
+                    account_kind="linked",
+                )
                 db.flush()
                 parent_created = True
             elif parent_name and not parent.full_name:
@@ -1521,6 +1587,16 @@ def create_web_api() -> Flask:
                 )
                 db.query(PatientModel).filter(PatientModel.id.in_(patient_ids)).delete(synchronize_session=False)
             _delete_user_avatars("parent", pid)
+            sid = getattr(parent, "content_specialist_id", None)
+            if sid:
+                shadow = db.query(SpecialistModel).filter(SpecialistModel.id == sid).first()
+                if shadow and bool(getattr(shadow, "is_shadow", False)):
+                    parent.content_specialist_id = None
+                    db.flush()
+                    _delete_specialist_cascade(db, sid)
+                else:
+                    parent.content_specialist_id = None
+                    db.flush()
             db.delete(parent)
             db.commit()
             return jsonify({"message": "Parent account deleted successfully"})
@@ -1539,6 +1615,38 @@ def create_web_api() -> Flask:
                 c["last_session"] = (s_repo.get_patient_sessions(c["id"], limit=1)[0] if c["stats"]["total_sessions"] else None)
                 _attach_program_info(db, c)
             return jsonify(children)
+
+    @app.route("/api/parents/children", methods=["POST"])
+    def create_parent_child():
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        data = request.get_json() or {}
+        name = (data.get("name") or "").strip()
+        if not name:
+            return jsonify({"error": "name required"}), 400
+        raw_age = data.get("age")
+        age: int | None = None
+        if raw_age is not None and raw_age != "":
+            try:
+                age = int(raw_age)
+            except (TypeError, ValueError):
+                return jsonify({"error": "age must be a number"}), 400
+        diagnostic = (data.get("diagnostic") or "").strip() or None
+        with get_db() as db:
+            parent_repo = ParentRepository(db)
+            parent = parent_repo.get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid, err = _resolve_specialist_id_for_new_parent_child(db, parent)
+            if err or sid is None:
+                return jsonify({"error": err or "cannot resolve clinician scope"}), 400
+            p_repo = PatientRepository(db)
+            if not SpecialistRepository(db).get_by_id(sid):
+                return jsonify({"error": "specialist scope not found"}), 404
+            p = p_repo.create(sid, name, age=age, diagnostic=diagnostic, parent_id=pid)
+            db.commit()
+            return jsonify(p_repo._to_dict(p)), 201
 
     @app.route("/api/parents/children/<int:patient_id>", methods=["GET"])
     def get_child(patient_id: int):
@@ -1569,6 +1677,168 @@ def create_web_api() -> Flask:
             if not p or p.parent_id != pid:
                 return jsonify({"error": "child not found"}), 404
             return jsonify(SessionRepository(db).get_patient_sessions(patient_id, limit=limit))
+
+    @app.route("/api/parents/children/<int:patient_id>/assign-program", methods=["PUT"])
+    def parent_assign_child_program(patient_id: int):
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        data = request.get_json() or {}
+        training_program_id = data.get("training_program_id")
+        with get_db() as db:
+            p_repo = PatientRepository(db)
+            program_repo = TrainingProgramRepository(db)
+            patient = p_repo.get_by_id(patient_id)
+            if not patient or patient.parent_id != pid:
+                return jsonify({"error": "child not found"}), 404
+            if training_program_id in ("", None):
+                p_repo.assign_program(patient_id, None)
+                db.commit()
+                cleared = p_repo.get_by_id(patient_id)
+                payload = p_repo._to_dict(cleared) if cleared else {}
+                _attach_parent_info(db, payload)
+                _attach_program_info(db, payload)
+                return jsonify(payload)
+            try:
+                training_program_id = int(training_program_id)
+            except (TypeError, ValueError):
+                return jsonify({"error": "training_program_id must be a valid integer"}), 400
+            program = program_repo.get_by_id(training_program_id)
+            if not program or program.specialist_id != patient.specialist_id:
+                return jsonify({"error": "training program not found"}), 404
+            if program.status != "ready":
+                return jsonify({"error": "Only ready training programs can be assigned"}), 400
+            p_repo.assign_program(patient_id, training_program_id)
+            db.commit()
+            fresh = p_repo.get_by_id(patient_id)
+            payload = p_repo._to_dict(fresh) if fresh else {}
+            _attach_parent_info(db, payload)
+            _attach_program_info(db, payload)
+            return jsonify(payload)
+
+    @app.route("/api/parents/library", methods=["GET"])
+    def list_parent_library():
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        with get_db() as db:
+            parent = ParentRepository(db).get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid = _parent_standalone_library_sid(parent)
+            if not sid:
+                return jsonify({"error": "Library is only available for family (standalone) parent accounts."}), 403
+            _mark_stale_processing_programs(db, specialist_id=sid)
+            db.commit()
+            repo = TrainingProgramRepository(db)
+            return jsonify(repo.get_by_specialist(sid))
+
+    @app.route("/api/parents/library", methods=["POST"])
+    def create_parent_library_item():
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        if request.content_type and "multipart/form-data" in request.content_type:
+            name = (request.form.get("name") or "").strip()
+            pdf_path = (request.form.get("pdf_path") or "").strip() or None
+            uploaded_file = request.files.get("pdf_file")
+        else:
+            data = request.get_json() or {}
+            name = (data.get("name") or "").strip()
+            pdf_path = (data.get("pdf_path") or "").strip() or None
+            uploaded_file = None
+        if not name:
+            return jsonify({"error": "name required"}), 400
+        if uploaded_file and uploaded_file.filename:
+            uploads_dir = DATA_DIR / "library_uploads"
+            uploads_dir.mkdir(parents=True, exist_ok=True)
+            safe_name = secure_filename(uploaded_file.filename) or f"resource-{secrets.token_hex(4)}.pdf"
+            unique_name = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4)}-{safe_name}"
+            saved_path = uploads_dir / unique_name
+            uploaded_file.save(saved_path)
+            pdf_path = str(saved_path)
+        with get_db() as db:
+            parent = ParentRepository(db).get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid = _parent_standalone_library_sid(parent)
+            if not sid:
+                return jsonify({"error": "Library is only available for family (standalone) parent accounts."}), 403
+            if not SpecialistRepository(db).get_by_id(sid):
+                return jsonify({"error": "specialist scope not found"}), 404
+            repo = TrainingProgramRepository(db)
+            initial_status = "processing" if pdf_path else "draft"
+            item = repo.create(sid, name=name, pdf_path=pdf_path, status=initial_status)
+            db.commit()
+            if pdf_path:
+                threading.Thread(
+                    target=_process_training_program_async,
+                    args=(item.id,),
+                    daemon=True,
+                ).start()
+            return jsonify(repo._to_dict(item)), 201
+
+    @app.route("/api/parents/library/<int:item_id>/process", methods=["POST"])
+    def process_parent_library_item(item_id: int):
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        with get_db() as db:
+            parent = ParentRepository(db).get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid = _parent_standalone_library_sid(parent)
+            if not sid:
+                return jsonify({"error": "Library is only available for family (standalone) parent accounts."}), 403
+            repo = TrainingProgramRepository(db)
+            item = repo.get_by_id(item_id)
+            if not item or item.specialist_id != sid:
+                return jsonify({"error": "library item not found"}), 404
+            if not item.pdf_path:
+                return jsonify({"error": "No PDF linked to this library item"}), 400
+            item.status = "processing"
+            item.error_message = None
+            db.commit()
+            threading.Thread(
+                target=_process_training_program_async,
+                args=(item.id,),
+                daemon=True,
+            ).start()
+            return jsonify(repo._to_dict(item)), 200
+
+    @app.route("/api/parents/library/<int:item_id>", methods=["DELETE"])
+    def delete_parent_library_item(item_id: int):
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        with get_db() as db:
+            parent = ParentRepository(db).get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid = _parent_standalone_library_sid(parent)
+            if not sid:
+                return jsonify({"error": "Library is only available for family (standalone) parent accounts."}), 403
+            repo = TrainingProgramRepository(db)
+            item = repo.get_by_id(item_id)
+            if not item or item.specialist_id != sid:
+                return jsonify({"error": "library item not found"}), 404
+            pdf_path = item.pdf_path
+            db.query(PatientModel).filter(PatientModel.assigned_program_id == item_id).update(
+                {"assigned_program_id": None},
+                synchronize_session=False,
+            )
+            db.query(QuestionModel).filter(QuestionModel.training_program_id == item_id).delete(synchronize_session=False)
+            repo.delete(item_id)
+            db.commit()
+            if pdf_path:
+                try:
+                    path = Path(pdf_path)
+                    uploads_dir = DATA_DIR / "library_uploads"
+                    if path.exists() and uploads_dir in path.parents:
+                        path.unlink()
+                except Exception:
+                    pass
+            return jsonify({"message": "Library item deleted successfully"})
 
     @app.route("/api/health")
     def health():

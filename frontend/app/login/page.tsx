@@ -55,6 +55,7 @@ function LoginForm() {
         user.preferred_locale
           ? { preferred_locale: user.preferred_locale }
           : {}),
+        ...(user.role === "parent" ? { account_kind: user.account_kind ?? "linked" } : {}),
       }
       localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(storedUser))
       if (

@@ -3,9 +3,11 @@ Repository layer: CRUD operations on the database.
 """
 import json
 import logging
+import secrets
 from typing import List, Dict, Any, Set
 
 from sqlalchemy.orm import Session
+from werkzeug.security import generate_password_hash
 
 from backend.database.models import (
     UserModel,
@@ -69,8 +71,16 @@ class SpecialistRepository:
         password_hash: str,
         full_name: str | None = None,
         phone: str | None = None,
+        *,
+        is_shadow: bool = False,
     ) -> SpecialistModel:
-        s = SpecialistModel(email=email, password_hash=password_hash, full_name=full_name, phone=phone)
+        s = SpecialistModel(
+            email=email,
+            password_hash=password_hash,
+            full_name=full_name,
+            phone=phone,
+            is_shadow=is_shadow,
+        )
         self._db.add(s)
         self._db.flush()
         return s
@@ -94,8 +104,22 @@ class ParentRepository:
         password_hash: str,
         full_name: str | None = None,
         phone: str | None = None,
+        *,
+        account_kind: str = "linked",
+        content_specialist_id: int | None = None,
     ) -> ParentModel:
-        p = ParentModel(email=email, password_hash=password_hash, full_name=full_name, phone=phone)
+        if account_kind not in ("linked", "standalone"):
+            raise ValueError("account_kind must be 'linked' or 'standalone'")
+        if account_kind == "linked" and content_specialist_id is not None:
+            raise ValueError("linked parents must not set content_specialist_id")
+        p = ParentModel(
+            email=email,
+            password_hash=password_hash,
+            full_name=full_name,
+            phone=phone,
+            account_kind=account_kind,
+            content_specialist_id=content_specialist_id,
+        )
         self._db.add(p)
         self._db.flush()
         return p
@@ -458,3 +482,44 @@ class SessionRepository:
             "wrong_topics": wrong,
             "created_at": s.created_at.isoformat() if s.created_at else None,
         }
+
+
+def create_standalone_parent_with_shadow(
+    db: Session,
+    email: str,
+    password_hash: str,
+    full_name: str | None = None,
+    phone: str | None = None,
+) -> ParentModel:
+    """
+    Self-serve parent: account_kind standalone + internal specialist row for library/patient scope.
+    Caller must commit the session. Login remains role=parent (not the shadow specialist).
+    """
+    parent_repo = ParentRepository(db)
+    spec_repo = SpecialistRepository(db)
+
+    parent = parent_repo.create(
+        email,
+        password_hash,
+        full_name,
+        phone,
+        account_kind="standalone",
+        content_specialist_id=None,
+    )
+    db.flush()
+
+    shadow_email = f"shadow-p{parent.id}@internal.local"
+    if spec_repo.get_by_email(shadow_email):
+        shadow_email = f"shadow-p{parent.id}-{secrets.token_hex(4)}@internal.local"
+
+    shadow = spec_repo.create(
+        shadow_email,
+        generate_password_hash(secrets.token_urlsafe(32)),
+        full_name=None,
+        phone=None,
+        is_shadow=True,
+    )
+    db.flush()
+    parent.content_specialist_id = shadow.id
+    db.flush()
+    return parent

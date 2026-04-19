@@ -70,7 +70,8 @@ function RegisterPageInner() {
         formData.email,
         formData.password,
         formData.role,
-        formData.full_name || undefined
+        formData.full_name || undefined,
+        formData.role === "parent" ? "standalone" : undefined,
       )
 
       const storedUser = {
@@ -84,6 +85,7 @@ function RegisterPageInner() {
         user.preferred_locale
           ? { preferred_locale: user.preferred_locale }
           : {}),
+        ...(user.role === "parent" ? { account_kind: user.account_kind ?? "linked" } : {}),
       }
       localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(storedUser))
       if (
@@ -171,6 +173,12 @@ function RegisterPageInner() {
                     <RadioGroupItem value="administration" id="register-administration" />
                     <Label htmlFor="register-administration" className="font-normal">
                       {t("auth.role.administration")}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="parent" id="register-parent-standalone" />
+                    <Label htmlFor="register-parent-standalone" className="font-normal">
+                      {t("auth.role.parentStandalone")}
                     </Label>
                   </div>
                 </RadioGroup>

@@ -9,10 +9,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getAuthHeaders, publicApiBase } from "@/lib/api"
 import { usePortalI18n } from "@/lib/i18n/i18n-context"
 import type { AppLocale } from "@/lib/i18n/types"
 import { Star, KeyRound, BookOpen, Clock } from "lucide-react"
+import { toast } from "sonner"
 
 interface ApiChild {
   id: number
@@ -30,6 +32,12 @@ interface ApiSession {
   total_questions: number
   accuracy_pct: number
   created_at: string | null
+}
+
+interface LibraryProgramOption {
+  id: number
+  name: string
+  status: string
 }
 
 function localeTag(loc: AppLocale) {
@@ -67,6 +75,21 @@ function ChildDetailsContent() {
   const [sessions, setSessions] = useState<ApiSession[]>([])
   const [tab, setTab] = useState("overview")
   const [loading, setLoading] = useState(true)
+  const [isStandalone, setIsStandalone] = useState(false)
+  const [libraryPrograms, setLibraryPrograms] = useState<LibraryProgramOption[]>([])
+  const [assignSelect, setAssignSelect] = useState<string>("")
+  const [assigning, setAssigning] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("adhdAssistCurrentUser")
+      if (!raw) return
+      const u = JSON.parse(raw) as { account_kind?: string }
+      setIsStandalone(u.account_kind === "standalone")
+    } catch {
+      //
+    }
+  }, [])
 
   useEffect(() => {
     if (!childId) return
@@ -79,7 +102,10 @@ function ChildDetailsContent() {
           fetch(`${publicApiBase}/api/parents/children/${childId}/sessions?limit=30`, { headers: getAuthHeaders() }),
         ])
         if (cancelled) return
-        if (childRes.ok) setChild(await childRes.json())
+        if (childRes.ok) {
+          const c = (await childRes.json()) as ApiChild
+          setChild(c)
+        }
         if (sessionsRes.ok) setSessions(await sessionsRes.json())
       } finally {
         if (!cancelled) setLoading(false)
@@ -91,14 +117,75 @@ function ChildDetailsContent() {
     }
   }, [childId])
 
+  useEffect(() => {
+    if (!isStandalone || !childId) return
+    let cancelled = false
+    async function loadLib() {
+      try {
+        const res = await fetch(`${publicApiBase}/api/parents/library`, { headers: getAuthHeaders() })
+        if (!res.ok || cancelled) return
+        const data = (await res.json()) as LibraryProgramOption[]
+        setLibraryPrograms((data || []).filter((p) => p.status === "ready"))
+      } catch {
+        //
+      }
+    }
+    loadLib()
+    return () => {
+      cancelled = true
+    }
+  }, [isStandalone, childId])
+
+  useEffect(() => {
+    if (!child?.assigned_program?.id) {
+      setAssignSelect("")
+      return
+    }
+    setAssignSelect(String(child.assigned_program.id))
+  }, [child?.assigned_program?.id])
+
   const status = useMemo(
     () =>
       statusFrom(child?.stats || { total_sessions: 0, avg_accuracy: 0, total_correct: 0, total_asked: 0 }, t),
     [child, t],
   )
+
+  const programOptions = useMemo(() => {
+    const list = [...libraryPrograms]
+    if (child?.assigned_program?.id && !list.some((p) => p.id === child.assigned_program!.id)) {
+      list.push({
+        id: child.assigned_program.id,
+        name: child.assigned_program.name,
+        status: "ready",
+      })
+    }
+    return list
+  }, [libraryPrograms, child?.assigned_program])
+
   const stars = child?.stats?.total_correct ?? 0
   const goalTarget = 50
   const goalProgress = Math.min(100, Math.round((stars / goalTarget) * 100))
+
+  const handleAssignProgram = async () => {
+    if (!childId) return
+    setAssigning(true)
+    try {
+      const training_program_id = assignSelect === "" ? null : Number(assignSelect)
+      const res = await fetch(`${publicApiBase}/api/parents/children/${childId}/assign-program`, {
+        method: "PUT",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ training_program_id }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error((data as { error?: string }).error || "assign failed")
+      setChild(data as ApiChild)
+      toast.success(t("childDetail.assignSuccess"))
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "assign failed")
+    } finally {
+      setAssigning(false)
+    }
+  }
 
   if (loading) return <p className="text-sm text-muted-foreground">{t("childDetail.loading")}</p>
   if (!child) return <p className="text-sm text-muted-foreground">{t("childDetail.notFound")}</p>
@@ -173,6 +260,37 @@ function ChildDetailsContent() {
             </CardContent>
           </Card>
         </div>
+      ) : null}
+
+      {tab === "overview" && isStandalone ? (
+        <Card className="surface-card">
+          <CardHeader>
+            <CardTitle className="text-sm">{t("childDetail.assignTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">{t("childDetail.assignHint")}</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1 min-w-0">
+                <Select value={assignSelect || "__none__"} onValueChange={(v) => setAssignSelect(v === "__none__" ? "" : v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("childDetail.assignSelectPh")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">{t("childDetail.assignClear")}</SelectItem>
+                    {programOptions.map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="button" onClick={() => void handleAssignProgram()} disabled={assigning} className="shrink-0">
+                {assigning ? t("childDetail.assignSubmitting") : t("childDetail.assignBtn")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       {tab === "sessions" ? (

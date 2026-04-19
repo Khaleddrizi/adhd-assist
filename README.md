@@ -45,7 +45,8 @@ cp backend/.env.example backend/.env
 3. **بناء الكاش:** `python -m backend.scripts.build_question_cache 20`
 4. **استيراد للـ DB:** `python -m backend.scripts.import_cache_to_db`
 5. **Phase 4 (مرة واحدة):** `python -m backend.scripts.migrate_phase4`
-6. **تشغيل السيرفر:** `python run.py`
+6. **ولي مستقل — أعمدة المرحلة 1 (مرة واحدة إن لم تُشغَّل `init_db` بعد):** `python -m backend.scripts.migrate_parent_standalone_phase1`
+7. **تشغيل السيرفر:** `python run.py`
 
 - Alexa: `http://localhost:5002/alexa_quiz`
 - Dashboard: `http://localhost:5003/dashboard`

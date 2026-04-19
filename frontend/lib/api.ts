@@ -24,6 +24,8 @@ export interface AuthUser {
   created_at?: string | null
   /** UI language from backend after login / settings (specialist, parent, administration). */
   preferred_locale?: SpecialistLocale
+  /** Parent only: linked (clinician-managed) vs standalone (self-serve + library scope). */
+  account_kind?: "linked" | "standalone"
 }
 
 // Map backend role to frontend accountType for AuthGuard
@@ -104,12 +106,17 @@ export async function register(
   email: string,
   password: string,
   role: AuthRole,
-  full_name?: string
+  full_name?: string,
+  /** Required server-side when role is parent (self-serve / family account). */
+  account_kind?: "standalone",
 ): Promise<AuthUser> {
+  const body: Record<string, string | undefined> = { email, password, role }
+  if (full_name) body.full_name = full_name
+  if (role === "parent") body.account_kind = account_kind ?? "standalone"
   const res = await fetch(`${API_BASE}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, role, full_name }),
+    body: JSON.stringify(body),
     credentials: "include",
   })
   if (!res.ok) {

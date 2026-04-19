@@ -19,6 +19,7 @@ from backend.database.repositories import (
     PatientRepository,
     QuestionRepository,
     SessionRepository,
+    create_standalone_parent_with_shadow,
 )
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "PatientRepository",
     "QuestionRepository",
     "SessionRepository",
+    "create_standalone_parent_with_shadow",
 ]

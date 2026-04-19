@@ -31,6 +31,8 @@ class SpecialistModel(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     full_name: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    # Shadow rows: library/patient scope for standalone parents only (not a real clinician login).
+    is_shadow: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     preferred_locale: Mapped[str] = mapped_column(String(10), default="ar", nullable=False)
     country: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
@@ -53,6 +55,9 @@ class ParentModel(Base):
     state_region: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     address_line: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    # linked = under clinician; standalone = self-serve (library/patients use content_specialist_id).
+    account_kind: Mapped[str] = mapped_column(String(20), default="linked", nullable=False)
+    content_specialist_id: Mapped[Optional[int]] = mapped_column(ForeignKey("specialists.id"), nullable=True, index=True)
 
 
 class AdministratorModel(Base):

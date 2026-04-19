@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Home, Settings, LogOut, Users, BarChart3 } from "lucide-react"
+import { Home, Settings, LogOut, Users, BarChart3, Upload } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
 import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
 
@@ -17,6 +17,7 @@ function ParentDashboardLayoutInner({ children }: { children: React.ReactNode })
     email?: string
     preferred_locale?: string
     role?: string
+    account_kind?: string
   } | null>(null)
 
   useEffect(() => {
@@ -30,6 +31,8 @@ function ParentDashboardLayoutInner({ children }: { children: React.ReactNode })
     }
   }, [pathname])
 
+  const isStandaloneParent = currentUser?.account_kind === "standalone"
+
   const displayName = currentUser?.full_name || currentUser?.email || t("common.parent")
 
   const parentInitials = useMemo(() => {
@@ -39,15 +42,20 @@ function ParentDashboardLayoutInner({ children }: { children: React.ReactNode })
     return n.slice(0, 2).toUpperCase()
   }, [currentUser?.full_name, currentUser?.email])
 
-  const nav = useMemo<DashboardNavItem[]>(
-    () => [
+  const nav = useMemo<DashboardNavItem[]>(() => {
+    const items: DashboardNavItem[] = [
       { href: "/dashboard", label: t("layout.nav.home"), icon: Home },
       { href: "/dashboard/children", label: t("layout.nav.children"), icon: Users },
+    ]
+    if (isStandaloneParent) {
+      items.push({ href: "/dashboard/library", label: t("layout.nav.library"), icon: Upload })
+    }
+    items.push(
       { href: "/dashboard/reports", label: t("layout.nav.reports"), icon: BarChart3 },
       { href: "/dashboard/settings", label: t("layout.nav.settings"), icon: Settings },
-    ],
-    [t],
-  )
+    )
+    return items
+  }, [t, isStandaloneParent])
 
   const isNavItemActive = (item: DashboardNavItem) =>
     item.href === "/dashboard"

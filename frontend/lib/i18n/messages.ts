@@ -171,6 +171,7 @@ const ar: MessageTable = {
 
   "pa.layout.nav.home": "الرئيسية",
   "pa.layout.nav.children": "الأطفال",
+  "pa.layout.nav.library": "المكتبة",
   "pa.layout.nav.reports": "التقارير",
   "pa.layout.nav.settings": "الإعدادات",
   "pa.layout.portal": "بوابة ولي الأمر",
@@ -191,10 +192,10 @@ const ar: MessageTable = {
   "pa.dashboard.severityMild": "خفيف",
   "pa.dashboard.workspaceChildren": "مساحة الأطفال",
   "pa.dashboard.workspaceChildrenHint":
-    "تتبّع رحلة كل طفل والجلسات والمكافآت. كل ما تحتاجه لدعم الممارسة في المنزل في مكان واحد.",
+      "تتبّع رحلة كل طفل والجلسات والمكافآت. كل ما تحتاجه لدعم الممارسة في المنزل في مكان واحد.",
   "pa.dashboard.workspaceReports": "مساحة التقارير",
   "pa.dashboard.workspaceReportsHint":
-    "تصوّر التقدم عبر الفترات الزمنية ومقارنة الأداء واكتشاف الاتجاهات مبكرًا للاحتفال بالإنجازات وتعديل الروتين.",
+      "تصوّر التقدم عبر الفترات الزمنية ومقارنة الأداء واكتشاف الاتجاهات مبكرًا للاحتفال بالإنجازات وتعديل الروتين.",
   "pa.dashboard.openChildren": "فتح الأطفال ←",
   "pa.dashboard.openReports": "فتح التقارير ←",
   "pa.dashboard.emptyChild": "لا يوجد طفل مرتبط بحسابك بعد. تواصل مع المختص لإكمال الإعداد.",
@@ -272,7 +273,7 @@ const ar: MessageTable = {
   "pa.settings.deleteBtn": "حذف الحساب",
   "pa.settings.deleteDialogTitle": "حذف الحساب نهائيًا؟",
   "pa.settings.deleteDialogHint":
-    "سيُزال حساب ولي الأمر وجميع الأطفال المرتبطين وكل نتائج الاختبارات. لا يمكن التراجع عن ذلك.",
+      "سيُزال حساب ولي الأمر وجميع الأطفال المرتبطين وكل نتائج الاختبارات. لا يمكن التراجع عن ذلك.",
   "pa.settings.deletePw": "كلمة المرور الحالية",
   "pa.settings.deletePwPh": "مطلوب للتحقق من الهوية",
   "pa.settings.deleteDeleting": "جاري الحذف…",
@@ -745,6 +746,7 @@ const fr: MessageTable = {
 
   "pa.layout.nav.home": "Accueil",
   "pa.layout.nav.children": "Enfants",
+  "pa.layout.nav.library": "Bibliothèque",
   "pa.layout.nav.reports": "Rapports",
   "pa.layout.nav.settings": "Paramètres",
   "pa.layout.portal": "Portail parent",

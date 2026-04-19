@@ -208,27 +208,27 @@ function DoctorPortalContent() {
           <CardContent className="pt-6">
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("home.kpiTotal")}</p>
             <p className="mt-1 text-3xl font-bold text-sky-700 dark:text-sky-400">{kpis.totalPatients}</p>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("home.kpiAttention")}</p>
             <p className="mt-1 text-3xl font-bold text-red-700 dark:text-red-400">{kpis.needsAttention}</p>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("home.kpiAvg")}</p>
             <p className="mt-1 text-3xl font-bold text-amber-700 dark:text-amber-400">{kpis.avgFocusScore}%</p>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
         <Card className="surface-card">
           <CardContent className="pt-6">
             <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("home.kpiWeek")}</p>
             <p className="mt-1 text-3xl font-bold text-emerald-700 dark:text-emerald-400">{kpis.activeThisWeek}</p>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          </div>
 
       <div
         className={[
@@ -241,9 +241,9 @@ function DoctorPortalContent() {
         <div className="flex items-center gap-2">
           {kpis.alertCount > 0 ? <AlertTriangle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
           <span className="font-medium">{alertBannerText}</span>
-        </div>
+            </div>
         <span className="text-xs text-muted-foreground">{t("home.alertsHint")}</span>
-      </div>
+          </div>
 
       <Card className="border-slate-200 dark:border-slate-700 shadow-sm">
         <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
@@ -252,9 +252,9 @@ function DoctorPortalContent() {
               <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
                 <Users className="h-5 w-5 text-primary" />
                 <span className="text-[15px] font-semibold">{t("home.tableTitle")}</span>
-              </CardTitle>
+                </CardTitle>
               <p className="text-sm text-muted-foreground mt-1">{t("home.tableHint")}</p>
-            </div>
+                        </div>
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -263,9 +263,9 @@ function DoctorPortalContent() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               />
-            </div>
-          </div>
-        </CardHeader>
+                  </div>
+              </div>
+            </CardHeader>
         <CardContent className="p-0">
           <div className="min-w-0 overflow-x-auto">
             <Table>
@@ -332,7 +332,7 @@ function DoctorPortalContent() {
                             <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                               {patient.name.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
-                          </Avatar>
+                      </Avatar>
                           <span className="font-medium text-slate-900 dark:text-white">{patient.name}</span>
                         </div>
                       </TableCell>
@@ -376,29 +376,29 @@ function DoctorPortalContent() {
                             ].join(" ")}
                           >
                             {patient.focusScore}%
-                          </span>
-                        </div>
+                            </span>
+                          </div>
                       </TableCell>
                       <TableCell className="py-5">{getStatusBadge(patient.status, t)}</TableCell>
                       <TableCell className="py-5 text-right">
-                        <Button
+                            <Button 
                           variant="outline"
-                          size="sm"
+                              size="sm" 
                           className="text-primary border-primary/30 hover:bg-primary/10"
-                          onClick={() => router.push(`/orthophoniste/patient/${patient.id}`)}
-                        >
+                              onClick={() => router.push(`/orthophoniste/patient/${patient.id}`)}
+                            >
                           <Eye className="h-4 w-4 mr-1.5" />
                           {t("common.details")}
-                        </Button>
+                            </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
     </div>
   )
 }
