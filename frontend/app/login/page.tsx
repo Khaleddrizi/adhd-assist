@@ -12,9 +12,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { CheckCircle, AlertCircle } from "lucide-react"
 import { login, toAccountType, type AuthRole } from "@/lib/api"
+import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
+import { SiteHeader } from "@/components/site-header"
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const { t } = usePortalI18n()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -33,7 +36,7 @@ export default function LoginPage() {
     setMessage(null)
 
     if (!formData.email || !formData.password) {
-      setMessage({ type: "error", text: "يرجى تعبئة جميع الحقول" })
+      setMessage({ type: "error", text: t("auth.validation.fillAll") })
       setIsLoading(false)
       return
     }
@@ -63,24 +66,24 @@ export default function LoginPage() {
         document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
       }
 
-      setMessage({ type: "success", text: "تم تسجيل الدخول بنجاح! جاري التوجيه..." })
+      setMessage({ type: "success", text: t("auth.success.login") })
       const target = user.role === "specialist" ? "/orthophoniste" : user.role === "administration" ? "/administration" : "/dashboard"
       setTimeout(() => router.replace(target), 600)
     } catch (err) {
-      setMessage({ type: "error", text: err instanceof Error ? err.message : "فشل تسجيل الدخول." })
+      setMessage({ type: "error", text: err instanceof Error ? err.message : t("auth.error.loginFailed") })
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="app-shell flex items-center justify-center px-4 py-12">
+    <div className="app-shell flex flex-1 items-center justify-center px-4 py-12">
       <Card className="surface-card w-full max-w-md border-border/70 shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
-            تسجيل الدخول
+            {t("auth.login.title")}
           </CardTitle>
-          <CardDescription>أدخل بياناتك للوصول إلى حسابك</CardDescription>
+          <CardDescription>{t("auth.login.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {message && (
@@ -97,11 +100,11 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input id="email" type="email" placeholder="example@domain.com" value={formData.email} onChange={handleInputChange} required />
+                <Label htmlFor="email">{t("auth.label.email")}</Label>
+                <Input id="email" type="email" placeholder={t("auth.placeholder.email")} value={formData.email} onChange={handleInputChange} required />
               </div>
               <div className="grid gap-2">
-                <Label>نوع الحساب</Label>
+                <Label>{t("auth.label.accountType")}</Label>
                 <RadioGroup
                   value={formData.role}
                   onValueChange={(v) => setFormData({ ...formData, role: v as AuthRole })}
@@ -109,37 +112,54 @@ export default function LoginPage() {
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="specialist" id="specialist" />
-                    <Label htmlFor="specialist" className="font-normal">أخصائي (طبيب)</Label>
+                    <Label htmlFor="specialist" className="font-normal">
+                      {t("auth.role.specialist")}
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="parent" id="parent" />
-                    <Label htmlFor="parent" className="font-normal">ولي أمر</Label>
+                    <Label htmlFor="parent" className="font-normal">
+                      {t("auth.role.parent")}
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="administration" id="administration" />
-                    <Label htmlFor="administration" className="font-normal">إدارة</Label>
+                    <Label htmlFor="administration" className="font-normal">
+                      {t("auth.role.administration")}
+                    </Label>
                   </div>
                 </RadioGroup>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">كلمة المرور</Label>
+                <Label htmlFor="password">{t("auth.label.password")}</Label>
                 <Input id="password" type="password" value={formData.password} onChange={handleInputChange} required />
               </div>
               <Button type="submit" className="w-full bg-gradient-to-r from-primary to-cyan-500 shadow-sm" disabled={isLoading}>
-                {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+                {isLoading ? t("auth.login.submitting") : t("auth.login.submit")}
               </Button>
             </div>
           </form>
         </CardContent>
         <CardFooter>
           <p className="text-sm text-muted-foreground text-center w-full">
-            ليس لديك حساب مهني؟{" "}
+            {t("auth.login.footerNoAccount")}{" "}
             <Link href="/register" className="text-primary underline-offset-4 hover:underline">
-              إنشاء حساب مهني
+              {t("auth.login.footerRegisterLink")}
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <PortalI18nProvider role="public">
+      <div className="flex min-h-screen flex-col">
+        <SiteHeader variant="login" />
+        <LoginForm />
+      </div>
+    </PortalI18nProvider>
   )
 }
