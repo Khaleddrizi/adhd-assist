@@ -3,7 +3,7 @@
  * usePortalT() prefixes sp./pa. automatically except for keys starting with "common.".
  */
 import type { AppLocale } from "./types"
-import { PORTAL_PAGES_AR, PORTAL_PAGES_EN } from "./messages-portal-pages"
+import { PORTAL_PAGES_AR, PORTAL_PAGES_EN, PORTAL_PAGES_FR } from "./messages-portal-pages"
 
 export type MessageTable = Record<string, string>
 
@@ -582,6 +582,39 @@ const en: MessageTable = {
 
 const fr: MessageTable = {
   ...en,
+  ...PORTAL_PAGES_FR,
+  "common.save": "Enregistrer",
+  "common.saving": "Enregistrement…",
+  "common.cancel": "Annuler",
+  "common.loading": "Chargement…",
+  "common.delete": "Supprimer",
+  "common.details": "Détails",
+  "common.open": "Ouvrir",
+  "common.age": "ans",
+  "common.ageUnknown": "Âge —",
+  "common.dash": "—",
+  "common.specialist": "Spécialiste",
+  "common.parent": "Parent",
+  "common.eduvoxPortal": "Portail EDUVOX",
+  "common.severityMild": "Léger",
+  "common.severityModerate": "Modéré",
+  "common.severitySevere": "Sévère",
+  "common.noLevel": "Niveau non renseigné",
+  "common.noPhone": "Pas de téléphone",
+  "common.notAssigned": "Non attribué",
+  "common.copy": "Copier",
+  "common.browse": "Parcourir",
+  "common.exportCsv": "Exporter CSV",
+  "common.exportPdf": "Exporter PDF",
+  "common.sessions": "Séances",
+  "common.questions": "Questions",
+  "common.accuracy": "Précision",
+  "common.duration": "Durée",
+  "common.date": "Date",
+  "common.score": "Score",
+  "common.child": "Enfant",
+  "common.yesterdayLabel": "Hier",
+
   "sp.layout.nav.home": "Accueil",
   "sp.layout.nav.patients": "Patients",
   "sp.layout.nav.analytics": "Analyses",
