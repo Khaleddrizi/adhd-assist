@@ -190,11 +190,26 @@ function ChildCard({ child, t, locale }: { child: ApiChild; t: (key: string) => 
   )
 }
 
+function readParentAccountKind(): "linked" | "standalone" {
+  try {
+    const raw = localStorage.getItem("adhdAssistCurrentUser")
+    if (!raw) return "linked"
+    const u = JSON.parse(raw) as { account_kind?: string }
+    return u.account_kind === "standalone" ? "standalone" : "linked"
+  } catch {
+    return "linked"
+  }
+}
+
 function ChildrenPageContent() {
   const { t, locale } = usePortalI18n()
+  const [accountKind] = useState<"linked" | "standalone">(readParentAccountKind)
   const [children, setChildren] = useState<ApiChild[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
+
+  const showAddChild =
+    accountKind === "standalone" || (!loading && children.length > 0)
 
   useEffect(() => {
     let cancelled = false
@@ -230,14 +245,27 @@ function ChildrenPageContent() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">{t("childrenPage.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t("childrenPage.subtitle")}</p>
         </div>
-        <div className="relative w-full min-w-[220px] sm:w-auto sm:max-w-xs shrink-0">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("childrenPage.searchPh")}
-            className="h-10 rounded-[8px] border-slate-200 bg-white pl-9 shadow-sm dark:border-slate-700 dark:bg-slate-950"
-          />
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-end shrink-0">
+          {showAddChild ? (
+            <Button
+              asChild
+              className="h-10 w-full shrink-0 bg-gradient-to-r from-primary to-cyan-500 text-white shadow-sm sm:w-auto"
+            >
+              <Link href="/dashboard/children/new" className="inline-flex items-center gap-2">
+                <UserPlus className="h-4 w-4 shrink-0" />
+                {t("childrenPage.addChild")}
+              </Link>
+            </Button>
+          ) : null}
+          <div className="relative w-full min-w-[220px] sm:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("childrenPage.searchPh")}
+              className="h-10 rounded-[8px] border-slate-200 bg-white pl-9 shadow-sm dark:border-slate-700 dark:bg-slate-950"
+            />
+          </div>
         </div>
       </div>
 
@@ -246,8 +274,20 @@ function ChildrenPageContent() {
       ) : children.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/60 py-16 text-center dark:border-slate-700 dark:bg-slate-950/30">
           <UserPlus className="h-10 w-10 text-slate-400 dark:text-slate-500" strokeWidth={1.25} aria-hidden />
-          <p className="mt-4 text-sm font-medium text-muted-foreground">{t("childrenPage.emptyTitle")}</p>
-          <p className="mt-1 max-w-sm px-4 text-xs text-slate-400 dark:text-slate-500">{t("childrenPage.emptyHint")}</p>
+          <p className="mt-4 text-sm font-medium text-muted-foreground">
+            {accountKind === "standalone" ? t("childrenPage.emptyTitleStandalone") : t("childrenPage.emptyTitle")}
+          </p>
+          <p className="mt-1 max-w-sm px-4 text-xs text-slate-400 dark:text-slate-500">
+            {accountKind === "standalone" ? t("childrenPage.emptyHintStandalone") : t("childrenPage.emptyHint")}
+          </p>
+          {accountKind === "standalone" ? (
+            <Button asChild className="mt-6 bg-gradient-to-r from-primary to-cyan-500 text-white shadow-sm">
+              <Link href="/dashboard/children/new" className="inline-flex items-center gap-2">
+                <UserPlus className="h-4 w-4 shrink-0" />
+                {t("childrenPage.addChild")}
+              </Link>
+            </Button>
+          ) : null}
         </div>
       ) : (
         <>
