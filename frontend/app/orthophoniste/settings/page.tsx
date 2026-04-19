@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,9 @@ import {
 } from "@/components/ui/dialog"
 import { fetchApi, type SpecialistLocale } from "@/lib/api"
 import { toast } from "sonner"
+import { usePortalI18n, notifyLocaleChanged } from "@/lib/i18n/i18n-context"
+import { ProfileAvatar } from "@/components/profile-avatar"
+import { useProfileAvatarUpload } from "@/hooks/use-profile-avatar-upload"
 import {
   ShieldCheck,
   UserCircle2,
@@ -63,19 +66,31 @@ function initialsFromName(name: string) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
 }
 
-function passwordStrength(password: string): { score: 0 | 1 | 2 | 3 | 4; label: string } {
-  if (!password) return { score: 0, label: "فارغ" }
-  if (password.length < 6) return { score: 1, label: "ضعيف" }
+function passwordStrengthScore(password: string): 0 | 1 | 2 | 3 | 4 {
+  if (!password) return 0
+  if (password.length < 6) return 1
   const hasUpper = /[A-Z]/.test(password)
   const hasNumber = /\d/.test(password)
   const hasSpecial = /[^A-Za-z0-9]/.test(password)
-  if (password.length >= 8 && hasUpper && hasNumber && hasSpecial) return { score: 4, label: "قوي" }
-  if (password.length >= 8 && hasNumber) return { score: 3, label: "جيد" }
-  return { score: 2, label: "مقبول" }
+  if (password.length >= 8 && hasUpper && hasNumber && hasSpecial) return 4
+  if (password.length >= 8 && hasNumber) return 3
+  return 2
 }
 
 function SettingsPage() {
   const router = useRouter()
+  const { t, refreshLocale } = usePortalI18n()
+  const avatarMessages = useMemo(
+    () => ({
+      ok: t("settings.toastPhotoOk"),
+      err: t("settings.toastPhotoErr"),
+      badType: t("settings.toastPhotoType"),
+      tooBig: t("settings.toastPhotoSize"),
+    }),
+    [t],
+  )
+  const { version: avatarVersion, uploading: avatarUploading, pickFile: pickAvatar, fileInput: avatarFileInput } =
+    useProfileAvatarUpload("/api/specialists/me/avatar", avatarMessages)
   const [loading, setLoading] = useState(true)
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
@@ -104,6 +119,20 @@ function SettingsPage() {
   })
   const [activeNav, setActiveNav] = useState<SettingsNavItem>("profile")
 
+  function syncStoredUser(full_name: string, email: string, preferred_locale?: string) {
+    const raw = localStorage.getItem("adhdAssistCurrentUser")
+    if (!raw) return
+    try {
+      const user = JSON.parse(raw)
+      user.full_name = full_name
+      user.email = email
+      if (preferred_locale) user.preferred_locale = preferred_locale
+      localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(user))
+    } catch {
+      //
+    }
+  }
+
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -120,31 +149,18 @@ function SettingsPage() {
           state_region: data.state_region || "",
           address_line: data.address_line || "",
         })
-        if (typeof document !== "undefined") {
-          document.documentElement.lang = loc
-        }
+        syncStoredUser(data.full_name || "", data.email, loc)
+        notifyLocaleChanged()
+        refreshLocale()
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "تعذّر تحميل الملف الشخصي")
+        toast.error(err instanceof Error ? err.message : t("settings.toastProfileLoad"))
       } finally {
         setLoading(false)
       }
     }
     loadProfile()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load profile once on mount
   }, [])
-
-  const syncStoredUser = (full_name: string, email: string, preferred_locale?: string) => {
-    const raw = localStorage.getItem("adhdAssistCurrentUser")
-    if (!raw) return
-    try {
-      const user = JSON.parse(raw)
-      user.full_name = full_name
-      user.email = email
-      if (preferred_locale) user.preferred_locale = preferred_locale
-      localStorage.setItem("adhdAssistCurrentUser", JSON.stringify(user))
-    } catch {
-      //
-    }
-  }
 
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -155,9 +171,9 @@ function SettingsPage() {
         body: JSON.stringify(profile),
       })
       syncStoredUser(data.full_name || "", data.email, data.preferred_locale)
-      toast.success("تم تحديث الملف الشخصي بنجاح")
+      toast.success(t("settings.toastProfileOk"))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر تحديث الملف الشخصي")
+      toast.error(err instanceof Error ? err.message : t("settings.toastProfileErr"))
     } finally {
       setSavingProfile(false)
     }
@@ -172,7 +188,7 @@ function SettingsPage() {
   const handlePasswordSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (passwords.new_password !== passwords.confirm_password) {
-      toast.error("كلمتا المرور الجديدتان غير متطابقتين")
+      toast.error(t("settings.toastPwMismatch"))
       return
     }
     setSavingPassword(true)
@@ -187,7 +203,7 @@ function SettingsPage() {
       toast.success(data.message)
       setPasswords({ current_password: "", new_password: "", confirm_password: "" })
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر تغيير كلمة المرور")
+      toast.error(err instanceof Error ? err.message : t("settings.toastPwErr"))
     } finally {
       setSavingPassword(false)
     }
@@ -195,7 +211,7 @@ function SettingsPage() {
 
   const handleLogoutEverywhere = () => {
     localStorage.removeItem("adhdAssistCurrentUser")
-    toast.success("تم تسجيل الخروج من هذا الجهاز.")
+    toast.success(t("settings.toastLogout"))
   }
 
   const handlePreferencesSave = async (e: React.FormEvent) => {
@@ -221,10 +237,11 @@ function SettingsPage() {
         address_line: data.address_line || "",
       }))
       syncStoredUser(profile.full_name, profile.email, loc)
-      if (typeof document !== "undefined") document.documentElement.lang = loc
-      toast.success("تم حفظ اللغة والمنطقة")
+      notifyLocaleChanged()
+      refreshLocale()
+      toast.success(t("settings.toastPrefsOk"))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر حفظ التفضيلات")
+      toast.error(err instanceof Error ? err.message : t("settings.toastPrefsErr"))
     } finally {
       setSavingPrefs(false)
     }
@@ -232,7 +249,7 @@ function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     if (!deletePassword.trim()) {
-      toast.error("أدخل كلمة المرور الحالية لتأكيد الحذف")
+      toast.error(t("settings.toastDeletePw"))
       return
     }
     setDeletingAccount(true)
@@ -242,34 +259,35 @@ function SettingsPage() {
         body: JSON.stringify({ current_password: deletePassword }),
       })
       localStorage.removeItem("adhdAssistCurrentUser")
-      toast.success("تم حذف الحساب نهائياً")
+      toast.success(t("settings.toastDeleteOk"))
       setDeleteOpen(false)
       setDeletePassword("")
       router.push("/login?role=therapist")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر حذف الحساب")
+      toast.error(err instanceof Error ? err.message : t("settings.toastDeleteErr"))
     } finally {
       setDeletingAccount(false)
     }
   }
 
-  const strength = passwordStrength(passwords.new_password)
+  const strengthScore = passwordStrengthScore(passwords.new_password)
+  const pwStrengthKeys = ["settings.pwEmpty", "settings.pwWeak", "settings.pwFair", "settings.pwGood", "settings.pwStrong"] as const
   const passwordsMatch = Boolean(passwords.confirm_password) && passwords.new_password === passwords.confirm_password
   const passwordsMismatch = Boolean(passwords.confirm_password) && passwords.new_password !== passwords.confirm_password
-  const doctorName = profile.full_name || "مختص"
+  const doctorName = profile.full_name || t("common.specialist")
 
   return (
     <div className="min-w-0">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">الملف الشخصي والأمان</h1>
-        <p className="text-sm text-muted-foreground mt-1">إدارة بيانات حساب المختص وكلمة المرور.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("settings.pageHint")}</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
         <aside className="self-start">
           <nav className="space-y-5">
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">الحساب</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navAccount")}</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -282,7 +300,7 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <UserCircle2 className="h-4 w-4" />
-                  معلومات الملف
+                  {t("settings.navProfile")}
                 </button>
                 <button
                   type="button"
@@ -295,12 +313,12 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Lock className="h-4 w-4" />
-                  تغيير كلمة المرور
+                  {t("settings.navPassword")}
                 </button>
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">التفضيلات</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navPrefs")}</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -313,7 +331,7 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Bell className="h-4 w-4" />
-                  الإشعارات
+                  {t("settings.navNotifications")}
                 </button>
                 <button
                   type="button"
@@ -326,12 +344,12 @@ function SettingsPage() {
                   ].join(" ")}
                 >
                   <Globe2 className="h-4 w-4" />
-                  اللغة والمنطقة
+                  {t("settings.navLanguage")}
                 </button>
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">منطقة خطرة</p>
+              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navDanger")}</p>
               <button
                 type="button"
                 onClick={() => scrollToSection("danger")}
@@ -343,7 +361,7 @@ function SettingsPage() {
                 ].join(" ")}
               >
                 <TriangleAlert className="h-4 w-4" />
-                حذف الحساب
+                {t("settings.navDelete")}
               </button>
             </div>
           </nav>
@@ -357,35 +375,46 @@ function SettingsPage() {
                   <User className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">معلومات الملف الشخصي</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">حدّث بيانات حساب المختص</p>
+                  <CardTitle className="text-[14px] font-bold">{t("settings.profileCardTitle")}</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">{t("settings.profileCardHint")}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <p className="text-sm text-muted-foreground">جاري تحميل الملف الشخصي…</p>
+                <p className="text-sm text-muted-foreground">{t("settings.profileLoading")}</p>
               ) : (
                 <form className="space-y-5" onSubmit={handleProfileSave}>
+                  {avatarFileInput}
                   <div className="flex items-center justify-between gap-4 border-b border-slate-200/70 pb-4 dark:border-slate-700/70">
                     <div className="flex items-center gap-3">
-                      <div className="h-[60px] w-[60px] rounded-full bg-[#1a8fe3] text-white flex items-center justify-center text-lg font-semibold">
-                        {initialsFromName(doctorName)}
-                      </div>
+                      <ProfileAvatar
+                        apiPath="/api/specialists/me/avatar"
+                        initials={initialsFromName(doctorName)}
+                        version={avatarVersion}
+                        className="h-[60px] w-[60px] rounded-full bg-[#1a8fe3] text-white text-lg border-2 border-slate-200/80 dark:border-slate-600"
+                      />
                       <div>
                         <p className="text-[15px] font-bold text-slate-900 dark:text-white">{doctorName}</p>
-                        <p className="text-[12px] text-muted-foreground">مختص</p>
+                        <p className="text-[12px] text-muted-foreground">{t("common.specialist")}</p>
                       </div>
                     </div>
-                    <Button type="button" variant="outline" size="sm" className="border-primary text-primary">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-primary text-primary"
+                      onClick={pickAvatar}
+                      disabled={avatarUploading}
+                    >
                       <Camera className="h-4 w-4 mr-1" />
-                      تغيير الصورة
+                      {avatarUploading ? t("common.saving") : t("settings.changePhoto")}
                     </Button>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
-                      <Label htmlFor="full_name">الاسم الكامل</Label>
+                      <Label htmlFor="full_name">{t("settings.fullName")}</Label>
                       <Input
                         id="full_name"
                         value={profile.full_name}
@@ -393,7 +422,7 @@ function SettingsPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="phone">الهاتف</Label>
+                      <Label htmlFor="phone">{t("settings.phone")}</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -403,7 +432,7 @@ function SettingsPage() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Label htmlFor="email">{t("settings.email")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -415,7 +444,7 @@ function SettingsPage() {
 
                   <Button type="submit" disabled={savingProfile}>
                     <Check className="h-4 w-4 mr-2" />
-                    {savingProfile ? "جاري الحفظ…" : "حفظ التغييرات"}
+                    {savingProfile ? t("common.saving") : t("settings.saveChanges")}
                   </Button>
                 </form>
               )}
@@ -429,15 +458,15 @@ function SettingsPage() {
                   <ShieldCheck className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">تغيير كلمة المرور</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">حافظ على أمان حسابك بكلمة مرور قوية</p>
+                  <CardTitle className="text-[14px] font-bold">{t("settings.passwordTitle")}</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">{t("settings.passwordHint")}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <form className="space-y-4" onSubmit={handlePasswordSave}>
                 <div className="grid gap-2">
-                  <Label htmlFor="current_password">كلمة المرور الحالية</Label>
+                  <Label htmlFor="current_password">{t("settings.currentPassword")}</Label>
                   <div className="relative">
                     <Input
                       id="current_password"
@@ -458,7 +487,7 @@ function SettingsPage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="new_password">كلمة المرور الجديدة</Label>
+                  <Label htmlFor="new_password">{t("settings.newPassword")}</Label>
                   <div className="relative">
                     <Input
                       id="new_password"
@@ -478,17 +507,17 @@ function SettingsPage() {
                   </div>
 
                   <div className="mt-1">
-                    <p className="text-[11px] text-muted-foreground mb-1">قوة كلمة المرور</p>
+                    <p className="text-[11px] text-muted-foreground mb-1">{t("settings.pwStrength")}</p>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((lvl) => (
                         <span
                           key={lvl}
                           className={[
                             "h-1.5 rounded",
-                            strength.score >= lvl
-                              ? strength.score === 1
+                            strengthScore >= lvl
+                              ? strengthScore === 1
                                 ? "bg-red-500"
-                                : strength.score <= 3
+                                : strengthScore <= 3
                                   ? "bg-amber-500"
                                   : "bg-emerald-500"
                               : "bg-slate-200 dark:bg-slate-700",
@@ -496,11 +525,12 @@ function SettingsPage() {
                         />
                       ))}
                     </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">{t(pwStrengthKeys[strengthScore])}</p>
                   </div>
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm_password">تأكيد كلمة المرور الجديدة</Label>
+                  <Label htmlFor="confirm_password">{t("settings.confirmPassword")}</Label>
                   <div className="relative">
                     <Input
                       id="confirm_password"
@@ -528,12 +558,12 @@ function SettingsPage() {
                     ) : null}
                   </div>
                   {passwordsMismatch ? (
-                    <p className="text-[11px] text-red-600">كلمتا المرور غير متطابقتين</p>
+                    <p className="text-[11px] text-red-600">{t("settings.pwMismatch")}</p>
                   ) : null}
                 </div>
 
                 <Button type="submit" variant="outline" disabled={savingPassword} className="bg-white text-slate-900 border-slate-300">
-                  {savingPassword ? "جاري التحديث…" : "تحديث كلمة المرور"}
+                  {savingPassword ? t("settings.updating") : t("settings.updatePassword")}
                 </Button>
               </form>
             </CardContent>
@@ -546,13 +576,13 @@ function SettingsPage() {
                   <Bell className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">الإشعارات</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">ضبط التنبيهات وإشعارات البريد</p>
+                  <CardTitle className="text-[14px] font-bold">{t("settings.notificationsTitle")}</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">{t("settings.notificationsHint")}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">تفضيلات الإشعارات ستتوفر قريبًا.</p>
+              <p className="text-sm text-muted-foreground">{t("settings.notificationsSoon")}</p>
             </CardContent>
           </Card>
 
@@ -563,15 +593,15 @@ function SettingsPage() {
                   <Globe2 className="h-4 w-4 text-[#1a8fe3]" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold">اللغة والمنطقة</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">تعيين اللغة الافتراضية والتوطين</p>
+                  <CardTitle className="text-[14px] font-bold">{t("settings.langTitle")}</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">{t("settings.langHint")}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <form className="space-y-4" onSubmit={handlePreferencesSave}>
                 <div className="grid gap-2">
-                  <Label htmlFor="preferred_locale">لغة الواجهة</Label>
+                  <Label htmlFor="preferred_locale">{t("settings.langUi")}</Label>
                   <Select
                     value={prefs.preferred_locale}
                     onValueChange={(v) => setPrefs((p) => ({ ...p, preferred_locale: v as SpecialistLocale }))}
@@ -580,49 +610,47 @@ function SettingsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ar">العربية</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="ar">{t("settings.langAr")}</SelectItem>
+                      <SelectItem value="fr">{t("settings.langFr")}</SelectItem>
+                      <SelectItem value="en">{t("settings.langEn")}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-[11px] text-muted-foreground">
-                    تُحفظ في حسابك وتُطبَّق على اتجاه الصفحة (LTR للإنجليزية والفرنسية). ترجمة كاملة للمحتوى قيد التوسع.
-                  </p>
+                  <p className="text-[11px] text-muted-foreground">{t("settings.langNote")}</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="grid gap-2">
-                    <Label htmlFor="country">البلد</Label>
+                    <Label htmlFor="country">{t("settings.country")}</Label>
                     <Input
                       id="country"
                       value={prefs.country}
                       onChange={(e) => setPrefs((p) => ({ ...p, country: e.target.value }))}
-                      placeholder="مثال: الجزائر"
+                      placeholder={t("settings.countryPh")}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="state_region">الولاية / الإقليم</Label>
+                    <Label htmlFor="state_region">{t("settings.region")}</Label>
                     <Input
                       id="state_region"
                       value={prefs.state_region}
                       onChange={(e) => setPrefs((p) => ({ ...p, state_region: e.target.value }))}
-                      placeholder="مثال: وهران"
+                      placeholder={t("settings.regionPh")}
                     />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="address_line">العنوان</Label>
+                  <Label htmlFor="address_line">{t("settings.address")}</Label>
                   <Textarea
                     id="address_line"
                     rows={3}
                     value={prefs.address_line}
                     onChange={(e) => setPrefs((p) => ({ ...p, address_line: e.target.value }))}
-                    placeholder="الشارع، الرمز البريدي، المدينة…"
+                    placeholder={t("settings.addressPh")}
                     className="resize-y min-h-[80px]"
                   />
                 </div>
                 <Button type="submit" disabled={savingPrefs}>
                   <Check className="h-4 w-4 mr-2" />
-                  {savingPrefs ? "جاري الحفظ…" : "حفظ اللغة والمنطقة"}
+                  {savingPrefs ? t("common.saving") : t("settings.saveLang")}
                 </Button>
               </form>
             </CardContent>
@@ -635,33 +663,31 @@ function SettingsPage() {
                   <TriangleAlert className="h-4 w-4 text-red-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-[14px] font-bold text-red-700">منطقة خطرة</CardTitle>
-                  <p className="text-[11px] text-red-600/80">إجراءات لا رجعة فيها — تابع بحذر</p>
+                  <CardTitle className="text-[14px] font-bold text-red-700">{t("settings.dangerTitle")}</CardTitle>
+                  <p className="text-[11px] text-red-600/80">{t("settings.dangerHint")}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">تسجيل الخروج من كل الأجهزة</p>
-                  <p className="text-xs text-muted-foreground mt-1">إلغاء الجلسات الحالية ويتطلب تسجيل دخول جديد.</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.logoutAll")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("settings.logoutAllHint")}</p>
                 </div>
                 <Button variant="outline" size="sm" className="border-red-300 text-red-700" onClick={handleLogoutEverywhere}>
                   <LogOut className="h-4 w-4 mr-1.5" />
-                  خروج من كل مكان
+                  {t("settings.logoutAllBtn")}
                 </Button>
               </div>
               <div className="h-px bg-slate-200 dark:bg-slate-700" />
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">حذف الحساب</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    حذف نهائي لحسابك وجميع بيانات المرضى. لا يمكن التراجع عن ذلك.
-                  </p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.deleteTitle")}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("settings.deleteHint")}</p>
                 </div>
                 <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" type="button" onClick={() => setDeleteOpen(true)}>
                   <Trash2 className="h-4 w-4 mr-1.5" />
-                  حذف الحساب
+                  {t("settings.deleteBtn")}
                 </Button>
               </div>
             </CardContent>
@@ -672,28 +698,26 @@ function SettingsPage() {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>تأكيد حذف الحساب</DialogTitle>
-            <DialogDescription>
-              سيتم حذف حسابك وجميع المرضى والجلسات والبرامج المرتبطة بهذا الحساب بشكل نهائي. لا يمكن التراجع.
-            </DialogDescription>
+            <DialogTitle>{t("settings.deleteDialogTitle")}</DialogTitle>
+            <DialogDescription>{t("settings.deleteDialogHint")}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-2">
-            <Label htmlFor="delete_password">كلمة المرور الحالية</Label>
+            <Label htmlFor="delete_password">{t("settings.deletePw")}</Label>
             <Input
               id="delete_password"
               type="password"
               autoComplete="current-password"
               value={deletePassword}
               onChange={(e) => setDeletePassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t("settings.deletePwPh")}
             />
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => setDeleteOpen(false)} disabled={deletingAccount}>
-              إلغاء
+              {t("common.cancel")}
             </Button>
             <Button type="button" className="bg-red-600 hover:bg-red-700" disabled={deletingAccount} onClick={handleDeleteAccount}>
-              {deletingAccount ? "جاري الحذف…" : "حذف نهائي"}
+              {deletingAccount ? t("settings.deleteDeleting") : t("settings.deleteConfirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

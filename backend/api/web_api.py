@@ -5,13 +5,14 @@ import re
 import json
 import random
 import os
+import mimetypes
 import threading
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
 import bcrypt
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -37,6 +38,33 @@ AUTH_TOKEN_SECRET = os.getenv("WEB_API_AUTH_SECRET", "adhd-assist-dev-secret-cha
 _token_serializer = URLSafeTimedSerializer(AUTH_TOKEN_SECRET, salt="web-api-auth")
 PROCESSING_STALE_MINUTES = int(os.getenv("PROGRAM_PROCESSING_STALE_MINUTES", "20"))
 
+AVATAR_DIR = DATA_DIR / "avatars"
+AVATAR_EXT_ALLOWED = {".jpg", ".jpeg", ".png", ".webp"}
+AVATAR_MAX_BYTES = 2 * 1024 * 1024
+
+
+def _ensure_avatar_dir() -> None:
+    AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _avatar_disk_paths(prefix: str, user_id: int) -> list[Path]:
+    _ensure_avatar_dir()
+    return sorted(AVATAR_DIR.glob(f"{prefix}_{user_id}.*"))
+
+
+def _delete_user_avatars(prefix: str, user_id: int) -> None:
+    for p in _avatar_disk_paths(prefix, user_id):
+        try:
+            p.unlink(missing_ok=True)
+        except TypeError:
+            try:
+                if p.exists():
+                    p.unlink()
+            except OSError:
+                pass
+        except OSError:
+            pass
+
 
 def _delete_specialist_cascade(db, specialist_id: int) -> None:
     """Delete specialist-owned data: sessions, Alexa users, patients, programs, questions; then the account."""
@@ -56,6 +84,7 @@ def _delete_specialist_cascade(db, specialist_id: int) -> None:
         db.query(QuestionModel).filter(QuestionModel.training_program_id.in_(prog_ids)).delete(synchronize_session=False)
         db.query(TrainingProgramModel).filter(TrainingProgramModel.id.in_(prog_ids)).delete(synchronize_session=False)
     db.query(PatientModel).filter(PatientModel.specialist_id == specialist_id).delete(synchronize_session=False)
+    _delete_user_avatars("specialist", specialist_id)
     spec = db.query(SpecialistModel).filter(SpecialistModel.id == specialist_id).first()
     if spec:
         db.delete(spec)
@@ -777,6 +806,36 @@ def create_web_api() -> Flask:
             db.commit()
             return jsonify({"message": "Password updated successfully"})
 
+    @app.route("/api/specialists/me/avatar", methods=["GET", "POST", "DELETE"])
+    def specialist_avatar():
+        sid = _get_specialist_id()
+        if not sid:
+            return _auth_required()
+        if request.method == "GET":
+            paths = _avatar_disk_paths("specialist", sid)
+            if not paths:
+                return "", 404
+            p = paths[0]
+            mt = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
+            return send_file(p, mimetype=mt, max_age=0)
+        if request.method == "DELETE":
+            _delete_user_avatars("specialist", sid)
+            return jsonify({"message": "Avatar removed"})
+        file = request.files.get("file")
+        if not file or not file.filename:
+            return jsonify({"error": "file required"}), 400
+        ext = Path(secure_filename(file.filename)).suffix.lower()
+        if ext not in AVATAR_EXT_ALLOWED:
+            return jsonify({"error": "invalid image type"}), 400
+        raw = file.read()
+        if len(raw) > AVATAR_MAX_BYTES:
+            return jsonify({"error": "file too large"}), 400
+        _delete_user_avatars("specialist", sid)
+        _ensure_avatar_dir()
+        dest = AVATAR_DIR / f"specialist_{sid}{ext}"
+        dest.write_bytes(raw)
+        return jsonify({"message": "Avatar updated"})
+
     @app.route("/api/specialists/me", methods=["DELETE"])
     def delete_specialist_me():
         sid = _get_specialist_id()
@@ -1381,6 +1440,36 @@ def create_web_api() -> Flask:
             db.commit()
             return jsonify({"message": "Password updated successfully"})
 
+    @app.route("/api/parents/me/avatar", methods=["GET", "POST", "DELETE"])
+    def parent_avatar():
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        if request.method == "GET":
+            paths = _avatar_disk_paths("parent", pid)
+            if not paths:
+                return "", 404
+            p = paths[0]
+            mt = mimetypes.guess_type(str(p))[0] or "application/octet-stream"
+            return send_file(p, mimetype=mt, max_age=0)
+        if request.method == "DELETE":
+            _delete_user_avatars("parent", pid)
+            return jsonify({"message": "Avatar removed"})
+        file = request.files.get("file")
+        if not file or not file.filename:
+            return jsonify({"error": "file required"}), 400
+        ext = Path(secure_filename(file.filename)).suffix.lower()
+        if ext not in AVATAR_EXT_ALLOWED:
+            return jsonify({"error": "invalid image type"}), 400
+        raw = file.read()
+        if len(raw) > AVATAR_MAX_BYTES:
+            return jsonify({"error": "file too large"}), 400
+        _delete_user_avatars("parent", pid)
+        _ensure_avatar_dir()
+        dest = AVATAR_DIR / f"parent_{pid}{ext}"
+        dest.write_bytes(raw)
+        return jsonify({"message": "Avatar updated"})
+
     @app.route("/api/parents/me", methods=["DELETE"])
     def delete_parent_me():
         pid = _get_parent_id()
@@ -1410,6 +1499,7 @@ def create_web_api() -> Flask:
                     synchronize_session=False,
                 )
                 db.query(PatientModel).filter(PatientModel.id.in_(patient_ids)).delete(synchronize_session=False)
+            _delete_user_avatars("parent", pid)
             db.delete(parent)
             db.commit()
             return jsonify({"message": "Parent account deleted successfully"})

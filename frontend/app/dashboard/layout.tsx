@@ -6,41 +6,12 @@ import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Home, Settings, LogOut, Users, BarChart3 } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
+import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
 
-const PARENT_NAV_LABELS = {
-  ar: {
-    home: "الرئيسية",
-    children: "الأطفال",
-    reports: "التقارير",
-    settings: "الإعدادات",
-    portal: "بوابة ولي الأمر",
-  },
-  en: {
-    home: "Home",
-    children: "Children",
-    reports: "Reports",
-    settings: "Settings",
-    portal: "Parent portal",
-  },
-  fr: {
-    home: "Accueil",
-    children: "Enfants",
-    reports: "Rapports",
-    settings: "Paramètres",
-    portal: "Portail parent",
-  },
-} as const
-
-type ParentNavLocale = keyof typeof PARENT_NAV_LABELS
-
-function parentNavLocale(raw: string | undefined): ParentNavLocale {
-  if (raw === "en" || raw === "fr") return raw
-  return "ar"
-}
-
-export default function ParentDashboardLayout({ children }: { children: React.ReactNode }) {
+function ParentDashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t } = usePortalI18n()
   const [currentUser, setCurrentUser] = useState<{
     full_name?: string
     email?: string
@@ -54,17 +25,12 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       if (!raw) return
       const u = JSON.parse(raw)
       setCurrentUser(u)
-      if (u.role === "parent" && typeof document !== "undefined") {
-        const loc = parentNavLocale(u.preferred_locale)
-        document.documentElement.lang = loc
-        document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
-      }
     } catch {
       //
     }
   }, [pathname])
 
-  const displayName = currentUser?.full_name || currentUser?.email || "ولي أمر"
+  const displayName = currentUser?.full_name || currentUser?.email || t("common.parent")
 
   const parentInitials = useMemo(() => {
     const n = (currentUser?.full_name || currentUser?.email || "P").trim()
@@ -73,19 +39,14 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
     return n.slice(0, 2).toUpperCase()
   }, [currentUser?.full_name, currentUser?.email])
 
-  const navLabels = useMemo(() => {
-    if (currentUser?.role !== "parent") return PARENT_NAV_LABELS.ar
-    return PARENT_NAV_LABELS[parentNavLocale(currentUser.preferred_locale)]
-  }, [currentUser?.role, currentUser?.preferred_locale])
-
   const nav = useMemo<DashboardNavItem[]>(
     () => [
-      { href: "/dashboard", label: navLabels.home, icon: Home },
-      { href: "/dashboard/children", label: navLabels.children, icon: Users },
-      { href: "/dashboard/reports", label: navLabels.reports, icon: BarChart3 },
-      { href: "/dashboard/settings", label: navLabels.settings, icon: Settings },
+      { href: "/dashboard", label: t("layout.nav.home"), icon: Home },
+      { href: "/dashboard/children", label: t("layout.nav.children"), icon: Users },
+      { href: "/dashboard/reports", label: t("layout.nav.reports"), icon: BarChart3 },
+      { href: "/dashboard/settings", label: t("layout.nav.settings"), icon: Settings },
     ],
-    [navLabels],
+    [t],
   )
 
   const isNavItemActive = (item: DashboardNavItem) =>
@@ -112,7 +73,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500">
           EDUVOX
         </span>
-        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{navLabels.portal}</p>
+        <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("layout.portal")}</p>
       </Link>
     </div>
   )
@@ -122,7 +83,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-500 truncate block">
         EDUVOX
       </span>
-      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">{navLabels.portal}</p>
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">{t("layout.portal")}</p>
     </div>
   )
 
@@ -139,7 +100,7 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
       </div>
       <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
         <LogOut className="h-4 w-4 mr-2" />
-        تسجيل الخروج
+        {t("layout.logout")}
       </Button>
     </div>
   )
@@ -156,5 +117,13 @@ export default function ParentDashboardLayout({ children }: { children: React.Re
     >
       {children}
     </AppDashboardShell>
+  )
+}
+
+export default function ParentDashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PortalI18nProvider role="parent">
+      <ParentDashboardLayoutInner>{children}</ParentDashboardLayoutInner>
+    </PortalI18nProvider>
   )
 }

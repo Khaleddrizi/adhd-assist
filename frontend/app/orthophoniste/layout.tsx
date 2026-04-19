@@ -7,10 +7,12 @@ import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Activity, Users, BarChart3, Upload, Settings, LogOut } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
+import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
 
-export default function OrthophonisteLayout({ children }: { children: React.ReactNode }) {
+function OrthophonisteLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
+  const { t } = usePortalI18n()
   const [currentUser, setCurrentUser] = useState<{ full_name?: string; email?: string } | null>(null)
 
   useEffect(() => {
@@ -19,27 +21,22 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
       if (!raw) return
       const u = JSON.parse(raw)
       setCurrentUser(u)
-      if (u.role === "specialist" && typeof document !== "undefined") {
-        const loc = u.preferred_locale === "fr" || u.preferred_locale === "en" ? u.preferred_locale : "ar"
-        document.documentElement.lang = loc
-        document.documentElement.dir = loc === "ar" ? "rtl" : "ltr"
-      }
     } catch {
       //
     }
   }, [pathname])
 
-  const displayName = currentUser?.full_name || currentUser?.email || "مختص"
+  const displayName = currentUser?.full_name || currentUser?.email || t("common.specialist")
 
   const nav = useMemo<DashboardNavItem[]>(
     () => [
-      { href: "/orthophoniste", label: "الرئيسية", icon: Activity },
-      { href: "/orthophoniste/patients", label: "المرضى", icon: Users },
-      { href: "/orthophoniste/analytics", label: "التحليلات السريرية", icon: BarChart3 },
-      { href: "/orthophoniste/library", label: "المكتبة", icon: Upload },
-      { href: "/orthophoniste/settings", label: "الإعدادات", icon: Settings },
+      { href: "/orthophoniste", label: t("layout.nav.home"), icon: Activity },
+      { href: "/orthophoniste/patients", label: t("layout.nav.patients"), icon: Users },
+      { href: "/orthophoniste/analytics", label: t("layout.nav.analytics"), icon: BarChart3 },
+      { href: "/orthophoniste/library", label: t("layout.nav.library"), icon: Upload },
+      { href: "/orthophoniste/settings", label: t("layout.nav.settings"), icon: Settings },
     ],
-    [],
+    [t],
   )
 
   const isNavItemActive = (item: DashboardNavItem) =>
@@ -80,7 +77,7 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
       <p className="text-sm font-medium truncate">{displayName}</p>
       <Button variant="outline" size="sm" className="w-full mt-3" onClick={handleLogout}>
         <LogOut className="h-4 w-4 mr-2" />
-        تسجيل الخروج
+        {t("layout.logout")}
       </Button>
     </div>
   )
@@ -100,3 +97,10 @@ export default function OrthophonisteLayout({ children }: { children: React.Reac
   )
 }
 
+export default function OrthophonisteLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PortalI18nProvider role="specialist">
+      <OrthophonisteLayoutInner>{children}</OrthophonisteLayoutInner>
+    </PortalI18nProvider>
+  )
+}

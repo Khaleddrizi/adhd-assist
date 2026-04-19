@@ -6,6 +6,8 @@ import { AuthGuard } from "@/components/auth-guard"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { getAuthHeaders, publicApiBase } from "@/lib/api"
+import { usePortalI18n } from "@/lib/i18n/i18n-context"
+import type { AppLocale } from "@/lib/i18n/types"
 import {
   ArrowRight,
   Users,
@@ -33,23 +35,26 @@ function initials(name: string) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-function childStatus(stats: ApiChild["stats"]) {
-  if (!stats.total_sessions || stats.avg_accuracy < 30) return { label: "يحتاج انتباهًا", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
-  if (stats.avg_accuracy < 70) return { label: "مراقبة", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
-  return { label: "على المسار", cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
+function childStatus(stats: ApiChild["stats"], t: (key: string) => string) {
+  if (!stats.total_sessions || stats.avg_accuracy < 30)
+    return { label: t("dashboard.childNeeds"), cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
+  if (stats.avg_accuracy < 70)
+    return { label: t("dashboard.childMonitor"), cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
+  return { label: t("dashboard.childOnTrack"), cls: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" }
 }
 
-function severityChip(diagnostic: string | null | undefined) {
+function severityChip(diagnostic: string | null | undefined, t: (key: string) => string) {
   const d = (diagnostic || "").trim()
-  if (!d) return { label: "—", cls: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" }
-  if (/severe/i.test(d)) return { label: "شديد", cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
-  if (/moderate/i.test(d)) return { label: "متوسط", cls: "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100" }
-  if (/mild/i.test(d)) return { label: "خفيف", cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
+  if (!d) return { label: t("dashboard.severityNone"), cls: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" }
+  if (/severe/i.test(d)) return { label: t("dashboard.severitySevere"), cls: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-200" }
+  if (/moderate/i.test(d)) return { label: t("dashboard.severityModerate"), cls: "bg-orange-100 text-orange-900 dark:bg-orange-950/40 dark:text-orange-100" }
+  if (/mild/i.test(d)) return { label: t("dashboard.severityMild"), cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
   return { label: d, cls: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100" }
 }
 
-function formatTodayChip() {
-  return new Date().toLocaleDateString("ar", {
+function formatTodayChip(locale: AppLocale) {
+  const loc = locale === "ar" ? "ar" : locale === "fr" ? "fr-FR" : "en-US"
+  return new Date().toLocaleDateString(loc, {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -58,6 +63,7 @@ function formatTodayChip() {
 }
 
 function ParentPortalContent() {
+  const { t, locale } = usePortalI18n()
   const [children, setChildren] = useState<ApiChild[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -89,36 +95,32 @@ function ParentPortalContent() {
     return { totalChildren, totalSessions, totalStars, avgAccuracy }
   }, [children])
 
-  const dateChip = useMemo(() => formatTodayChip(), [])
+  const dateChip = useMemo(() => formatTodayChip(locale), [locale])
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="text-muted-foreground">جاري التحميل…</p>
+        <p className="text-muted-foreground">{t("dashboard.loading")}</p>
       </div>
     )
   }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Welcome bar */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-[20px] font-bold text-slate-900 dark:text-white leading-tight">نظرة ولي الأمر</h1>
-          <p className="mt-1 text-xs text-muted-foreground max-w-md">
-            ملخص سريع — انتقل إلى «الأطفال» أو «التقارير» للتفاصيل.
-          </p>
+          <h1 className="text-[20px] font-bold text-slate-900 dark:text-white leading-tight">{t("dashboard.title")}</h1>
+          <p className="mt-1 text-xs text-muted-foreground max-w-md">{t("dashboard.subtitle")}</p>
         </div>
         <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
           {dateChip}
         </span>
       </div>
 
-      {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">الأطفال</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("dashboard.kpiChildren")}</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#1a8fe3" }}>
               {totals.totalChildren}
             </p>
@@ -134,7 +136,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">الجلسات</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("dashboard.kpiSessions")}</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#0f766e" }}>
               {totals.totalSessions}
             </p>
@@ -150,7 +152,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">النجوم</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("dashboard.kpiStars")}</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#d97706" }}>
               {totals.totalStars}
             </p>
@@ -166,7 +168,7 @@ function ParentPortalContent() {
         </Card>
         <Card className="surface-card overflow-hidden border-border/70 shadow-sm">
           <CardContent className="flex h-full min-h-[140px] flex-col pt-5 pb-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">متوسط الدقة</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("dashboard.kpiAccuracy")}</p>
             <p className="mt-2 text-2xl font-bold leading-none" style={{ color: "#534AB7" }}>
               {totals.avgAccuracy}%
             </p>
@@ -182,7 +184,6 @@ function ParentPortalContent() {
         </Card>
       </div>
 
-      {/* قائمة الأطفال المرتبطين */}
       {children.length > 0 ? (
         <div className="space-y-3">
           {children.map((child) => (
@@ -202,30 +203,27 @@ function ParentPortalContent() {
                     <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{child.name}</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950/50 dark:text-sky-200">
-                        {child.age != null ? `${child.age} سنة` : "العمر —"}
+                        {child.age != null ? `${child.age} ${t("common.age")}` : t("common.ageUnknown")}
                       </span>
                       {(() => {
-                        const sev = severityChip(child.diagnostic)
+                        const sev = severityChip(child.diagnostic, t)
                         return (
                           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${sev.cls}`}>{sev.label}</span>
                         )
                       })()}
                       {(() => {
-                        const st = childStatus(child.stats)
+                        const st = childStatus(child.stats, t)
                         return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${st.cls}`}>{st.label}</span>
                       })()}
                       <code className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                        {child.alexa_code || "—"}
+                        {child.alexa_code || t("common.dash")}
                       </code>
                     </div>
                   </div>
                 </div>
-                <Button
-                  asChild
-                  className="shrink-0 rounded-full bg-[#1a8fe3] px-5 text-white hover:bg-[#1578c4]"
-                >
+                <Button asChild className="shrink-0 rounded-full bg-[#1a8fe3] px-5 text-white hover:bg-[#1578c4]">
                   <Link href={`/dashboard/children/${child.id}`}>
-                    التفاصيل
+                    {t("common.details")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -236,13 +234,10 @@ function ParentPortalContent() {
       ) : (
         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3.5 dark:border-amber-900/50 dark:bg-amber-950/25">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="text-sm text-amber-950 dark:text-amber-100">
-            لا يوجد طفل مرتبط بحسابك بعد. تواصل مع المختص لإكمال الإعداد.
-          </p>
+          <p className="text-sm text-amber-950 dark:text-amber-100">{t("dashboard.emptyChild")}</p>
         </div>
       )}
 
-      {/* Workspace cards */}
       <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
         <Card className="surface-card flex h-full min-h-[280px] flex-col border-border/70 shadow-sm">
           <CardContent className="flex h-full flex-col p-6">
@@ -252,32 +247,25 @@ function ParentPortalContent() {
             >
               <Users className="h-5 w-5" style={{ color: "#1a8fe3" }} />
             </div>
-            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">مساحة الأطفال</h2>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              تتبّع رحلة كل طفل والجلسات والمكافآت. كل ما تحتاجه لدعم الممارسة في المنزل في مكان واحد.
-            </p>
+            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">{t("dashboard.workspaceChildren")}</h2>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("dashboard.workspaceChildrenHint")}</p>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>تبويبات النظرة العامة والجلسات والمكافآت</span>
+                <span>{t("dashboard.wc1")}</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>سجل درجة التركيز لكل طفل</span>
+                <span>{t("dashboard.wc2")}</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>النجوم ومراحل المكافآت</span>
+                <span>{t("dashboard.wc3")}</span>
               </li>
             </ul>
             <div className="mt-auto pt-6">
-              <Button
-                asChild
-                className="w-full rounded-full bg-[#1a8fe3] text-white hover:bg-[#1578c4]"
-              >
-                <Link href="/dashboard/children">
-                  فتح الأطفال ←
-                </Link>
+              <Button asChild className="w-full rounded-full bg-[#1a8fe3] text-white hover:bg-[#1578c4]">
+                <Link href="/dashboard/children">{t("dashboard.openChildren")}</Link>
               </Button>
             </div>
           </CardContent>
@@ -291,29 +279,25 @@ function ParentPortalContent() {
             >
               <CalendarRange className="h-5 w-5" style={{ color: "#534AB7" }} />
             </div>
-            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">مساحة التقارير</h2>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              تصوّر التقدم عبر الفترات الزمنية ومقارنة الأداء واكتشاف الاتجاهات مبكرًا للاحتفال بالإنجازات وتعديل الروتين.
-            </p>
+            <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">{t("dashboard.workspaceReports")}</h2>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("dashboard.workspaceReportsHint")}</p>
             <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>مخططات التقدم الأسبوعية والشهرية</span>
+                <span>{t("dashboard.wr1")}</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>اتجاهات الدقة عبر الزمن</span>
+                <span>{t("dashboard.wr2")}</span>
               </li>
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                <span>تقارير جلسات قابلة للتنزيل</span>
+                <span>{t("dashboard.wr3")}</span>
               </li>
             </ul>
             <div className="mt-auto pt-6">
               <Button asChild variant="outline" className="w-full rounded-full border-slate-300 bg-white dark:bg-transparent">
-                <Link href="/dashboard/reports">
-                  فتح التقارير ←
-                </Link>
+                <Link href="/dashboard/reports">{t("dashboard.openReports")}</Link>
               </Button>
             </div>
           </CardContent>
