@@ -8,7 +8,6 @@ import { fetchApi } from "@/lib/api"
 import {
   Activity,
   AlertTriangle,
-  Baby,
   Bot,
   ChevronRight,
   Link2,
@@ -28,16 +27,13 @@ interface AdminOverview {
   total_parents: number
   standalone_parents_count?: number
   linked_parents_count?: number
-  total_children: number
   total_alexa_users: number
   sessions_today: number
-  orphan_children: number
 }
 
 interface IncidentsPayload {
   disabled_doctors: Array<{ id: number; email: string; full_name: string | null }>
   disabled_parents: Array<{ id: number; email: string; full_name: string | null }>
-  orphan_children: Array<{ id: number; name: string; age: number | null; diagnostic: string | null }>
 }
 
 interface AuditLog {
@@ -151,15 +147,12 @@ function AdministrationHome() {
 
   const disabledDoctors = incidents?.disabled_doctors || []
   const disabledParents = incidents?.disabled_parents || []
-  const orphanList = incidents?.orphan_children || []
-  const totalIncidents = disabledDoctors.length + disabledParents.length + orphanList.length
-
-  const orphanCount = overview?.orphan_children ?? orphanList.length
+  const totalIncidents = disabledDoctors.length + disabledParents.length
 
   const incidentViewHref = useMemo(() => {
     if (disabledDoctors.length > 0) return "/administration/doctors"
     if (disabledParents.length > 0) return "/administration/parents"
-    return "/administration/children"
+    return "/administration/audit"
   }, [disabledDoctors.length, disabledParents.length])
 
   const alexaZero = (overview?.total_alexa_users ?? 0) === 0
@@ -185,18 +178,6 @@ function AdministrationHome() {
             <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">{t("home.bannerAllOk")}</p>
           </div>
           <p className="text-xs font-medium text-emerald-700/90 dark:text-emerald-300/80 sm:text-right">{t("home.bannerAllOkMeta")}</p>
-        </div>
-      ) : orphanList.length > 0 ? (
-        <div className="flex w-full flex-col gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/50 dark:bg-red-950/30">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" aria-hidden />
-            <p className="text-sm font-medium text-red-950 dark:text-red-100">
-              {totalIncidents === 1
-                ? t("home.bannerOrphansOne")
-                : t("home.bannerOrphans").replace("{count}", String(totalIncidents))}
-            </p>
-          </div>
-          <p className="text-xs text-red-800/90 dark:text-red-300/80 sm:text-right">{t("home.bannerAllOkMeta")}</p>
         </div>
       ) : (
         <div className="flex w-full flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-amber-800/60 dark:bg-amber-950/25">
@@ -258,16 +239,7 @@ function AdministrationHome() {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {t("home.sectionOperations")}
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <KpiCard
-              label={t("home.kpiChildren")}
-              value={overview?.total_children ?? 0}
-              valueClassName="text-purple-600 dark:text-purple-400"
-              subtitle={t("home.kpiChildrenSub")}
-              icon={Baby}
-              iconWrapClass="bg-purple-500/10"
-              iconClass="text-purple-600 dark:text-purple-400"
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
             <KpiCard
               label={t("home.kpiAlexa")}
               value={overview?.total_alexa_users ?? 0}
@@ -286,31 +258,6 @@ function AdministrationHome() {
               iconWrapClass="bg-emerald-500/10"
               iconClass={sessionsZero ? "text-[#d1d5db] dark:text-slate-500" : "text-emerald-600 dark:text-emerald-400"}
             />
-          </div>
-          <div className="grid gap-4 lg:grid-cols-3">
-            <div className="lg:col-span-3">
-              <KpiCard
-                label={t("home.kpiOrphans")}
-                value={orphanCount}
-                valueClassName={
-                  orphanCount === 0 ? "text-[#d1d5db] dark:text-slate-500" : "text-red-600 dark:text-red-400"
-                }
-                subtitle={
-                  orphanCount === 0
-                    ? t("home.kpiOrphansSubNone")
-                    : orphanCount === 1
-                      ? t("home.kpiOrphansSubOne")
-                      : t("home.kpiOrphansSubMany").replace("{count}", String(orphanCount))
-                }
-                subtitleClassName={
-                  orphanCount === 0 ? "text-emerald-600 dark:text-emerald-400" : "font-medium text-red-600 dark:text-red-400"
-                }
-                icon={Baby}
-                iconWrapClass={orphanCount === 0 ? "bg-slate-100 dark:bg-slate-800" : "bg-red-500/10"}
-                iconClass={orphanCount === 0 ? "text-slate-400" : "text-red-600 dark:text-red-400"}
-                borderClassName={orphanCount > 0 ? "border-[#fca5a5] dark:border-red-500/50" : undefined}
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -399,33 +346,6 @@ function AdministrationHome() {
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
             </Link>
 
-            <Link
-              href="/administration/children"
-              className={cn(
-                "flex items-center gap-3 py-3.5 pl-3 transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40",
-                orphanList.length > 0 && "border-l-[3px] border-l-red-500 bg-red-50/50 dark:bg-red-950/20",
-              )}
-            >
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-500/15">
-                <Baby className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{t("home.childrenOrphans")}</p>
-                <p
-                  className={cn(
-                    "text-xs",
-                    orphanList.length > 0
-                      ? "font-medium text-red-600 dark:text-red-400"
-                      : "text-slate-500 dark:text-slate-400",
-                  )}
-                >
-                  {orphanList.length === 0
-                    ? t("home.childrenOrphansOk")
-                    : t("home.childrenOrphansBad").replace("{count}", String(orphanList.length))}
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
-            </Link>
           </CardContent>
         </Card>
 

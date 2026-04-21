@@ -40,12 +40,6 @@ type AdminParent = AdminSubscriptionRow & {
   account_kind?: string
 }
 
-interface ChildRef {
-  id: number
-  name: string
-  parent_id: number | null
-}
-
 const actionBtn =
   "h-auto min-h-0 gap-1 rounded-md px-2.5 py-[5px] text-[11px] font-semibold leading-tight"
 
@@ -66,20 +60,10 @@ function ParentsPageInner() {
   )
 
   const [items, setItems] = useState<AdminParent[]>([])
-  const [allChildren, setAllChildren] = useState<ChildRef[]>([])
   const [search, setSearch] = useState("")
   const [inactiveOnly, setInactiveOnly] = useState(false)
   const [subDialogOpen, setSubDialogOpen] = useState(false)
   const [subRow, setSubRow] = useState<AdminParent | null>(null)
-
-  const loadChildren = useCallback(async () => {
-    try {
-      const data = await fetchApi<ChildRef[]>("/api/administration/children?q=")
-      setAllChildren(data.map((c) => ({ id: c.id, name: c.name, parent_id: c.parent_id ?? null })))
-    } catch {
-      setAllChildren([])
-    }
-  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -96,30 +80,13 @@ function ParentsPageInner() {
     }
   }, [search, accountTab])
 
-  useEffect(() => {
-    loadChildren()
-  }, [loadChildren])
-
   const reload = async () => {
     const qs = new URLSearchParams()
     qs.set("q", search.trim())
     qs.set("account_kind", accountTab)
     const data = await fetchApi<AdminParent[]>(`/api/administration/parents?${qs.toString()}`)
     setItems(data)
-    await loadChildren()
   }
-
-  const namesByParentId = useMemo(() => {
-    const m = new Map<number, string[]>()
-    for (const c of allChildren) {
-      if (c.parent_id != null) {
-        const list = m.get(c.parent_id) || []
-        list.push(c.name)
-        m.set(c.parent_id, list)
-      }
-    }
-    return m
-  }, [allChildren])
 
   const linkedChildrenTotal = useMemo(() => items.reduce((s, i) => s + (i.children_count || 0), 0), [items])
   const unlinkedParentsCount = useMemo(() => items.filter((i) => (i.children_count || 0) === 0).length, [items])
@@ -350,7 +317,6 @@ function ParentsPageInner() {
                 {displayParents.map((row) => {
                   const status = entityStatusFromAccount(row.is_active, row.children_count, row.created_at)
                   const name = row.full_name || row.email
-                  const childNames = namesByParentId.get(row.id) || []
                   const noKids = (row.children_count || 0) === 0
                   return (
                     <TableRow
@@ -399,17 +365,7 @@ function ParentsPageInner() {
                           </span>
                           {noKids ? (
                             <span className="text-[12px] italic text-red-600 dark:text-red-400">{t("entity.noChildrenChip")}</span>
-                          ) : (
-                            childNames.map((n, idx) => (
-                              <span
-                                key={`${row.id}-${idx}-${n}`}
-                                className="inline-flex max-w-[140px] truncate rounded-full bg-teal-100 px-2 py-0.5 text-[10px] font-medium text-teal-900 dark:bg-teal-500/20 dark:text-teal-100"
-                                title={n}
-                              >
-                                {n}
-                              </span>
-                            ))
-                          )}
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell>

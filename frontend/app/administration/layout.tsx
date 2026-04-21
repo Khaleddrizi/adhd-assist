@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   Stethoscope,
   Users,
-  Baby,
   ScrollText,
   LogOut,
   ShieldAlert,
@@ -63,10 +62,6 @@ function AdministrationLayoutInner({ children }: { children: React.ReactNode }) 
           { href: "/administration/doctors", label: t("layout.navDoctors"), icon: Stethoscope },
           { href: "/administration/parents", label: t("layout.navParents"), icon: Users },
         ],
-      },
-      {
-        label: t("layout.navGroupOperations"),
-        items: [{ href: "/administration/children", label: t("layout.navChildren"), icon: Baby }],
       },
       {
         label: t("layout.navGroupSystem"),

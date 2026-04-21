@@ -8,15 +8,9 @@ import { ShieldAlert, ShieldCheck, AlertTriangle } from "lucide-react"
 import { usePortalI18n } from "@/lib/i18n/i18n-context"
 import type { AppLocale } from "@/lib/i18n/types"
 
-interface AdminOverview {
-  total_doctors: number
-  total_parents: number
-  standalone_parents_count?: number
-  linked_parents_count?: number
-  total_children: number
-  total_alexa_users: number
-  sessions_today: number
-  orphan_children: number
+interface IncidentsPayload {
+  disabled_doctors: Array<{ id: number }>
+  disabled_parents: Array<{ id: number }>
 }
 
 interface AuditLog {
@@ -37,19 +31,17 @@ function formatLogWhen(iso: string | null, locale: AppLocale): string {
 
 function SecurityPageContent() {
   const { t, locale } = usePortalI18n()
-  const [overview, setOverview] = useState<AdminOverview | null>(null)
+  const [incidents, setIncidents] = useState<IncidentsPayload | null>(null)
   const [logs, setLogs] = useState<AuditLog[]>([])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [data, audit] = await Promise.all([
-        fetchApi<AdminOverview>("/api/administration/overview"),
-        fetchApi<AuditLog[]>("/api/administration/audit-logs?limit=15"),
-      ])
+      const audit = await fetchApi<AuditLog[]>("/api/administration/audit-logs?limit=15")
+      const incidentsData = await fetchApi<IncidentsPayload>("/api/administration/incidents")
       if (!cancelled) {
-        setOverview(data)
         setLogs(audit)
+        setIncidents(incidentsData)
       }
     }
     load()
@@ -58,8 +50,10 @@ function SecurityPageContent() {
     }
   }, [])
 
-  const hasRisk = (overview?.orphan_children ?? 0) > 0
-  const orphanN = overview?.orphan_children ?? 0
+  const disabledDoctorsCount = incidents?.disabled_doctors.length ?? 0
+  const disabledParentsCount = incidents?.disabled_parents.length ?? 0
+  const hasRisk = disabledDoctorsCount + disabledParentsCount > 0
+  const riskN = disabledDoctorsCount + disabledParentsCount
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -81,7 +75,7 @@ function SecurityPageContent() {
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               {hasRisk
-                ? t("security.integrityHintRisk").replace("{count}", String(orphanN))
+                ? t("security.integrityHintRisk").replace("{count}", String(riskN))
                 : t("security.integrityHintOk")}
             </p>
           </CardContent>

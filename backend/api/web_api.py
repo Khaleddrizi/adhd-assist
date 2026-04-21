@@ -591,10 +591,8 @@ def create_web_api() -> Flask:
                 "total_parents": total_parents,
                 "standalone_parents_count": standalone_parents,
                 "linked_parents_count": linked_parents,
-                "total_children": db.query(PatientModel).count(),
                 "total_alexa_users": db.query(UserModel).count(),
                 "sessions_today": db.query(QuizSessionModel).filter(QuizSessionModel.created_at >= today_start).count(),
-                "orphan_children": db.query(PatientModel).filter(PatientModel.parent_id.is_(None)).count(),
             }
             return jsonify(payload)
 
@@ -671,39 +669,6 @@ def create_web_api() -> Flask:
                 }
                 for p in parents
             ])
-
-    @app.route("/api/administration/children", methods=["GET"])
-    def list_admin_children():
-        aid = _get_admin_id()
-        if not aid:
-            return _auth_required()
-        q = (request.args.get("q") or "").strip().lower()
-        with get_db() as db:
-            query = db.query(PatientModel)
-            if q:
-                query = query.filter(func.lower(PatientModel.name).like(f"%{q}%"))
-            children = query.order_by(PatientModel.created_at.desc()).all()
-            output = []
-            for c in children:
-                parent = ParentRepository(db).get_by_id(c.parent_id) if c.parent_id else None
-                doctor = SpecialistRepository(db).get_by_id(c.specialist_id) if c.specialist_id else None
-                stats = SessionRepository(db).get_patient_stats(c.id)
-                output.append({
-                    "id": c.id,
-                    "name": c.name,
-                    "age": c.age,
-                    "diagnostic": c.diagnostic,
-                    "alexa_code": c.alexa_code,
-                    "parent_id": c.parent_id,
-                    "specialist_id": c.specialist_id,
-                    "created_at": c.created_at.isoformat() if c.created_at else None,
-                    "doctor_name": doctor.full_name or doctor.email if doctor else "—",
-                    "parent_name": parent.full_name or parent.email if parent else "—",
-                    "parent_email": parent.email if parent else None,
-                    "sessions_count": stats.get("total_sessions", 0),
-                    "avg_accuracy": stats.get("avg_accuracy", 0),
-                })
-            return jsonify(output)
 
     @app.route("/api/administration/doctors/<int:doctor_id>/status", methods=["PUT"])
     def admin_set_doctor_status(doctor_id: int):
@@ -869,39 +834,6 @@ def create_web_api() -> Flask:
                 }
             )
 
-    @app.route("/api/administration/children/<int:child_id>/transfer", methods=["PUT"])
-    def admin_transfer_child(child_id: int):
-        aid = _get_admin_id()
-        if not aid:
-            return _auth_required()
-        data = request.get_json() or {}
-        new_parent_id = data.get("parent_id")
-        new_specialist_id = data.get("specialist_id")
-        with get_db() as db:
-            child = PatientRepository(db).get_by_id(child_id)
-            if not child:
-                return jsonify({"error": "child not found"}), 404
-            if new_parent_id is not None:
-                parent = ParentRepository(db).get_by_id(int(new_parent_id))
-                if not parent:
-                    return jsonify({"error": "parent not found"}), 404
-                child.parent_id = int(new_parent_id)
-            if new_specialist_id is not None:
-                doctor = SpecialistRepository(db).get_by_id(int(new_specialist_id))
-                if not doctor:
-                    return jsonify({"error": "doctor not found"}), 404
-                child.specialist_id = int(new_specialist_id)
-            _audit_log(
-                db,
-                aid,
-                "child_transfer",
-                "child",
-                child_id,
-                {"parent_id": child.parent_id, "specialist_id": child.specialist_id},
-            )
-            db.commit()
-            return jsonify({"message": "Child ownership updated", "id": child_id, "parent_id": child.parent_id, "specialist_id": child.specialist_id})
-
     @app.route("/api/administration/audit-logs", methods=["GET"])
     def admin_audit_logs():
         aid = _get_admin_id()
@@ -941,8 +873,6 @@ def create_web_api() -> Flask:
         with get_db() as db:
             disabled_doctors = db.query(SpecialistModel).filter(SpecialistModel.is_active == False).order_by(SpecialistModel.created_at.desc()).all()  # noqa: E712
             disabled_parents = db.query(ParentModel).filter(ParentModel.is_active == False).order_by(ParentModel.created_at.desc()).all()  # noqa: E712
-            orphan_children = db.query(PatientModel).filter(PatientModel.parent_id.is_(None)).order_by(PatientModel.created_at.desc()).all()
-
             return jsonify({
                 "disabled_doctors": [
                     {
@@ -961,16 +891,6 @@ def create_web_api() -> Flask:
                         "created_at": p.created_at.isoformat() if p.created_at else None,
                     }
                     for p in disabled_parents
-                ],
-                "orphan_children": [
-                    {
-                        "id": c.id,
-                        "name": c.name,
-                        "age": c.age,
-                        "diagnostic": c.diagnostic,
-                        "created_at": c.created_at.isoformat() if c.created_at else None,
-                    }
-                    for c in orphan_children
                 ],
             })
 
