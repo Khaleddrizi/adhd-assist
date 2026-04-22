@@ -415,6 +415,141 @@ def _process_training_program(db, item) -> None:
         db.flush()
 
 
+# Fixed English MCQs for a ready-made library demo (no PDF / no worker).
+_DEMO_ADHD_LIBRARY_NAME = "Demo: ADHD quick quiz"
+_DEMO_ADHD_QUESTIONS: list[dict] = [
+    {
+        "question": "What does ADHD stand for?",
+        "options": {
+            "A": "Attention Deficit Hyperactivity Disorder",
+            "B": "Anxiety Disorder Health Diagnosis",
+            "C": "Auditory Delay Hearing Disorder",
+        },
+        "correct": "A",
+        "chunk_text": "ADHD terminology",
+    },
+    {
+        "question": "Which of these is a common core symptom of ADHD?",
+        "options": {
+            "A": "Difficulty sustaining attention",
+            "B": "Permanent hearing loss",
+            "C": "Photographic memory",
+        },
+        "correct": "A",
+        "chunk_text": "Core symptoms",
+    },
+    {
+        "question": "ADHD symptoms typically appear or are first recognised in which period of life?",
+        "options": {
+            "A": "Childhood or adolescence",
+            "B": "Only after age 70",
+            "C": "Never; it is not a real condition",
+        },
+        "correct": "A",
+        "chunk_text": "Developmental context",
+    },
+    {
+        "question": "How is ADHD best described in clinical settings?",
+        "options": {
+            "A": "A neurodevelopmental condition affecting regulation of attention and activity",
+            "B": "A contagious infection",
+            "C": "A temporary reaction to poor diet only",
+        },
+        "correct": "A",
+        "chunk_text": "Clinical framing",
+    },
+    {
+        "question": "Which statement about treatment is most accurate?",
+        "options": {
+            "A": "Support often combines education, behavioural strategies, and sometimes medication as prescribed",
+            "B": "Treatment should always be ignored",
+            "C": "Only surgery is recommended for everyone",
+        },
+        "correct": "A",
+        "chunk_text": "Treatment overview",
+    },
+    {
+        "question": "Can adults have ADHD?",
+        "options": {
+            "A": "Yes; many adults were diagnosed in childhood or are diagnosed later",
+            "B": "No; ADHD ends completely at age 18 for everyone",
+            "C": "Only if they never attended school",
+        },
+        "correct": "A",
+        "chunk_text": "Lifespan",
+    },
+    {
+        "question": "Hyperactivity in ADHD may present as:",
+        "options": {
+            "A": "Restlessness, fidgeting, or difficulty remaining seated when it is expected",
+            "B": "Always sleeping 20 hours per day",
+            "C": "Complete inability to speak",
+        },
+        "correct": "A",
+        "chunk_text": "Hyperactivity",
+    },
+    {
+        "question": "Which classroom or home strategy is often helpful for learners with ADHD?",
+        "options": {
+            "A": "Clear routines, visual schedules, and movement or attention breaks",
+            "B": "Removing all structure every day",
+            "C": "Avoiding any feedback on performance",
+        },
+        "correct": "A",
+        "chunk_text": "Environmental supports",
+    },
+]
+
+
+def _merge_questions_into_disk_cache(program_id: int, generated: list[dict]) -> None:
+    from backend.core.quiz_logic import QuestionCache
+
+    cache = QuestionCache(QUESTION_CACHE_PATH)
+    existing = cache.load() if QUESTION_CACHE_PATH.exists() else []
+    preserved = [q for q in existing if q.get("training_program_id") != program_id]
+    merged = preserved + generated
+    QUESTION_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(QUESTION_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(merged, f, indent=2, ensure_ascii=False)
+
+
+def _create_demo_adhd_library_program(db, specialist_id: int) -> TrainingProgramModel:
+    """Insert a ready training program with fixed English questions (duplicates allowed)."""
+    repo = TrainingProgramRepository(db)
+    item = repo.create(
+        specialist_id,
+        name=_DEMO_ADHD_LIBRARY_NAME,
+        pdf_path=None,
+        status="draft",
+    )
+    db.flush()
+    pid = item.id
+    item.name = f"{_DEMO_ADHD_LIBRARY_NAME} (#{pid})"
+    db.flush()
+    generated: list[dict] = []
+    for i, spec in enumerate(_DEMO_ADHD_QUESTIONS):
+        unique_chunk_id = (pid * 1_000_000) + i
+        generated.append(
+            {
+                "question": spec["question"],
+                "training_program_id": pid,
+                "options": spec["options"],
+                "correct": spec["correct"],
+                "chunk_id": unique_chunk_id,
+                "chunk_text": spec.get("chunk_text", "")[:500],
+                "times_asked": 0,
+                "times_correct": 0,
+            }
+        )
+    QuestionRepository(db).import_from_cache(generated)
+    _merge_questions_into_disk_cache(pid, generated)
+    item.question_count = len(generated)
+    item.status = "ready"
+    item.error_message = None
+    db.flush()
+    return item
+
+
 def _process_training_program_async(item_id: int) -> None:
     try:
         with get_db() as db:
@@ -1579,6 +1714,23 @@ def create_web_api() -> Flask:
             db.commit()
             return jsonify(repo._to_dict(item)), 201
 
+    @app.route("/api/specialists/library/demo-adhd", methods=["POST"])
+    def create_specialist_library_demo_adhd():
+        sid = _get_specialist_id()
+        if not sid:
+            return _auth_required()
+        with get_db() as db:
+            spec_row = SpecialistRepository(db).get_by_id(sid)
+            if not spec_row:
+                return jsonify({"error": "specialist not found"}), 404
+            sub = _specialist_subscription_dict(spec_row)
+            if sub.get("library_frozen"):
+                return _subscription_error_response(sub, "subscription_library_frozen")
+            item = _create_demo_adhd_library_program(db, sid)
+            db.commit()
+            t_repo = TrainingProgramRepository(db)
+            return jsonify(t_repo._to_dict(item)), 201
+
     @app.route("/api/specialists/library/<int:item_id>/process", methods=["POST"])
     def process_specialist_library_item(item_id: int):
         sid = _get_specialist_id()
@@ -1958,6 +2110,28 @@ def create_web_api() -> Flask:
             item = repo.create(sid, name=name, pdf_path=pdf_path, status=initial_status)
             db.commit()
             return jsonify(repo._to_dict(item)), 201
+
+    @app.route("/api/parents/library/demo-adhd", methods=["POST"])
+    def create_parent_library_demo_adhd():
+        pid = _get_parent_id()
+        if not pid:
+            return _auth_required()
+        with get_db() as db:
+            parent = ParentRepository(db).get_by_id(pid)
+            if not parent:
+                return jsonify({"error": "parent not found"}), 404
+            sid = _parent_standalone_library_sid(parent)
+            if not sid:
+                return jsonify({"error": "Library is only available for family (standalone) parent accounts."}), 403
+            if not SpecialistRepository(db).get_by_id(sid):
+                return jsonify({"error": "specialist scope not found"}), 404
+            sub = _parent_subscription_dict(parent)
+            if sub.get("library_frozen"):
+                return _subscription_error_response(sub, "subscription_library_frozen")
+            item = _create_demo_adhd_library_program(db, sid)
+            db.commit()
+            t_repo = TrainingProgramRepository(db)
+            return jsonify(t_repo._to_dict(item)), 201
 
     @app.route("/api/parents/library/<int:item_id>/process", methods=["POST"])
     def process_parent_library_item(item_id: int):

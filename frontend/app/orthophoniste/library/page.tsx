@@ -103,6 +103,7 @@ function LibraryPage() {
   const [items, setItems] = useState<LibraryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [demoSaving, setDemoSaving] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -247,6 +248,26 @@ function LibraryPage() {
       await loadItems()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("library.toastDeleteFail"))
+    }
+  }
+
+  const handleAddDemoQuiz = async () => {
+    if (libraryWriteLocked) {
+      toast.error(t("library.subscriptionFrozen"))
+      return
+    }
+    setDemoSaving(true)
+    try {
+      const created = await fetchApi<LibraryItem>("/api/specialists/library/demo-adhd", {
+        method: "POST",
+        body: "{}",
+      })
+      toast.success(t("library.toastDemoAdded").replace("{n}", String(created.question_count ?? 0)))
+      await loadItems()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("library.toastDemoFail"))
+    } finally {
+      setDemoSaving(false)
     }
   }
 
@@ -447,6 +468,19 @@ function LibraryPage() {
                 <PlusCircle className="h-4 w-4 mr-2" />
                 {saving ? t("library.adding") : t("library.addBtn")}
               </Button>
+              <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/40 p-3 space-y-2">
+                <p className="text-xs text-muted-foreground leading-snug">{t("library.demoHint")}</p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={demoSaving || libraryWriteLocked}
+                  className="w-full"
+                  onClick={handleAddDemoQuiz}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {demoSaving ? t("library.adding") : t("library.demoBtn")}
+                </Button>
+              </div>
             </form>
           </CardContent>
         </Card>
