@@ -321,17 +321,12 @@ function LibraryPage() {
         <p className="text-sm text-muted-foreground mt-1">{t("library.subtitle")}</p>
       </div>
 
-      <div className="mb-6">
-        <SubscriptionLibraryBanner
-          subscription={meProfile?.subscription ?? null}
-          messageFrozen={t("library.subscriptionFrozen")}
-          messageGrace={t("library.subscriptionGrace")}
-        />
-      </div>
-
-      <div className="mb-6 rounded-xl border border-sky-200 dark:border-sky-500/30 bg-sky-50/90 dark:bg-sky-950/25 px-4 py-4 space-y-3">
+      <div
+        id="library-ready-program"
+        className="mb-6 rounded-xl border-2 border-sky-300 dark:border-sky-500/50 bg-sky-50 dark:bg-sky-950/30 px-4 py-4 space-y-3 shadow-sm"
+      >
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-sky-950 dark:text-sky-100">{t("library.readyKidsTitle")}</p>
+          <p className="text-base font-semibold text-sky-950 dark:text-sky-100">{t("library.readyKidsTitle")}</p>
           <p className="text-xs text-sky-900/85 dark:text-sky-200/85 mt-1 leading-relaxed">{t("library.readyKidsHint")}</p>
           <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 whitespace-pre-line leading-relaxed border-t border-sky-200/80 dark:border-sky-800/50 pt-3">
             {t("library.readyKidsFlow")}
@@ -341,12 +336,20 @@ function LibraryPage() {
           type="button"
           variant="secondary"
           disabled={readyKidsSaving || libraryWriteLocked}
-          className="w-full sm:w-auto border-sky-300 bg-white hover:bg-sky-50 dark:bg-sky-900/50 dark:border-sky-600"
+          className="w-full sm:w-auto border-sky-400 bg-white hover:bg-sky-100 font-medium text-sky-950 dark:bg-sky-900/60 dark:border-sky-500 dark:text-sky-50"
           onClick={handleAddReadyKidsProgram}
         >
           <Sparkles className="h-4 w-4 mr-2" />
           {readyKidsSaving ? t("library.adding") : t("library.readyKidsBtn")}
         </Button>
+      </div>
+
+      <div className="mb-6">
+        <SubscriptionLibraryBanner
+          subscription={meProfile?.subscription ?? null}
+          messageFrozen={t("library.subscriptionFrozen")}
+          messageGrace={t("library.subscriptionGrace")}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3 mb-6">
