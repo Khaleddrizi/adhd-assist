@@ -550,6 +550,28 @@ def _create_ready_kids_adhd_quiz_program(db, specialist_id: int) -> TrainingProg
     return item
 
 
+def _ensure_default_ready_kids_library_if_empty(
+    db: Session,
+    specialist_id: int,
+    parent_for_subscription: ParentModel | None = None,
+) -> bool:
+    """If this specialist scope has no library programs yet, insert the ready kids ADHD quiz (unless writes are frozen)."""
+    if parent_for_subscription is not None:
+        sub = _parent_subscription_dict(parent_for_subscription)
+    else:
+        spec_row = SpecialistRepository(db).get_by_id(specialist_id)
+        if not spec_row:
+            return False
+        sub = _specialist_subscription_dict(spec_row)
+    if sub.get("library_frozen"):
+        return False
+    repo = TrainingProgramRepository(db)
+    if repo.get_by_specialist(specialist_id):
+        return False
+    _create_ready_kids_adhd_quiz_program(db, specialist_id)
+    return True
+
+
 def _process_training_program_async(item_id: int) -> None:
     try:
         with get_db() as db:
@@ -1678,7 +1700,11 @@ def create_web_api() -> Flask:
             _mark_stale_processing_programs(db, specialist_id=sid)
             db.commit()
             repo = TrainingProgramRepository(db)
-            return jsonify(repo.get_by_specialist(sid))
+            items = repo.get_by_specialist(sid)
+            if not items and _ensure_default_ready_kids_library_if_empty(db, sid):
+                db.commit()
+                items = repo.get_by_specialist(sid)
+            return jsonify(items)
 
     @app.route("/api/specialists/library", methods=["POST"])
     def create_specialist_library_item():
@@ -2070,7 +2096,11 @@ def create_web_api() -> Flask:
             _mark_stale_processing_programs(db, specialist_id=sid)
             db.commit()
             repo = TrainingProgramRepository(db)
-            return jsonify(repo.get_by_specialist(sid))
+            items = repo.get_by_specialist(sid)
+            if not items and _ensure_default_ready_kids_library_if_empty(db, sid, parent):
+                db.commit()
+                items = repo.get_by_specialist(sid)
+            return jsonify(items)
 
     @app.route("/api/parents/library", methods=["POST"])
     def create_parent_library_item():
