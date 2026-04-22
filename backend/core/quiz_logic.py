@@ -4,8 +4,12 @@ Quiz logic: question generation, adaptive selection, cache, sessions, services.
 import json
 import re
 import random
+import time
+import logging
 from pathlib import Path
 from typing import List, Dict, Any, Set
+
+logger = logging.getLogger("AlexaQuiz.QuizGenerator")
 
 
 # ========== Question Generation (Groq) ==========
@@ -16,11 +20,21 @@ ALEXA_INTROS_NEXT = ["Next question. ", "Here's the next one. "]
 class QuizGenerator:
     """Generate MCQ questions from text via the Groq API."""
 
-    def __init__(self, api_key: str, model: str = "llama-3.3-70b-versatile", timeout_seconds: float = 25.0):
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "llama-3.3-70b-versatile",
+        timeout_seconds: float = 45.0,
+        max_retries: int = 2,
+        retry_backoff_seconds: float = 1.0,
+    ):
         self._api_key = api_key
         self._model = model
         self._timeout_seconds = timeout_seconds
+        self._max_retries = max(0, int(max_retries))
+        self._retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
         self._client = None
+        self.last_error: str | None = None
 
     def _get_client(self):
         if self._client is None:
@@ -29,6 +43,7 @@ class QuizGenerator:
         return self._client
 
     def generate(self, context: str) -> Dict[str, Any] | None:
+        self.last_error = None
         prompt = f"""
 Context: {context[:800]}
 Task: Create exactly ONE short MCQ (under 12 words). Simple English.
@@ -39,26 +54,36 @@ B) [Option]
 C) [Option]
 Correct: [A or B or C]
 """
-        try:
-            client = self._get_client()
-            completion = client.chat.completions.create(
-                messages=[{"role": "user", "content": prompt}],
-                model=self._model,
-                temperature=0.8,
-            )
-            text = completion.choices[0].message.content or ""
-            match = re.search(r"Correct:\s*([A-C])", text, re.IGNORECASE)
-            if not match:
-                return None
-            correct = match.group(1).strip().upper()
-            clean = re.sub(r"Correct:.*", "", text, flags=re.DOTALL).strip()
-            if "main goal" in clean.lower() or "purpose of" in clean.lower():
-                return None
-            options = self._parse_options(clean)
-            intro = random.choice(ALEXA_INTROS_FIRST)
-            return {"question": f"{intro}{clean}", "question_body": clean, "options": options, "correct": correct}
-        except Exception:
-            return None
+        for attempt in range(self._max_retries + 1):
+            try:
+                client = self._get_client()
+                completion = client.chat.completions.create(
+                    messages=[{"role": "user", "content": prompt}],
+                    model=self._model,
+                    temperature=0.8,
+                )
+                text = completion.choices[0].message.content or ""
+                match = re.search(r"Correct:\s*([A-C])", text, re.IGNORECASE)
+                if not match:
+                    return None
+                correct = match.group(1).strip().upper()
+                clean = re.sub(r"Correct:.*", "", text, flags=re.DOTALL).strip()
+                if "main goal" in clean.lower() or "purpose of" in clean.lower():
+                    return None
+                options = self._parse_options(clean)
+                intro = random.choice(ALEXA_INTROS_FIRST)
+                return {"question": f"{intro}{clean}", "question_body": clean, "options": options, "correct": correct}
+            except Exception as exc:
+                self.last_error = str(exc)[:300] or exc.__class__.__name__
+                logger.warning(
+                    "Groq generation attempt %s/%s failed: %s",
+                    attempt + 1,
+                    self._max_retries + 1,
+                    self.last_error,
+                )
+                if attempt < self._max_retries and self._retry_backoff_seconds > 0:
+                    time.sleep(self._retry_backoff_seconds * (attempt + 1))
+        return None
 
     def _parse_options(self, text: str) -> Dict[str, str]:
         options = {}

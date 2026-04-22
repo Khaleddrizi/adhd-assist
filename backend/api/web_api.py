@@ -255,14 +255,31 @@ def _process_training_program(db, item) -> None:
         return
 
     try:
-        text = extract_text_from_pdf(item.pdf_path)
-        chunks = chunk_text(text, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
-        chunks = [c for c in chunks if c.strip()]
+        try:
+            text = extract_text_from_pdf(item.pdf_path)
+        except Exception as exc:
+            logger.exception("PDF extraction failed for program %s", getattr(item, "id", None))
+            item.status = "failed"
+            item.error_message = f"PDF extraction failed: {str(exc)[:220]}"
+            item.question_count = 0
+            db.flush()
+            return
+
+        try:
+            chunks = chunk_text(text, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+            chunks = [c for c in chunks if c.strip()]
+        except Exception as exc:
+            logger.exception("Chunking failed for program %s", getattr(item, "id", None))
+            item.status = "failed"
+            item.error_message = f"Chunking failed: {str(exc)[:220]}"
+            item.question_count = 0
+            db.flush()
+            return
         if not chunks:
             raise ValueError("No readable text chunks found in the PDF")
 
         max_questions = min(10, len(chunks))
-        generator = QuizGenerator(api_key=GROQ_API_KEY)
+        generator = QuizGenerator(api_key=GROQ_API_KEY, timeout_seconds=45.0, max_retries=2, retry_backoff_seconds=1.2)
         used = set()
         generated = []
         attempt = 0
@@ -290,6 +307,8 @@ def _process_training_program(db, item) -> None:
             })
 
         if not generated:
+            if getattr(generator, "last_error", None):
+                raise ValueError(f"Groq generation failed: {generator.last_error}")
             raise ValueError("Question generation failed for this PDF")
 
         # Re-processing should replace this program's previous questions.
@@ -310,6 +329,7 @@ def _process_training_program(db, item) -> None:
         item.error_message = None
         db.flush()
     except Exception as exc:
+        logger.exception("Training program processing failed for program %s", getattr(item, "id", None))
         item.status = "failed"
         item.error_message = str(exc)[:500]
         item.question_count = 0
