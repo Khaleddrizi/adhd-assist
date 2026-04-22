@@ -389,6 +389,23 @@ function LibraryPage() {
         </Card>
       </div>
 
+      <div className="mb-6 rounded-xl border border-violet-200 dark:border-violet-500/30 bg-violet-50/90 dark:bg-violet-950/25 px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-violet-950 dark:text-violet-100">{t("library.demoBlockTitle")}</p>
+          <p className="text-xs text-violet-900/80 dark:text-violet-200/85 mt-1 leading-relaxed">{t("library.demoHint")}</p>
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={demoSaving || libraryWriteLocked}
+          className="shrink-0 w-full sm:w-auto border-violet-300 bg-white hover:bg-violet-50 dark:bg-violet-900/50 dark:border-violet-600"
+          onClick={handleAddDemoQuiz}
+        >
+          <Sparkles className="h-4 w-4 mr-2" />
+          {demoSaving ? t("library.adding") : t("library.demoBtn")}
+        </Button>
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-[38%_62%] items-stretch">
         <Card className="surface-card h-full">
           <CardHeader>
@@ -483,19 +500,6 @@ function LibraryPage() {
                 <PlusCircle className="h-4 w-4 mr-2" />
                 {saving ? t("library.adding") : t("library.addBtn")}
               </Button>
-              <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/40 p-3 space-y-2">
-                <p className="text-xs text-muted-foreground leading-snug">{t("library.demoHint")}</p>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={demoSaving || libraryWriteLocked}
-                  className="w-full"
-                  onClick={handleAddDemoQuiz}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  {demoSaving ? t("library.adding") : t("library.demoBtn")}
-                </Button>
-              </div>
             </form>
           </CardContent>
         </Card>
@@ -522,9 +526,20 @@ function LibraryPage() {
             {loading ? (
               <p className="text-sm text-muted-foreground">{t("library.loading")}</p>
             ) : filteredItems.length === 0 ? (
-              <div className="py-14 flex flex-col items-center text-center text-muted-foreground">
-                <FolderOpen className="h-10 w-10 mb-3 opacity-60" />
+              <div className="py-12 flex flex-col items-center text-center text-muted-foreground gap-4 max-w-md mx-auto px-2">
+                <FolderOpen className="h-10 w-10 opacity-60" />
                 <p className="text-sm italic">{t("library.empty")}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{t("library.emptyDemoCta")}</p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={demoSaving || libraryWriteLocked}
+                  className="border-violet-300 bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/40 dark:border-violet-600"
+                  onClick={handleAddDemoQuiz}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {demoSaving ? t("library.adding") : t("library.demoBtn")}
+                </Button>
               </div>
             ) : (
               <div className="space-y-4">

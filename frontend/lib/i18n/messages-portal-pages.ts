@@ -113,6 +113,8 @@ export const PORTAL_PAGES_AR: PortalPagesTable = {
     "انتهت فترة الاشتراك المدفوعة (ومهلة السماح). يمكنك عرض المكتبة فقط؛ لا يمكن إضافة موارد أو معالجتها أو حذفها. تواصل مع الإدارة بعد تسوية الدفع.",
   "sp.library.subscriptionGrace":
     "أنت في مهلة السماح بعد آخر يوم مدفوع. يمكنك عرض المكتبة؛ سيتوقف إنشاء المحتوى الجديد بعد انتهاء المهلة إن لم يُحدَّث الدفع.",
+  "sp.library.demoBlockTitle": "اختبار ADHD جاهز للتجربة (إنجليزي)",
+  "sp.library.emptyDemoCta": "لإنشاء برنامج تدريبي جاهز بضغطة واحدة (بدون رفع PDF):",
   "sp.library.demoBtn": "إضافة اختبار تجريبي ADHD (إنجليزي)",
   "sp.library.demoHint": "برنامج جاهز بأسئلة إنجليزية ثابتة — يمكنك إنشاء أكثر من نسخة.",
   "sp.library.toastDemoAdded": "تمت إضافة الاختبار التجريبي ({n} أسئلة).",
@@ -262,6 +264,8 @@ export const PORTAL_PAGES_AR: PortalPagesTable = {
     "انتهت فترة الاشتراك المدفوعة (ومهلة السماح). عرض المكتبة فقط؛ لا إضافة أو معالجة أو حذف. راجع الإدارة بعد الدفع.",
   "pa.library.subscriptionGrace":
     "مهلة سماح بعد آخر يوم مدفوع. يمكنك الاطلاع؛ سيتوقف إنشاء المحتوى الجديد بعد انتهاء المهلة دون تحديث الدفع.",
+  "pa.library.demoBlockTitle": "اختبار ADHD جاهز للتجربة (إنجليزي)",
+  "pa.library.emptyDemoCta": "لإنشاء برنامج تدريبي جاهز بضغطة واحدة (بدون رفع PDF):",
   "pa.library.demoBtn": "إضافة اختبار تجريبي ADHD (إنجليزي)",
   "pa.library.demoHint": "برنامج جاهز بأسئلة إنجليزية ثابتة — يمكنك إنشاء أكثر من نسخة.",
   "pa.library.toastDemoAdded": "تمت إضافة الاختبار التجريبي ({n} أسئلة).",
@@ -430,6 +434,8 @@ export const PORTAL_PAGES_EN: PortalPagesTable = {
     "Your paid period (and grace) has ended. You can view the library only; adding, processing, or deleting resources is blocked until billing is updated by administration.",
   "sp.library.subscriptionGrace":
     "You are in the grace period after the last paid day. You can view the library; new uploads and processing will stop when grace ends unless payment is recorded.",
+  "sp.library.demoBlockTitle": "Ready-made English ADHD demo quiz",
+  "sp.library.emptyDemoCta": "Create a ready training program in one click (no PDF upload):",
   "sp.library.demoBtn": "Add English ADHD demo quiz",
   "sp.library.demoHint": "Instant ready program with fixed English questions. You can add more than one copy.",
   "sp.library.toastDemoAdded": "Demo quiz added ({n} questions).",
@@ -579,6 +585,8 @@ export const PORTAL_PAGES_EN: PortalPagesTable = {
     "Paid period (and grace) has ended. Library is view-only; uploads, processing, and deletes are blocked until administration updates billing.",
   "pa.library.subscriptionGrace":
     "Grace period after the last paid day. You can browse; new library actions will stop when grace ends unless billing is updated.",
+  "pa.library.demoBlockTitle": "Ready-made English ADHD demo quiz",
+  "pa.library.emptyDemoCta": "Create a ready training program in one click (no PDF upload):",
   "pa.library.demoBtn": "Add English ADHD demo quiz",
   "pa.library.demoHint": "Instant ready program with fixed English questions. You can add more than one copy.",
   "pa.library.toastDemoAdded": "Demo quiz added ({n} questions).",
@@ -748,6 +756,8 @@ export const PORTAL_PAGES_FR: PortalPagesTable = {
     "Période payée (et grâce) terminée. Bibliothèque en lecture seule jusqu’à mise à jour par l’administration.",
   "sp.library.subscriptionGrace":
     "Délai de grâce après le dernier jour payé. Consultation possible ; actions bloquées à la fin du délai sans paiement enregistré.",
+  "sp.library.demoBlockTitle": "Quiz démo TDAH prêt (anglais)",
+  "sp.library.emptyDemoCta": "Créez un programme prêt en un clic (sans PDF) :",
   "sp.library.demoBtn": "Ajouter le quiz démo TDAH (anglais)",
   "sp.library.demoHint":
     "Programme prêt tout de suite avec des questions fixes en anglais. Vous pouvez ajouter plusieurs exemplaires.",
@@ -898,6 +908,8 @@ export const PORTAL_PAGES_FR: PortalPagesTable = {
     "Période payée (et grâce) terminée. Bibliothèque en lecture seule jusqu’à mise à jour par l’administration.",
   "pa.library.subscriptionGrace":
     "Délai de grâce après le dernier jour payé. Consultation possible ; actions bloquées à la fin du délai sans paiement enregistré.",
+  "pa.library.demoBlockTitle": "Quiz démo TDAH prêt (anglais)",
+  "pa.library.emptyDemoCta": "Créez un programme prêt en un clic (sans PDF) :",
   "pa.library.demoBtn": "Ajouter le quiz démo TDAH (anglais)",
   "pa.library.demoHint":
     "Programme prêt tout de suite avec des questions fixes en anglais. Vous pouvez ajouter plusieurs exemplaires.",
