@@ -346,7 +346,7 @@ function ParentProfilePageContent() {
         <aside className="lg:sticky lg:top-6 self-start">
           <nav className="space-y-5 rounded-xl border border-slate-200/80 bg-white/80 p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/40">
             <div>
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.navAccount")}</p>
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.navAccount")}</p>
               <div className="space-y-1">
                 <button type="button" onClick={() => scrollToSection("profile")} className={navBtn(activeNav === "profile")}>
                   <UserCircle2 className="h-4 w-4 shrink-0" />
@@ -375,7 +375,7 @@ function ParentProfilePageContent() {
               </div>
             </div>
             <div>
-              <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.navDanger")}</p>
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("settings.navDanger")}</p>
               <button type="button" onClick={() => scrollToSection("danger")} className={navBtn(activeNav === "danger", true)}>
                 <TriangleAlert className="h-4 w-4 shrink-0" />
                 {t("settings.navDelete")}
@@ -393,7 +393,7 @@ function ParentProfilePageContent() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold">{t("settings.profileTitle")}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.profileHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{t("settings.profileHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -413,7 +413,7 @@ function ParentProfilePageContent() {
                       />
                       <div className="min-w-0">
                         <p className="text-[15px] font-bold text-slate-900 dark:text-white truncate">{parentDisplayName}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{t("settings.roleBadge")}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{t("settings.roleBadge")}</p>
                       </div>
                     </div>
                     <Button
@@ -479,7 +479,7 @@ function ParentProfilePageContent() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold">{t("settings.passwordTitle")}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.passwordHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{t("settings.passwordHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -528,7 +528,7 @@ function ParentProfilePageContent() {
                     </button>
                   </div>
                   <div className="mt-1">
-                    <p className="text-[11px] text-muted-foreground mb-1.5">{t("settings.pwStrength")}</p>
+                    <p className="text-xs text-muted-foreground mb-1.5">{t("settings.pwStrength")}</p>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((lvl) => (
                         <span
@@ -546,7 +546,7 @@ function ParentProfilePageContent() {
                         />
                       ))}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">{t(pwStrengthKeys[strengthScore])}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t(pwStrengthKeys[strengthScore])}</p>
                   </div>
                 </div>
 
@@ -571,7 +571,7 @@ function ParentProfilePageContent() {
                     </button>
                   </div>
                   {passwords.confirm_password ? (
-                    <div className="flex items-center gap-1.5 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-xs">
                       {passwordsMatch ? (
                         <>
                           <Check className="h-3.5 w-3.5 text-emerald-600" />
@@ -607,7 +607,7 @@ function ParentProfilePageContent() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold">{t("settings.notificationsTitle")}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.notificationsHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{t("settings.notificationsHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -624,7 +624,7 @@ function ParentProfilePageContent() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold">{t("settings.langTitle")}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.langHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{t("settings.langHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -645,7 +645,7 @@ function ParentProfilePageContent() {
                       <SelectItem value="en">{t("settings.langEn")}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.langNote")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.langNote")}</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="grid gap-2">
@@ -696,7 +696,7 @@ function ParentProfilePageContent() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold">{t("settings.childrenTitle")}</CardTitle>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("settings.childrenHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{t("settings.childrenHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -723,7 +723,7 @@ function ParentProfilePageContent() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-900 dark:text-white">{child.name}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
+                            <p className="text-sm text-muted-foreground mt-0.5">
                               {agePart} · {diagPart} · {t("settings.childCode")}{" "}
                               <span className="font-mono text-slate-600 dark:text-slate-400">{codePart}</span>
                             </p>
@@ -749,7 +749,7 @@ function ParentProfilePageContent() {
                 <TriangleAlert className="h-5 w-5 shrink-0 text-red-600 dark:text-red-400" />
                 <div>
                   <CardTitle className="text-base font-bold text-red-700 dark:text-red-400">{t("settings.dangerTitle")}</CardTitle>
-                  <p className="text-xs text-red-600/90 dark:text-red-400/90 mt-0.5">{t("settings.dangerHint")}</p>
+                  <p className="text-sm text-red-600/90 dark:text-red-400/90 mt-0.5">{t("settings.dangerHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -757,7 +757,7 @@ function ParentProfilePageContent() {
               <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.logoutAll")}</p>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-md">{t("settings.logoutAllHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md">{t("settings.logoutAllHint")}</p>
                 </div>
                 <Button
                   type="button"
@@ -773,7 +773,7 @@ function ParentProfilePageContent() {
               <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.deleteTitle")}</p>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-lg">{t("settings.deleteHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-lg">{t("settings.deleteHint")}</p>
                 </div>
                 <Button
                   type="button"

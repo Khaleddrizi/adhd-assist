@@ -110,9 +110,9 @@ function ParentPortalContent() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-[20px] font-bold text-slate-900 dark:text-white leading-tight">{t("dashboard.title")}</h1>
-          <p className="mt-1 text-xs text-muted-foreground max-w-md">{t("dashboard.subtitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground max-w-md">{t("dashboard.subtitle")}</p>
         </div>
-        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 px-3 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
+        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100/90 px-3 py-1.5 text-sm font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300">
           {dateChip}
         </span>
       </div>
@@ -248,8 +248,8 @@ function ParentPortalContent() {
               <Users className="h-5 w-5" style={{ color: "#1a8fe3" }} />
             </div>
             <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">{t("dashboard.workspaceChildren")}</h2>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("dashboard.workspaceChildrenHint")}</p>
-            <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("dashboard.workspaceChildrenHint")}</p>
+            <ul className="mt-4 space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                 <span>{t("dashboard.wc1")}</span>
@@ -280,8 +280,8 @@ function ParentPortalContent() {
               <CalendarRange className="h-5 w-5" style={{ color: "#534AB7" }} />
             </div>
             <h2 className="mt-4 text-[15px] font-bold text-slate-900 dark:text-white">{t("dashboard.workspaceReports")}</h2>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("dashboard.workspaceReportsHint")}</p>
-            <ul className="mt-4 space-y-2.5 text-xs text-slate-700 dark:text-slate-300">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("dashboard.workspaceReportsHint")}</p>
+            <ul className="mt-4 space-y-2.5 text-sm text-slate-700 dark:text-slate-300">
               <li className="flex gap-2">
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                 <span>{t("dashboard.wr1")}</span>

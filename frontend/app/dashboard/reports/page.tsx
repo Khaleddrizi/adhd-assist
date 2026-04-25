@@ -323,9 +323,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiSessions")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiSessions")}</p>
               <p className="text-xl font-bold text-[#0f766e]">{loading ? "—" : totalSessions}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {t("reports.kpiSessionsHint").replace("{range}", rangeLabels[range])}
               </p>
             </div>
@@ -340,9 +340,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiAccuracy")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiAccuracy")}</p>
               <p className="text-xl font-bold text-[#534AB7]">{loading ? "—" : `${overallAccuracy}%`}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{t("reports.kpiAccuracyHint")}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("reports.kpiAccuracyHint")}</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -355,9 +355,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiStars")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiStars")}</p>
               <p className="text-xl font-bold text-[#d97706]">{loading ? "—" : starsEarned}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{t("reports.kpiStarsHint")}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("reports.kpiStarsHint")}</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -370,9 +370,9 @@ function ReportsPageContent() {
         <Card className="surface-card border-border/70 shadow-sm">
           <CardContent className="flex items-stretch justify-between gap-3 p-4">
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiActive")}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("reports.kpiActive")}</p>
               <p className="text-xl font-bold text-[#1a8fe3]">{loading ? "—" : activeChildren}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{t("reports.kpiActiveHint")}</p>
+              <p className="text-sm text-muted-foreground mt-0.5">{t("reports.kpiActiveHint")}</p>
             </div>
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
@@ -484,7 +484,7 @@ function ReportsPageContent() {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <ul className="mt-4 space-y-2 text-xs sm:mt-0">
+                  <ul className="mt-4 space-y-2 text-sm sm:mt-0">
                     <li className="flex items-center gap-2">
                       <span className="h-2.5 w-2.5 rounded-full" style={{ background: DONUT_GREEN }} />
                       {t("reports.legendHigh").replace("{n}", String(distribution.pct.green))}
@@ -503,7 +503,7 @@ function ReportsPageContent() {
             </div>
 
             <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 {t("reports.milestonesTitle")}
               </p>
               <div className="grid grid-cols-3 gap-2">
@@ -523,15 +523,15 @@ function ReportsPageContent() {
                         : "border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950/30",
                     )}
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-wide">{t(m.labelKey)}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide">{t(m.labelKey)}</p>
                     <p className={cn("mt-1 text-lg font-bold", m.count === 0 && "text-slate-400 dark:text-slate-500")}>
                       {m.count}
                     </p>
-                    <p className="text-[10px] text-muted-foreground">{t("reports.tooltipSessions")}</p>
+                    <p className="text-xs text-muted-foreground">{t("reports.tooltipSessions")}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground">
                 {t("reports.milestoneHint")}
               </p>
             </div>
@@ -559,8 +559,8 @@ function ReportsPageContent() {
           {sortedTableRows.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <Calendar className="h-[26px] w-[26px] text-slate-400 dark:text-slate-500" strokeWidth={1.25} />
-              <p className="mt-3 text-xs text-muted-foreground">{t("reports.lastSessionsEmpty")}</p>
-              <p className="mt-1 max-w-sm text-[11px] text-slate-400 dark:text-slate-500">{t("reports.lastSessionsHint")}</p>
+              <p className="mt-3 text-sm text-muted-foreground">{t("reports.lastSessionsEmpty")}</p>
+              <p className="mt-1 max-w-sm text-sm text-slate-400 dark:text-slate-500">{t("reports.lastSessionsHint")}</p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-slate-100 dark:border-slate-800">

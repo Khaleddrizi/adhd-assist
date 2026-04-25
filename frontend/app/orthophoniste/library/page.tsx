@@ -327,8 +327,8 @@ function LibraryPage() {
       >
         <div className="min-w-0">
           <p className="text-base font-semibold text-sky-950 dark:text-sky-100">{t("library.readyKidsTitle")}</p>
-          <p className="text-xs text-sky-900/85 dark:text-sky-200/85 mt-1 leading-relaxed">{t("library.readyKidsHint")}</p>
-          <p className="text-xs text-slate-700 dark:text-slate-300 mt-3 whitespace-pre-line leading-relaxed border-t border-sky-200/80 dark:border-sky-800/50 pt-3">
+          <p className="text-sm text-sky-900/85 dark:text-sky-200/85 mt-1 leading-relaxed">{t("library.readyKidsHint")}</p>
+          <p className="text-sm text-slate-700 dark:text-slate-300 mt-3 whitespace-pre-line leading-relaxed border-t border-sky-200/80 dark:border-sky-800/50 pt-3">
             {t("library.readyKidsFlow")}
           </p>
         </div>
@@ -357,9 +357,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("library.kpiTotal")}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("library.kpiTotal")}</p>
                 <p className="text-3xl font-bold mt-1 text-[#1a8fe3]">{kpis.total}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t("library.kpiTotalHint")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("library.kpiTotalHint")}</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-[#EBF5FE] flex items-center justify-center">
                 <FolderOpen className="h-5 w-5 text-[#1a8fe3]" />
@@ -371,9 +371,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("library.kpiPdf")}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("library.kpiPdf")}</p>
                 <p className="text-3xl font-bold mt-1 text-teal-600">{kpis.linked}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t("library.kpiPdfHint")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("library.kpiPdfHint")}</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-teal-50 flex items-center justify-center">
                 <FileText className="h-5 w-5 text-teal-600" />
@@ -385,9 +385,9 @@ function LibraryPage() {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("library.kpiReady")}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("library.kpiReady")}</p>
                 <p className="text-3xl font-bold mt-1 text-violet-600">{kpis.ready}</p>
-                <p className="text-xs text-muted-foreground mt-1">{t("library.kpiReadyHint")}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t("library.kpiReadyHint")}</p>
               </div>
               <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
                 <CheckCircle2 className="h-5 w-5 text-violet-600" />
@@ -431,7 +431,7 @@ function LibraryPage() {
               </div>
               <div className="flex items-center gap-3 py-1">
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
-                <span className="text-xs text-muted-foreground">{t("library.orUpload")}</span>
+                <span className="text-sm text-muted-foreground">{t("library.orUpload")}</span>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
               </div>
               <div className="grid gap-2">
@@ -474,9 +474,9 @@ function LibraryPage() {
                       {t("common.browse")}
                     </button>
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{t("library.dropSub")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("library.dropSub")}</p>
                   {selectedFile ? (
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
                       {t("library.selectedFile").replace("{name}", selectedFile.name)}
                     </p>
                   ) : null}
@@ -520,7 +520,7 @@ function LibraryPage() {
               <div className="py-12 flex flex-col items-center text-center text-muted-foreground gap-4 max-w-md mx-auto px-2">
                 <FolderOpen className="h-10 w-10 opacity-60" />
                 <p className="text-sm italic">{t("library.empty")}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-line">{t("library.readyKidsFlow")}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line">{t("library.readyKidsFlow")}</p>
                 <Button
                   type="button"
                   variant="secondary"

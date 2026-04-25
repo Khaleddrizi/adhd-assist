@@ -287,7 +287,7 @@ function SettingsPage() {
         <aside className="self-start">
           <nav className="space-y-5">
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navAccount")}</p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">{t("settings.navAccount")}</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -318,7 +318,7 @@ function SettingsPage() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navPrefs")}</p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">{t("settings.navPrefs")}</p>
               <div className="space-y-1">
                 <button
                   type="button"
@@ -349,7 +349,7 @@ function SettingsPage() {
               </div>
             </div>
             <div>
-              <p className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">{t("settings.navDanger")}</p>
+              <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">{t("settings.navDanger")}</p>
               <button
                 type="button"
                 onClick={() => scrollToSection("danger")}
@@ -376,7 +376,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-[14px] font-bold">{t("settings.profileCardTitle")}</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.profileCardHint")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.profileCardHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -459,7 +459,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-[14px] font-bold">{t("settings.passwordTitle")}</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.passwordHint")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.passwordHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -507,7 +507,7 @@ function SettingsPage() {
                   </div>
 
                   <div className="mt-1">
-                    <p className="text-[11px] text-muted-foreground mb-1">{t("settings.pwStrength")}</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t("settings.pwStrength")}</p>
                     <div className="grid grid-cols-4 gap-1.5">
                       {[1, 2, 3, 4].map((lvl) => (
                         <span
@@ -525,7 +525,7 @@ function SettingsPage() {
                         />
                       ))}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">{t(pwStrengthKeys[strengthScore])}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t(pwStrengthKeys[strengthScore])}</p>
                   </div>
                 </div>
 
@@ -558,7 +558,7 @@ function SettingsPage() {
                     ) : null}
                   </div>
                   {passwordsMismatch ? (
-                    <p className="text-[11px] text-red-600">{t("settings.pwMismatch")}</p>
+                    <p className="text-xs text-red-600">{t("settings.pwMismatch")}</p>
                   ) : null}
                 </div>
 
@@ -577,7 +577,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-[14px] font-bold">{t("settings.notificationsTitle")}</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.notificationsHint")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.notificationsHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -594,7 +594,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-[14px] font-bold">{t("settings.langTitle")}</CardTitle>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.langHint")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.langHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -615,7 +615,7 @@ function SettingsPage() {
                       <SelectItem value="en">{t("settings.langEn")}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-[11px] text-muted-foreground">{t("settings.langNote")}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.langNote")}</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="grid gap-2">
@@ -664,7 +664,7 @@ function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-[14px] font-bold text-red-700">{t("settings.dangerTitle")}</CardTitle>
-                  <p className="text-[11px] text-red-600/80">{t("settings.dangerHint")}</p>
+                  <p className="text-sm text-red-600/80">{t("settings.dangerHint")}</p>
                 </div>
               </div>
             </CardHeader>
@@ -672,7 +672,7 @@ function SettingsPage() {
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.logoutAll")}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t("settings.logoutAllHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t("settings.logoutAllHint")}</p>
                 </div>
                 <Button variant="outline" size="sm" className="border-red-300 text-red-700" onClick={handleLogoutEverywhere}>
                   <LogOut className="h-4 w-4 mr-1.5" />
@@ -683,7 +683,7 @@ function SettingsPage() {
               <div className="flex items-center justify-between gap-4 p-5">
                 <div>
                   <p className="text-sm font-medium text-slate-900 dark:text-white">{t("settings.deleteTitle")}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t("settings.deleteHint")}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{t("settings.deleteHint")}</p>
                 </div>
                 <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" type="button" onClick={() => setDeleteOpen(true)}>
                   <Trash2 className="h-4 w-4 mr-1.5" />
