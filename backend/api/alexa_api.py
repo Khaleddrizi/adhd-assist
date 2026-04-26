@@ -11,15 +11,24 @@ from backend.database.models import QuestionModel
 
 logger = logging.getLogger("AlexaQuiz")
 
+# Short reprompts keep the mic open and reduce awkward silence after long TTS.
+_REPROMPT_LINK = "Say link, then spell your eight-character code."
+_REPROMPT_QUIZ = "Say give me a quiz to start."
+_REPROMPT_ANSWER = "What's your answer? Say A, B, or C."
 
-def build_alexa_response(text: str, end_session: bool = False):
-    return jsonify({
-        "version": "1.0",
-        "response": {
-            "outputSpeech": {"type": "PlainText", "text": text},
-            "shouldEndSession": end_session,
-        },
-    })
+
+def build_alexa_response(
+    text: str,
+    end_session: bool = False,
+    reprompt: str | None = None,
+):
+    response: dict = {
+        "outputSpeech": {"type": "PlainText", "text": text},
+        "shouldEndSession": end_session,
+    }
+    if reprompt and not end_session:
+        response["reprompt"] = {"outputSpeech": {"type": "PlainText", "text": reprompt}}
+    return jsonify({"version": "1.0", "response": response})
 
 
 def _extract_answer(intent: dict) -> str:
@@ -96,10 +105,11 @@ def create_alexa_app(
 
             if request_type == "LaunchRequest":
                 return build_alexa_response(
-                    "Welcome to ADHD Assist. First, say link followed by your code. "
-                    "For example: link 8 B 6 A 6 7 1 B. "
-                    "You can find your code in the parent or doctor dashboard.",
+                    "Welcome to ADHD Assist. Say link, then spell your eight-character code. "
+                    "Example: link, 8, B, 6, A, 6, 7, 1, B. "
+                    "You will find the code in the parent or doctor dashboard.",
                     end_session=False,
+                    reprompt=_REPROMPT_LINK,
                 )
 
             if request_type == "IntentRequest":
@@ -109,14 +119,14 @@ def create_alexa_app(
                 if intent_name == "AMAZON.HelpIntent":
                     if not _is_user_linked(user_id):
                         return build_alexa_response(
-                            "First say link followed by your code. "
-                            "For example: link 8 B 6 A 6 7 1 B. "
-                            "Then say give me a quiz to start."
+                            "Say link, then your code, letter by letter. "
+                            "Then say give me a quiz to start.",
+                            reprompt=_REPROMPT_LINK,
                         )
                     return build_alexa_response(
-                        "Say give me a quiz to start. "
-                        "Answer with A, B, or C. "
-                        "Say end quiz when done to get your final score."
+                        "Say give me a quiz to start. Answer with A, B, or C. "
+                        "Say end quiz when you are finished to hear your score.",
+                        reprompt=_REPROMPT_QUIZ,
                     )
 
                 if intent_name in ("AMAZON.StopIntent", "AMAZON.CancelIntent"):
@@ -126,60 +136,76 @@ def create_alexa_app(
                 if intent_name == "AMAZON.FallbackIntent":
                     if not _is_user_linked(user_id):
                         return build_alexa_response(
-                            "Say link followed by your code first. For example: link 8 B 6 A 6 7 1 B."
+                            "Say link, then spell your code.",
+                            reprompt=_REPROMPT_LINK,
                         )
                     return build_alexa_response(
-                        "Say give me a quiz to begin."
+                        "Try: give me a quiz.",
+                        reprompt=_REPROMPT_QUIZ,
                     )
 
                 if intent_name == "LinkPatientIntent":
                     code = _extract_code(intent)
                     if not code:
                         return build_alexa_response(
-                            "Say link followed by your code. For example: link 8 B 6 A 6 7 1 B."
+                            "Say link, then your eight-character code, one letter or digit at a time.",
+                            reprompt=_REPROMPT_LINK,
                         )
                     ok = _link_alexa_to_patient(user_id, code)
                     if ok:
                         patient_name, program_name = _get_linked_patient_context(user_id)
                         details = ""
                         if patient_name and program_name:
-                            details = f" You are now linked to {patient_name}. Assigned program: {program_name}."
+                            details = f" Linked to {patient_name}. Program: {program_name}."
                         elif patient_name:
-                            details = f" You are now linked to {patient_name}."
+                            details = f" Linked to {patient_name}."
                         return build_alexa_response(
-                            "You are linked! Say give me a quiz to start. "
-                            "Your results will appear in the web dashboard."
-                            + details
+                            "You are linked. Say give me a quiz to start. "
+                            "Your results will show on the web dashboard."
+                            + details,
+                            reprompt=_REPROMPT_QUIZ,
                         )
                     return build_alexa_response(
-                        "Code not found. Check your code and try again."
+                        "That code was not found. Check the dashboard and try again.",
+                        reprompt=_REPROMPT_LINK,
                     )
 
                 if intent_name == "StartQuizIntent":
                     if not _is_user_linked(user_id):
                         return build_alexa_response(
-                            "Please say link followed by your code first. "
-                            "You can find your code in the parent or doctor dashboard."
+                            "Link your account first. Say link, then your code from the dashboard.",
+                            reprompt=_REPROMPT_LINK,
                         )
                     questions, error_message = _get_patient_quiz_questions(user_id)
                     if error_message:
-                        return build_alexa_response(error_message)
+                        return build_alexa_response(
+                            error_message,
+                            reprompt=_REPROMPT_QUIZ if _is_user_linked(user_id) else _REPROMPT_LINK,
+                        )
                     linked_patient_id = _get_linked_patient_id(user_id)
                     text = _quiz.start_quiz(session_key, questions=questions)
                     if not text:
                         return build_alexa_response(
-                            "No questions are ready for this patient yet. Please ask the doctor to assign a ready program."
+                            "No questions are ready yet. Ask the doctor to assign a ready program.",
+                            reprompt=_REPROMPT_QUIZ,
                         )
                     if linked_patient_id:
                         s = _sessions.get(session_key)
                         if s is not None:
                             s["patient_id"] = linked_patient_id
-                    return build_alexa_response(text, end_session=False)
+                    return build_alexa_response(
+                        text, end_session=False, reprompt=_REPROMPT_ANSWER
+                    )
 
                 if intent_name == "AnswerIntent":
                     answer = _extract_answer(intent)
-                    text, end = _quiz.answer_and_next(session_key, answer)
-                    return build_alexa_response(text, end_session=end)
+                    text, end, quiz_reprompt = _quiz.answer_and_next(session_key, answer)
+                    rp = (
+                        None
+                        if end
+                        else (quiz_reprompt or _REPROMPT_ANSWER)
+                    )
+                    return build_alexa_response(text, end_session=end, reprompt=rp)
 
                 if intent_name == "EndQuizIntent":
                     text, end, snapshot = _quiz.end_quiz(session_key)
@@ -190,7 +216,11 @@ def create_alexa_app(
                         result_msg = text + " Check the web dashboard to see your progress."
                     return build_alexa_response(result_msg, end_session=end)
 
-            return build_alexa_response("Say give me a quiz to start.", end_session=False)
+            return build_alexa_response(
+                "Say give me a quiz to start.",
+                end_session=False,
+                reprompt=_REPROMPT_QUIZ if _is_user_linked(user_id) else _REPROMPT_LINK,
+            )
 
         except Exception as e:
             logger.exception("Alexa webhook error: %s", e)

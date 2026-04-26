@@ -306,14 +306,17 @@ class QuizService:
         self._sessions.set(session_id, questions=[q], question_pool=questions, score=0, wrong_topics=[])
         return self._cache.format_for_speech(q, first_question=True)
 
-    def answer_and_next(self, session_id: str, user_answer: str) -> tuple[str, bool]:
+    def answer_and_next(self, session_id: str, user_answer: str) -> tuple[str, bool, str | None]:
+        """Returns (speech, end_session, reprompt_or_none). None reprompt => use default A/B/C hint in Alexa."""
         if not self._sessions.get(session_id):
-            return "No active quiz. Say give me a quiz to start.", False
+            return "No active quiz. Say give me a quiz to start.", False, None
         current = self._sessions.get_current_question(session_id)
         if not current:
-            return "No question. Say give me a quiz.", False
+            return "No question. Say give me a quiz.", False, None
         correct = (current.get("correct") or "").strip().upper()
         user = (user_answer or "").strip().upper()[:1]
+        if not user:
+            return "I didn't catch that. Say A, B, or C.", False, None
         if user == correct:
             self._sessions.increment_score(session_id)
             feedback = "Correct!"
@@ -331,10 +334,14 @@ class QuizService:
             used_question_indices=used_ids,
         )
         if not next_q:
-            return feedback + " No more questions.", False
+            return (
+                f"{feedback} No more questions. Say end quiz to hear your score.",
+                False,
+                "Say end quiz to hear your score.",
+            )
         self._sessions.append_question(session_id, next_q)
         next_text = self._cache.format_for_speech(next_q, first_question=False, is_next=True)
-        return f"{feedback} {next_text}", False
+        return f"{feedback} {next_text}", False, None
 
     def end_quiz(self, session_id: str) -> tuple[str, bool, dict | None]:
         """
