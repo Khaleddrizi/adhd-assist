@@ -2224,4 +2224,9 @@ def create_web_api() -> Flask:
     def health():
         return jsonify({"service": "Web API", "status": "running"})
 
+    @app.route("/")
+    def root():
+        # Some hosts (e.g. Render) probe `/` by default; keep a lightweight 200 here.
+        return jsonify({"service": "Web API", "status": "running"})
+
     return app

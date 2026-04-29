@@ -239,6 +239,10 @@ def create_alexa_app(
                 "A server error occurred. Please try again.", end_session=True
             )
 
+    @app.route("/", methods=["GET"])
+    def root():
+        return jsonify({"service": "Alexa Quiz API", "status": "running"})
+
     @app.route("/test", methods=["GET"])
     def test():
         return jsonify({"service": "Alexa Quiz API", "status": "running"})
