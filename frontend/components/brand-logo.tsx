@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 type BrandLogoSize = "sm" | "md" | "lg"
 
 const sizeClass: Record<BrandLogoSize, string> = {
-  sm: "h-7",
+  sm: "h-8",
   md: "h-9",
   lg: "h-11",
 }
@@ -20,10 +20,10 @@ type BrandLogoProps = {
 export function BrandLogo({ size = "md", className, priority = false }: BrandLogoProps) {
   return (
     <Image
-      src="/atheeria-logo.png"
+      src="/atheeria-logo-tight.png"
       alt="Atheeria"
-      width={170}
-      height={52}
+      width={477}
+      height={165}
       priority={priority}
       className={cn(
         "w-auto object-contain",
