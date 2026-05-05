@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Home, Settings, LogOut, Users, BarChart3, Upload } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
 import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
+import { BrandLogo } from "@/components/brand-logo"
 
 function ParentDashboardLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -79,7 +79,7 @@ function ParentDashboardLayoutInner({ children }: { children: React.ReactNode })
   const sidebarHeader = (
     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
       <Link href="/dashboard" className="block min-w-0">
-        <Image src="/atheeria-logo.png" alt="Atheeria" width={150} height={44} className="h-11 w-auto object-contain" />
+        <BrandLogo size="lg" />
         <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t("layout.portal")}</p>
       </Link>
     </div>
@@ -87,7 +87,7 @@ function ParentDashboardLayoutInner({ children }: { children: React.ReactNode })
 
   const mobileBarTitle = (
     <div className="min-w-0">
-      <Image src="/atheeria-logo.png" alt="Atheeria" width={120} height={34} className="h-8 w-auto object-contain" />
+      <BrandLogo size="sm" />
       <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground truncate">{t("layout.portal")}</p>
     </div>
   )

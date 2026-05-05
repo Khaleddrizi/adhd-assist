@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Activity, Users, BarChart3, Upload, Settings, LogOut } from "lucide-react"
 import { AppDashboardShell, type DashboardNavItem } from "@/components/layout/app-dashboard-shell"
 import { PortalI18nProvider, usePortalI18n } from "@/lib/i18n/i18n-context"
+import { BrandLogo } from "@/components/brand-logo"
 
 function OrthophonisteLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -58,14 +58,12 @@ function OrthophonisteLayoutInner({ children }: { children: React.ReactNode }) {
   const sidebarHeader = (
     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
       <Link href="/" className="flex items-center gap-2 min-w-0">
-        <Image src="/atheeria-logo.png" alt="Atheeria" width={126} height={38} className="h-9 w-auto object-contain shrink-0" />
+        <BrandLogo size="md" className="shrink-0" />
       </Link>
     </div>
   )
 
-  const mobileBarTitle = (
-    <Image src="/atheeria-logo.png" alt="Atheeria" width={104} height={30} className="h-7 w-auto object-contain" />
-  )
+  const mobileBarTitle = <BrandLogo size="sm" />
 
   const sidebarFooter = (
     <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">

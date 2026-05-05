@@ -1,9 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone } from "lucide-react"
 import { usePortalI18n } from "@/lib/i18n/i18n-context"
+import { BrandLogo } from "@/components/brand-logo"
 
 export function SiteFooter() {
   const { t } = usePortalI18n()
@@ -14,7 +14,7 @@ export function SiteFooter() {
       <div className="container py-10">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-4">
-            <Image src="/atheeria-logo.png" alt="Atheeria" width={170} height={52} className="h-12 w-auto object-contain" />
+            <BrandLogo size="lg" />
             <p className="text-sm text-muted-foreground">{t("footer.tagline")}</p>
             <div className="flex flex-wrap gap-3">
               <Link href="#" className="text-muted-foreground hover:text-primary transition-colors duration-200">

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
@@ -20,6 +19,7 @@ import { PortalI18nProvider, usePortalI18n, notifyLocaleChanged } from "@/lib/i1
 import type { AppLocale } from "@/lib/i18n/types"
 import { cn } from "@/lib/utils"
 import { fetchApi } from "@/lib/api"
+import { BrandLogo } from "@/components/brand-logo"
 
 function setStoredLocale(next: AppLocale) {
   try {
@@ -123,21 +123,14 @@ function AdministrationLayoutInner({ children }: { children: React.ReactNode }) 
 
   const sidebarHeader = (
     <div className="border-b border-white/[0.08] px-6 py-6">
-      <Link href="/administration" className="flex items-start gap-3 min-w-0">
-        <Image src="/atheeria-logo.png" alt="Atheeria" width={130} height={38} className="h-10 w-auto object-contain shrink-0" />
-        <div className="min-w-0 pt-0.5">
-          <span className="block text-lg font-semibold tracking-tight text-slate-100 truncate">{t("layout.brandTitle")}</span>
-          <p className="mt-1 text-[11px] leading-snug text-slate-500">{t("layout.brandSubtitle")}</p>
-        </div>
+      <Link href="/administration" className="inline-flex min-w-0 items-center">
+        <BrandLogo size="lg" className="shrink-0" />
       </Link>
     </div>
   )
 
   const mobileBarTitle = (
-    <div className="flex min-w-0 items-center gap-2">
-      <Image src="/atheeria-logo.png" alt="Atheeria" width={104} height={30} className="h-8 w-auto object-contain shrink-0" />
-      <span className="truncate text-base font-semibold text-slate-100">{t("layout.brandTitle")}</span>
-    </div>
+    <BrandLogo size="md" className="shrink-0" />
   )
 
   const sidebarFooter = (
